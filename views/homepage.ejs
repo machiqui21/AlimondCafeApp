@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alimond Café</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="hero">
+    <h1>Welcome to Alimond Café</h1>
+  </header>
+
+  <section class="about">
+    <div class="about-text">
+      <h2>Our Story</h2>
+      <p>
+        This café was born from the unwavering commitment of Jessette and Mike, a devoted couple whose dream was simple yet powerful: to serve the best and most affordable coffee to their neighborhood. Though Mike has since passed, his legacy lives on in every cup we brew and every smile we share.
+      </p>
+      <p>
+        Their beloved sons have stood by them from the beginning—whether behind the counter or greeting customers, their helping hands and warm hearts have shaped this café into a true family endeavor.
+      </p>
+    </div>
+    <div class="about-image">
+      <img src="founders.jpg" alt="Jessette and Mike" />
+    </div>
+  </section>
+
+  <section id="menu" class="menu-preview">
+    <h2>Menu Highlights</h2>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <h3>Kapeng Barako</h3>
+        <p>Strong, bold, and proudly local.</p>
+      </div>
+      <div class="menu-item">
+        <h3>Sweet Gatas Latte</h3>
+        <p>Comfort in a cup, creamy and smooth.</p>
+      </div>
+      <div class="menu-item">
+        <h3>Tambay Iced Brew</h3>
+        <p>Chill vibes, cold brew style.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>📍 Alimond Café – Every cup brewed with love, for the neighborhood we call home.</p>
+    <p>Follow us @alimondcafe | Open daily 9am–7pm</p>
+  </footer>
+</body>
+</html>
+<button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+<script>
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+  }
+</script>
+<a href="/menu" class="btn">View menu</a>
