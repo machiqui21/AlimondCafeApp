@@ -1,14 +1,36 @@
-<body>
-  <header>
-    <h1>Alimond Cafe Menu</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alimond Café Menu</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+ <header class="hero">
+    <h1>Our Menu</h1>
   </header>
-  <main>
-    <section>
-      <h2>Our Menu</h2>
-    </section>
-  </main>
+   <section class="menu-list">   
+    <% if (products && products.length > 0) { %>
+      <ul class="product-list">
+        <% products.forEach(function(product) { %>
+          <li class="product-item">
+            <h2><%= product.name %></h2>
+            <ul class="price-list">
+              <% Object.keys(product.prices).forEach(function(size) { %>
+                <li><strong><%= size.charAt(0).toUpperCase() + size.slice(1) %>:</strong> $<%= product.prices[size].toFixed(2) %></li>
+              <% }); %>
+            </ul>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <p>No products available.</p>
+    <% } %>
+  </section>
+<body>
   <footer class="footer">
     <p>📍 Alimond Café – Every cup brewed with love, for the neighborhood we call home.</p>
     <p>Follow us @alimondcafe | Open daily 9am–7pm</p>
   </footer>
 </body>
+</html>
