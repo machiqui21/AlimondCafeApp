@@ -1,0 +1,159 @@
+:root {
+  --bg-light: #fdf6f0;
+  --bg-dark: #1e1e1e;
+  --text-light: #2c2c2c;
+  --text-dark: #f5f5f5;
+  --accent: #8b5e3c;
+  --highlight: #d4a373;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--accent);
+  color: white;
+  margin-top: 32px;
+  margin-bottom: 24px;
+
+}
+
+.logo {
+
+  float: left;
+  width: 140px; /* adjust based on your design */
+  height: auto;
+  margin: 0;
+}
+
+
+
+.hero h1 {
+  font-size: 2.8rem;
+  --accent: #8b5e3c;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: background 0.3s, color 0.3s;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 32px;
+  --highlight: #d4a373;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(62, 39, 35, 0.08);
+}
+
+.menu-table-section {
+  flex: 1 1 0;
+}
+
+.menu-table-section h2 {
+  text-align: center;
+  color: #e68f6f;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.menu-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fdf6f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(62, 39, 35, 0.04);
+}
+
+.menu-table th,
+.menu-table td {
+  padding: 14px 12px;
+  text-align: left;
+}
+
+.menu-table th {
+  background: #d4a373;
+  color: white;
+  font-weight: 600;
+  border-bottom: 2px solid #e0cfc2;
+}
+
+.menu-table td {
+  background: #fdf6f0;
+  color: var(--text-light);
+}
+
+.menu-table tr:nth-child(even) {
+  background: #f8f5f2;
+}
+
+.menu-table tr:hover {
+  background: #ffe0b2;
+}
+
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: var(--accent);
+  color: white;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--highlight);
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+
+/* Dark Mode Toggle */
+body.dark-mode {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+body.dark-mode .hero,
+body.dark-mode .footer {
+  background-color: #333;
+  color: var(--text-dark);
+}
+
+body.dark-mode .menu-table {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+body.dark-mode .menu-table th {
+  background: #444;
+  color: var(--text-dark);
+}
+
+body.dark-mode .menu-table td {
+  background-color: #2c2c2c;
+  color: var(--text-dark);
+}
+
+body.dark-mode .menu-table tr:hover {
+  background: #444;
+  color: var(--text-dark);
+}
+
+body.dark-mode .btn,
+body.dark-mode h2 {
+  background: #555;
+  color: var(--text-dark);
+}

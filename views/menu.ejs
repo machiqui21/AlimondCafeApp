@@ -1,36 +1,101 @@
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alimond Café Menu</title>
-  <link rel="stylesheet" href="/styles.css">
+    <title>Menu</title>
+    <link rel="stylesheet" href="/menu.css">
 </head>
- <header class="hero">
-    <h1>Our Menu</h1>
-  </header>
-   <section class="menu-list">   
-    <% if (products && products.length > 0) { %>
-      <ul class="product-list">
-        <% products.forEach(function(product) { %>
-          <li class="product-item">
-            <h2><%= product.name %></h2>
-            <ul class="price-list">
-              <% Object.keys(product.prices).forEach(function(size) { %>
-                <li><strong><%= size.charAt(0).toUpperCase() + size.slice(1) %>:</strong> $<%= product.prices[size].toFixed(2) %></li>
-              <% }); %>
-            </ul>
-          </li>
-        <% }); %>
-      </ul>
-    <% } else { %>
-      <p>No products available.</p>
-    <% } %>
-  </section>
-<body>
-  <footer class="footer">
-    <p>📍 Alimond Café – Every cup brewed with love, for the neighborhood we call home.</p>
-    <p>Follow us @alimondcafe | Open daily 9am–7pm</p>
-  </footer>
-</body>
+<% var ProductData=typeof ProductData !=='undefined' ? ProductData : []; %>
+    <% var PriceData=typeof PriceData !=='undefined' ? PriceData : []; %>
+    <% var ExtraPriceData=typeof ExtraPriceData !=='undefined' ? ExtraPriceData : []; %>
+        <% console.log('EJS loaded', ProductData, PriceData, ExtraPriceData); %>
+            <header class="hero">
+                <img class="logo" src="/images/AlimondsCafe.jpeg" >
+                <h1>Our Menu</h1>
+            </header>
+            <body>
+                <div class="menu-flex-container">
+                    <div class="menu-table-section">
+                        <h2>Product List</h2>
+                        <table class="menu-table">
+                            <tr>
+                                <th>Product</th>
+                                <th>Description</th>
+                            </tr>
+                            <% if (ProductData && ProductData.length> 0) {
+                                ProductData.forEach(function(product) { %>
+                                <tr>
+                                    <td>
+                                        <%= product.Name %>
+                                    </td>
+                                    <td>
+                                        <%= product.Description %>
+                                    </td>
+                                </tr>
+                                <% }); } else { %>
+                                    <tr>
+                                        <td colspan="2">No products available.</td>
+                                    </tr>
+                                    <% } %>
+                        </table>
+                    </div>
+                    <div class="menu-table-section">
+                        <h2>Price List</h2>
+                        <table class="menu-table">
+                            <tr>
+                                <th>Size</th>
+                                <th>Price</th>
+                            </tr>
+                            <% if (PriceData && PriceData.length> 0) {
+                                PriceData.forEach(function(pricelist) { %>
+                                <tr>
+                                    <td>
+                                        <%= pricelist.Item %>
+                                    </td>
+                                    <td>₱<%= pricelist.Amount %>
+                                    </td>
+                                </tr>
+                                <% }); } else { %>
+                                    <tr>
+                                        <td colspan="2">No prices available.</td>
+                                    </tr>
+                                    <% } %>
+                        </table>
+                    </div>
+                        <div class="menu-table-section">
+                        <h2>Extras</h2>
+                        <table class="menu-table">
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                            </tr>
+                            <% if (ExtraPriceData && ExtraPriceData.length> 0) {
+                                ExtraPriceData.forEach(function(extraPricelist) { %>
+                                <tr>
+                                    <td>
+                                        <%= extraPricelist.Item %>
+                                    </td>
+                                    <td>₱<%= extraPricelist.Amount %>
+                                    </td>
+                                </tr>
+                                <% }); } else { %>
+                                    <tr>
+                                        <td colspan="2">No extras available.</td>
+                                    </tr>
+                                    <% } %>
+                        </table>
+                    </div>
+                </div>
+                <footer class="footer">
+                    <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
+                    <p>Follow us @alimondscafe | Open daily 9am–7pm</p>
+                </footer>
+            </body>
+
 </html>
+<button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+</script>
+<a href="/" class="btn">Homepage</a>

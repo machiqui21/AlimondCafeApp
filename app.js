@@ -1,47 +1,43 @@
+console.log("App started");
 var express = require('express');
 var app = express();    
-var mysql = require('mysql');
 app.set('view engine', 'ejs');
 app.use(express.static('styles'));
+var db = require('./dbConfig');
 
-// MySQL connection setup
-var db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root', 
-    database: 'alimondcafe' // change to your actual database name
-});
-
-db.connect(function(err) {
-    if (err) throw err;
-    console.log('Connected to MySQL database!');
-});
+app.use('/images', express.static('images'));
 
 app.get('/', function(req, res) {
         res.render("homepage");
 });
 
 app.get('/menu', function(req, res) {
-        // Query products and their prices by size
-        const productQuery = 'SELECT * FROM products';
-        const priceQuery = 'SELECT * FROM price';
+        console.log("GET /menu called");
+        const productQuery = "SELECT * FROM products WHERE category = 'Standard'";
+        const priceQuery = "SELECT * FROM pricelist WHERE category = 'Standard'";
+        const extraQuery = "SELECT * FROM pricelist WHERE category = 'Extras'";
         db.query(productQuery, function(err, products) {
-            if (err) throw err;
-            db.query(priceQuery, function(err, prices) {
-                if (err) throw err;
-                // Merge prices into products by product_id
-                const productMap = {};
-                products.forEach(p => {
-                    productMap[p.id] = { name: p.name, prices: {} };
+                if (err) {
+                        console.error('Product query error:', err);
+                        return res.status(500).send('Database error');
+                }
+                console.log('Products:', products);
+                db.query(priceQuery, function(err, pricelist) {
+                        if (err) {
+                                console.error('Price query error:', err);
+                                return res.status(500).send('Database error');
+                        }
+                        console.log('Pricelist:', pricelist);
+
+                        db.query(extraQuery, function(err, extraPricelist) {
+                                if (err) {
+                                        console.error('Extra Price query error:', err);
+                                        return res.status(500).send('Database error');
+                                }
+                                console.log('Extra Pricelist:', extraPricelist);
+                                res.render('menu', { ProductData: products, PriceData: pricelist, ExtraPriceData: extraPricelist });
+                        });
                 });
-                prices.forEach(pr => {
-                    if (productMap[pr.product_id]) {
-                        productMap[pr.product_id].prices[pr.size] = pr.amount;
-                    }
-                });
-                // Convert map to array
-                const mergedProducts = Object.values(productMap);
-                res.render("menu", { products: mergedProducts });
-            });
         });
 });
 
