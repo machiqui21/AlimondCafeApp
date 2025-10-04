@@ -194,7 +194,14 @@
         function updateOrderPrice() {
             const product = document.getElementById('product').value;
             const size = document.getElementById('size').value;
-            const qty = parseInt(document.getElementById('qty').value, 10) || 1;
+            let qty = parseInt(document.getElementById('qty').value, 10);
+            if (isNaN(qty) || qty < 1) qty = 1;
+            document.getElementById('qty').value = qty; // force UI to stay in range
+            // Enable/disable Add order button based on qty
+            var submitBtn = document.querySelector('#orderForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = (qty < 1);
+            }
             let price = 0;
             if (product && size) {
                 price = getPrice(product, size);
@@ -204,7 +211,7 @@
                     price += getExtraPrice(cb.value);
                 });
             }
-            const total = price * qty;
+            const total = (qty === 0) ? 0 : price * qty;
             document.getElementById('orderPrice').textContent = total.toFixed(2);
             return total;
         }
@@ -212,30 +219,44 @@
         function renderOrderSummary() {
             var summaryDiv = document.getElementById('orderSummaryList');
             summaryDiv.innerHTML = '';
+            var totalAmountDiv = document.getElementById('totalAmountSummary');
             if (orders.length === 0) {
                 summaryDiv.innerHTML = '<p>No orders yet.</p>';
-                document.getElementById('customerNameSummary').textContent = '';
-                document.getElementById('totalAmountSummary').style.display = 'none';
-                document.getElementById('totalAmountSummary').textContent = '';
+                if (totalAmountDiv) {
+                    totalAmountDiv.style.display = 'none';
+                    totalAmountDiv.textContent = '';
+                }
                 return;
             }
             // Show total amount
-            var total = orders.reduce((sum, order) => sum + (order.amount * (order.qty || 1)), 0);
-            document.getElementById('totalAmountSummary').textContent = `Total: ₱${total.toFixed(2)}`;
-            document.getElementById('totalAmountSummary').style.display = 'block';
+            var total = orders.reduce((sum, order) => {
+                // If qty is 0, amount should be 0 for this order
+                var qty = (order.qty === 0) ? 0 : (order.qty || 1);
+                return sum + (order.amount * qty);
+            }, 0);
+            if (totalAmountDiv) {
+                totalAmountDiv.textContent = `Total: ₱${total.toFixed(2)}`;
+                totalAmountDiv.style.display = 'block';
+            }
+            // Always display the Add order button; only disable it if the order form's amount is 0
+            var submitBtn = document.querySelector('#orderForm button[type="submit"]');
+            if (submitBtn) {
+                var orderPrice = parseFloat(document.getElementById('orderPrice').textContent);
+                submitBtn.style.display = '';
+                submitBtn.disabled = isNaN(orderPrice) || orderPrice === 0;
+            }
             orders.forEach(function(order, idx) {
-                summaryDiv.innerHTML += `<div style=\"display: flex; justify-content: space-between; align-items: flex-start; border-bottom:1px solid #eee; margin-bottom:8px; padding-bottom:4px;\">
-                    <div>
-                        <strong>Item #${idx+1}</strong><br>
-                        Product: ${order.product}<br>
-                        Size: ${order.size}<br>
-                        Sugar: ${order.sugar}<br>
-                        Extras: ${order.extras && order.extras.length ? order.extras.join(', ') : '-'}<br>
-                        Qty: <input type=\"number\" class=\"orderQtyInput\" data-idx=\"${idx}\" min=\"1\" max=\"10\" value=\"${order.qty}\" style=\"width:50px;\"><br>
-                        Amount: ₱${order.amount.toFixed(2)}<br>
-                        <button type=\"button\" class=\"removeOrderBtn\" data-idx=\"${idx}\" style=\"margin-top:4px; color:#fff; background:#b00; border:none; border-radius:4px; padding:2px 8px; cursor:pointer;\">Remove</button>
-                    </div>
-                    <div style=\"min-width: 140px; text-align: right; font-weight: bold;\">Customer: ${order.customerName ? order.customerName : '-'}</div>
+                // If qty is 0, show amount as 0 (regardless of order.amount)
+                var displayAmount = (order.qty === 0) ? 0 : order.amount * order.qty;
+                summaryDiv.innerHTML += `<div style=\"border-bottom:1px solid #eee; margin-bottom:8px; padding-bottom:4px;\">
+                    <div style=\"display: flex; justify-content: space-between; align-items: flex-start;\"><strong>Item #${idx+1}</strong><span style=\"font-weight: bold; min-width: 140px; text-align: right;\">Customer: ${order.customerName ? order.customerName : '-'}</span></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Product:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.product}</span></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Size:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.size}</span></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Sugar:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.sugar}</span></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Extras:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.extras && order.extras.length ? order.extras.join(', ') : '-'}</span></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Qty:</span> <input type=\"number\" class=\"orderQtyInput\" data-idx=\"${idx}\" min=\"0\" max=\"10\" value=\"${order.qty}\" style=\"width:50px; margin-left:8px;\"></div>
+                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Amount:</span> <span style=\"font-weight: bold; font-size:0.97em;\">₱${(order.qty === 0 ? 0 : order.amount * order.qty).toFixed(2)}</span></div>
+                    <button type=\"button\" class=\"removeOrderBtn\" data-idx=\"${idx}\" style=\"margin-top:4px; color:#ffffff; background:#b00; border:none; border-radius:2px; padding:2px 2px; cursor:pointer;\">Remove</button>
                 </div>`;
             });
             // Show customer name at right of summary header
@@ -256,8 +277,18 @@
                 if (e.target.classList.contains('orderQtyInput')) {
                     var idx = parseInt(e.target.getAttribute('data-idx'), 10);
                     var newQty = parseInt(e.target.value, 10);
-                    if (!isNaN(idx) && newQty > 0 && newQty <= 10) {
+                    if (!isNaN(idx) && newQty >= 0 && newQty <= 10) {
                         orders[idx].qty = newQty;
+                        // Always recalculate amount based on original price and extras
+                        var basePrice = getPrice(orders[idx].product, orders[idx].size);
+                        var extrasTotal = 0;
+                        if (orders[idx].extras && Array.isArray(orders[idx].extras)) {
+                            orders[idx].extras.forEach(function(extra) {
+                                extrasTotal += getExtraPrice(extra);
+                            });
+                        }
+                        var pricePerItem = basePrice + extrasTotal;
+                        orders[idx].amount = (newQty === 0) ? 0 : pricePerItem;
                         renderOrderSummary();
                     }
                 }
@@ -307,12 +338,17 @@
                 var product = document.getElementById('product').value;
                 var size = document.getElementById('size').value;
                 var sugar = document.getElementById('sugar').value;
-                var qty = parseInt(document.getElementById('qty').value, 10) || 1;
+                var qty = parseInt(document.getElementById('qty').value, 10);
+                if (isNaN(qty)) qty = 0;
                 var amount = updateOrderPrice();
                 var extras = Array.from(document.querySelectorAll('input[type="checkbox"][name="extras"]:checked')).map(cb => cb.value);
                 var customerName = document.getElementById('customerName').value.trim();
                 if (!product || !size) {
                     alert('Please select a product and size.');
+                    return;
+                }
+                if (qty < 1) {
+                    alert('Quantity must be at least 1.');
                     return;
                 }
                 orders.push({ product, size, sugar, extras, qty, amount, customerName });
