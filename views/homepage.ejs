@@ -9,56 +9,77 @@
 </head>
 
 <body>
+  <div style="text-align:right; margin-bottom:10px;">
+    <a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a>
+  </div>
   <header class="hero">
     <img class="logo" src="/images/AlimondsCafe.jpeg" >
-    <h1>Welcome to Alimond's Café</h1>
+    <h1><%= __('Welcome to Alimond\'s Café') %></h1>
   </header>
   <section class="about">
     <div class="about-text">
-      <h2>Our Story</h2>
-      <p>
-        This café was born from the unwavering commitment of Jessette and Mike, a devoted couple whose dream was simple
-        yet powerful: to serve the best and most affordable coffee to their neighborhood. Though Mike has since passed,
-        his legacy lives on in every cup we brew and every smile we share.
-      </p>
-      <p>
-        Their beloved sons have stood by them from the beginning—whether behind the counter or greeting customers, their
-        helping hands and warm hearts have shaped this café into a true family endeavor.
-      </p>
+      <h2><%= __('Our Story') %></h2>
+      <p><%= __('This café was born from the unwavering commitment of Jessette and Mike, a devoted couple whose dream was simple yet powerful: to serve the best and most affordable coffee to their neighborhood. Though Mike has since passed, his legacy lives on in every cup we brew and every smile we share.') %></p>
+      <p><%= __('Their beloved sons have stood by them from the beginning—whether behind the counter or greeting customers, their helping hands and warm hearts have shaped this café into a true family endeavor.') %></p>
     </div>
     <div class="about-image">
       <img src="founders.jpg" alt="Jessette and Mike" />
     </div>
   </section>
   <section id="menu" class="menu-preview">
-    <h2>Menu Highlights</h2>
-    <div class="menu-grid">
-      <div class="menu-item">
-        <h3>Kapeng Barako</h3>
-        <p>Strong, bold, and proudly local.</p>
-      </div>
-      <div class="menu-item">
-        <h3>Sweet Gatas Latte</h3>
-        <p>Comfort in a cup, creamy and smooth.</p>
-      </div>
-      <div class="menu-item">
-        <h3>Tambay Iced Brew</h3>
-        <p>Chill vibes, cold brew style.</p>
+    <h2><%= __('Menu Highlights') %></h2>
+    <div class="highlights-marquee-container">
+      <div class="highlights-marquee">
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Kapeng Barako">
+          <h3><%= __('Kapeng Barako') %></h3>
+          <p><%= __('Strong, bold, and proudly local.') %></p>
+        </div>
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80" alt="Sweet Gatas Latte">
+          <h3><%= __('Sweet Gatas Latte') %></h3>
+          <p><%= __('Comfort in a cup, creamy and smooth.') %></p>
+        </div>
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Tambay Iced Brew">
+          <h3><%= __('Tambay Iced Brew') %></h3>
+          <p><%= __('Chill vibes, cold brew style.') %></p>
+        </div>
+        <!-- Duplicate for seamless loop -->
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Kapeng Barako">
+          <h3><%= __('Kapeng Barako') %></h3>
+          <p><%= __('Strong, bold, and proudly local.') %></p>
+        </div>
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80" alt="Sweet Gatas Latte">
+          <h3><%= __('Sweet Gatas Latte') %></h3>
+          <p><%= __('Comfort in a cup, creamy and smooth.') %></p>
+        </div>
+        <div class="highlight-item">
+          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Tambay Iced Brew">
+          <h3><%= __('Tambay Iced Brew') %></h3>
+          <p><%= __('Chill vibes, cold brew style.') %></p>
+        </div>
       </div>
     </div>
   </section>
-
-  <footer class="footer">
-    <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
-    <p>Follow us @alimondscafe | Open daily 9am–7pm</p>
-  </footer>
-</body>
-
-</html>
-<button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+  <section class="order-section">
+    <div class="order-form-center">
+      <%- include('orderForm', { ProductData: ProductData, PriceData: PriceData, ExtraPriceData: ExtraPriceData, __: __ }) %>
+    </div>
+  </section>
+<footer class="footer">
+  <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
+  <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
+</footer>
+<button onclick="toggleDarkMode()">🌙 <%= __('Toggle Dark Mode') %></button>
+<a href="/menu" class="btn"><%= __('View menu') %></a>
 <script>
   function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
   }
+  // No JS needed for marquee, handled by CSS animation
 </script>
-<a href="/menu" class="btn">View menu</a>
+</body>
+</html>

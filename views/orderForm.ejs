@@ -1,0 +1,107 @@
+<div class="order-now-form">
+        <div style="display: flex; flex-direction: row; gap: 32px;">
+            <div style="flex: 1;">
+                <h2>Order Now</h2>
+                <form id="orderForm" action="/order" method="POST">
+            <label for="customerName">Customer Name:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; width: 500px;">
+                <input type="text" id="customerName" name="customerName" required style="flex:1; width:120px;">
+            </div>
+            <label for="product">Select Product:</label>
+            <select id="product" name="product" required>
+                <option value="" selected>None</option>
+                <% if (ProductData && ProductData.length > 0) { %>
+                    <% ProductData.forEach(function(product) { %>
+                        <option value="<%= product.Name %>"><%= product.Name %></option>
+                    <% }); %>
+                <% } %>
+            </select>
+            <br><br>
+            <label for="size">Select Size:</label>
+            <select id="size" name="size" required>
+                <option value="" selected>None</option>
+                <% if (PriceData && PriceData.length > 0) { %>
+                    <% PriceData.forEach(function(price) { %>
+                        <option value="<%= price.Item %>"><%= price.Item %></option>
+                    <% }); %>
+                <% } else { %>
+                    <option value="">No sizes available</option>
+                <% } %>
+            </select>
+            <br><br>
+            <label>Extras:</label><br>
+            <% if (ExtraPriceData && ExtraPriceData.length > 0) { %>
+                <% ExtraPriceData.forEach(function(extra, idx) { %>
+                    <input type="checkbox" id="extra_<%= idx %>" name="extras" value="<%= extra.Item %>">
+                    <label for="extra_<%= idx %>">
+                        <%= extra.Item %>
+                    </label><br>
+                <% }); %>
+            <% } else { %>
+                <span>No extras available</span><br>
+            <% } %>
+            <br>
+            <label for="sugar">Sugar Level:</label>
+            <select id="sugar" name="sugar" required>
+                <option value="No Sugar">No Sugar</option>
+                <option value="Less Sugar">Less Sugar</option>
+                <option value="Regular Sugar">Regular Sugar</option>
+                <option value="Extra Sugar">Extra Sugar</option>
+            </select>
+            <br>
+            <label for="qty">Qty:</label>
+            <input type="number" id="qty" name="qty" min="1" max="10" value="1" style="width:60px;">
+            <br>
+            <br>
+            <div id="priceDisplay" style="font-weight:bold;">Order Amount: ₱<span id="orderPrice">0.00</span></div>
+            <br>
+            <button type="submit" class="btn">Submit order</button>
+        </form>
+    </div>
+    <script>
+        var priceList = <%- JSON.stringify(PriceData || []) %>;
+        var extraList = <%- JSON.stringify(ExtraPriceData || []) %>;
+        function getPrice(product, size) {
+            const found = priceList.find(p =>
+                p.Item && p.Item.toString().trim().toLowerCase() === size.toString().trim().toLowerCase()
+            );
+            return found ? found.Amount : 0;
+        }
+        function getExtraPrice(extra) {
+            const found = extraList.find(e => e.Item === extra);
+            return found ? found.Amount : 0;
+        }
+        function updateOrderPrice() {
+            const product = document.getElementById('product').value;
+            const size = document.getElementById('size').value;
+            const qty = parseInt(document.getElementById('qty').value, 10) || 1;
+            let price = 0;
+            if (product && size) {
+                price = getPrice(product, size);
+                // Sum all checked extras (checkboxes)
+                const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]:checked');
+                extraCheckboxes.forEach(function (cb) {
+                    price += getExtraPrice(cb.value);
+                });
+            }
+            const total = price * qty;
+            document.getElementById('orderPrice').textContent = total.toFixed(2);
+            return total;
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var productSelect = document.getElementById('product');
+            if (productSelect) productSelect.addEventListener('change', updateOrderPrice);
+            var sizeSelect = document.getElementById('size');
+            if (sizeSelect) sizeSelect.addEventListener('change', updateOrderPrice);
+            var qtyInput = document.getElementById('qty');
+            if (qtyInput) qtyInput.addEventListener('input', updateOrderPrice);
+            // Add event listeners to all extras checkboxes
+            const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]');
+            extraCheckboxes.forEach(function(cb) {
+                cb.addEventListener('change', updateOrderPrice);
+            });
+            // Set orderPrice to the return value of updateOrderPrice
+            var orderPriceSpan = document.getElementById('orderPrice');
+            if (orderPriceSpan) orderPriceSpan.textContent = updateOrderPrice().toFixed(2);
+        });
+    </script>
