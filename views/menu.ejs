@@ -1,36 +1,346 @@
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alimond Café Menu</title>
-  <link rel="stylesheet" href="/styles.css">
+    <title>Menu</title>
+    <link rel="stylesheet" href="/menu.css">
 </head>
- <header class="hero">
-    <h1>Our Menu</h1>
-  </header>
-   <section class="menu-list">   
-    <% if (products && products.length > 0) { %>
-      <ul class="product-list">
-        <% products.forEach(function(product) { %>
-          <li class="product-item">
-            <h2><%= product.name %></h2>
-            <ul class="price-list">
-              <% Object.keys(product.prices).forEach(function(size) { %>
-                <li><strong><%= size.charAt(0).toUpperCase() + size.slice(1) %>:</strong> $<%= product.prices[size].toFixed(2) %></li>
-              <% }); %>
-            </ul>
-          </li>
-        <% }); %>
-      </ul>
-    <% } else { %>
-      <p>No products available.</p>
-    <% } %>
-  </section>
+
 <body>
-  <footer class="footer">
-    <p>📍 Alimond Café – Every cup brewed with love, for the neighborhood we call home.</p>
-    <p>Follow us @alimondcafe | Open daily 9am–7pm</p>
-  </footer>
+    <div style="text-align:right; margin-bottom:10px;">
+        <a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a>
+    </div>
+    <header class="hero">
+        <img class="logo" src="/images/AlimondsCafe.jpeg">
+        <h1>Our Menu</h1>
+    </header>
+    <div class="menu-flex-container">
+        <div class="menu-table-section">
+            <h2><%= __('Product List') %></h2>
+            <table class="menu-table">
+                <tr>
+                    <th><%= __('Product') %></th>
+                    <th><%= __('Description') %></th>
+                </tr>
+                <% if (ProductData && ProductData.length> 0) {
+                    ProductData.forEach(function(product) { %>
+                    <tr>
+                        <td>
+                            <%= product.Name %>
+                        </td>
+                        <td>
+                            <%= product.Description %>
+                        </td>
+                    </tr>
+                    <% }); } else { %>
+                        <tr>
+                            <td colspan="2"><%= __('No products available.') %></td>
+                        </tr>
+                        <% } %>
+            </table>
+        </div>
+        <div class="menu-table-section">
+            <h2><%= __('Price List') %></h2>
+            <table class="menu-table">
+                <tr>
+                    <th><%= __('Size') %></th>
+                    <th><%= __('Price') %></th>
+                </tr>
+                <% if (PriceData && PriceData.length> 0) {
+                    PriceData.forEach(function(pricelist) { %>
+                    <tr>
+                        <td>
+                            <%= pricelist.Item %>
+                        </td>
+                        <td>₱<%= pricelist.Amount %>
+                        </td>
+                    </tr>
+                    <% }); } else { %>
+                        <tr>
+                            <td colspan="2"><%= __('No prices available.') %></td>
+                        </tr>
+                        <% } %>
+            </table>
+        </div>
+        <div class="menu-table-section">
+            <h2><%= __('Extras') %></h2>
+            <table class="menu-table">
+                <tr>
+                    <th><%= __('Item') %></th>
+                    <th><%= __('Price') %></th>
+                </tr>
+                <% if (ExtraPriceData && ExtraPriceData.length> 0) {
+                    ExtraPriceData.forEach(function(extraPricelist) { %>
+                    <tr>
+                        <td>
+                            <%= extraPricelist.Item %>
+                        </td>
+                        <td>₱<%= extraPricelist.Amount %>
+                        </td>
+                    </tr>
+                    <% }); } else { %>
+                        <tr>
+                            <td colspan="2"><%= __('No extras available.') %></td>
+                        </tr>
+                        <% } %>
+            </table>
+        </div>
+    </div>
+    <div class="order-now-form">
+        <div style="display: flex; flex-direction: row; gap: 32px;">
+            <div style="flex: 1;">
+                <h2>Order Now</h2>
+                <form id="orderForm" action="/order" method="POST">
+            <label for="customerName">Customer Name:</label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; width: 500px;">
+                <input type="text" id="customerName" name="customerName" required style="flex:1; width:120px;">
+                <button type="button" id="clearCustomerName" class="btn" style="display: flex;margin-top: 0rem;" disabled>Clear</button>
+            </div>
+            <label for="product">Select Product:</label>
+            <select id="product" name="product" required>
+                <option value="" selected>None</option>
+                <% if (ProductData && ProductData.length> 0) { %>
+                    <% ProductData.forEach(function(product) { %>
+                        <option value="<%= product.Name %>"><%= product.Name %></option>
+                    <% }); %>
+                <% } else { %>
+                    <option value="">No products available</option>
+                <% } %>
+            </select>
+            <br><br>
+            <label for="size">Select Size:</label>
+            <select id="size" name="size" required>
+                <option value="" selected>None</option>
+                <% if (PriceData && PriceData.length> 0) { %>
+                    <% PriceData.forEach(function(price) { %>
+                        <option value="<%= price.Item %>"><%= price.Item %></option>
+                    <% }); %>
+                <% } else { %>
+                    <option value="">No sizes available</option>
+                <% } %>
+            </select>
+   <br><br>
+            <label>Extras:</label><br>
+            <% if (ExtraPriceData && ExtraPriceData.length> 0) { %>
+                <% ExtraPriceData.forEach(function(extra, idx) { %>
+                    <input type="checkbox" id="extra_<%= idx %>" name="extras" value="<%= extra.Item %>">
+                    <label for="extra_<%= idx %>">
+                        <%= extra.Item %>
+                    </label><br>
+                    <% }); %>
+                        <% } else { %>
+                            <span>No extras available</span><br>
+                            <% } %>
+                                <br>
+                                <label for="sugar">Sugar Level:</label>
+                                <select id="sugar" name="sugar" required>
+                                    <option value="No Sugar">No Sugar</option>
+                                    <option value="Less Sugar">Less Sugar</option>
+                                    <option value="Regular Sugar">Regular Sugar</option>
+                                    <option value="Extra Sugar">Extra Sugar</option>
+                                </select>
+                                <br>
+                                <label for="qty">Qty:</label>
+                                <input type="number" id="qty" name="qty" min="1" max="10" value="1" style="width:60px;">
+                                <br>
+                                <br>
+                                <div id="priceDisplay" style="font-weight:bold;">Order Amount: ₱<span
+                                        id="orderPrice">0.00</span></div>
+                                <br>
+                                <button type="submit" class="btn">Add order</button>
+                </form>
+            </div>
+            <div style="flex: 1; border: 1px solid #ccc; border-radius: 8px; padding: 16px; background: #f9f9f9; min-width: 220px; max-width: 320px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0;">Order Summary</h3>
+                </div>
+                <p style="color: #b00; font-size: 0.95em; margin-bottom: 8px;">* Maximum of 10 items per order.</p>
+                <div id="orderSummary">
+                    <div id="orderSummaryList">
+                        <!-- Orders will be listed here -->
+                    </div>
+                    <div id="totalAmountSummary" style="text-align: right; font-weight: bold; margin-top: 8px;"></div>
+                    <!-- Submit Order button removed as per request -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
+        <p>Follow us @alimondscafe | Open daily 9am–7pm</p>
+    </footer>
+    <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+    <script>
+        var priceList = <%- JSON.stringify(PriceData || []) %>;
+        var extraList = <%- JSON.stringify(ExtraPriceData || []) %>;
+
+        // Store orders in an array
+        var orders = [];
+
+        function getPrice(product, size) {
+            const found = priceList.find(p =>
+                p.Item && p.Item.toString().trim().toLowerCase() === size.toString().trim().toLowerCase()
+            );
+            return found ? found.Amount : 0;
+        }
+        function getExtraPrice(extra) {
+            const found = extraList.find(e => e.Item === extra);
+            return found ? found.Amount : 0;
+        }
+        function updateOrderPrice() {
+            const product = document.getElementById('product').value;
+            const size = document.getElementById('size').value;
+            const qty = parseInt(document.getElementById('qty').value, 10) || 1;
+            let price = 0;
+            if (product && size) {
+                price = getPrice(product, size);
+                // Sum all checked extras (checkboxes)
+                const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]:checked');
+                extraCheckboxes.forEach(function (cb) {
+                    price += getExtraPrice(cb.value);
+                });
+            }
+            const total = price * qty;
+            document.getElementById('orderPrice').textContent = total.toFixed(2);
+            return total;
+        }
+
+        function renderOrderSummary() {
+            var summaryDiv = document.getElementById('orderSummaryList');
+            summaryDiv.innerHTML = '';
+            if (orders.length === 0) {
+                summaryDiv.innerHTML = '<p>No orders yet.</p>';
+                document.getElementById('customerNameSummary').textContent = '';
+                document.getElementById('totalAmountSummary').style.display = 'none';
+                document.getElementById('totalAmountSummary').textContent = '';
+                return;
+            }
+            // Show total amount
+            var total = orders.reduce((sum, order) => sum + (order.amount * (order.qty || 1)), 0);
+            document.getElementById('totalAmountSummary').textContent = `Total: ₱${total.toFixed(2)}`;
+            document.getElementById('totalAmountSummary').style.display = 'block';
+            orders.forEach(function(order, idx) {
+                summaryDiv.innerHTML += `<div style=\"display: flex; justify-content: space-between; align-items: flex-start; border-bottom:1px solid #eee; margin-bottom:8px; padding-bottom:4px;\">
+                    <div>
+                        <strong>Item #${idx+1}</strong><br>
+                        Product: ${order.product}<br>
+                        Size: ${order.size}<br>
+                        Sugar: ${order.sugar}<br>
+                        Extras: ${order.extras && order.extras.length ? order.extras.join(', ') : '-'}<br>
+                        Qty: <input type=\"number\" class=\"orderQtyInput\" data-idx=\"${idx}\" min=\"1\" max=\"10\" value=\"${order.qty}\" style=\"width:50px;\"><br>
+                        Amount: ₱${order.amount.toFixed(2)}<br>
+                        <button type=\"button\" class=\"removeOrderBtn\" data-idx=\"${idx}\" style=\"margin-top:4px; color:#fff; background:#b00; border:none; border-radius:4px; padding:2px 8px; cursor:pointer;\">Remove</button>
+                    </div>
+                    <div style=\"min-width: 140px; text-align: right; font-weight: bold;\">Customer: ${order.customerName ? order.customerName : '-'}</div>
+                </div>`;
+            });
+            // Show customer name at right of summary header
+            // No customer name in summary header
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide total amount on initial load if no orders
+            if (orders.length === 0) {
+                var totalAmountDiv = document.getElementById('totalAmountSummary');
+                if (totalAmountDiv) {
+                    totalAmountDiv.style.display = 'none';
+                    totalAmountDiv.textContent = '';
+                }
+            }
+            // Qty change logic in summary
+            document.getElementById('orderSummaryList').addEventListener('input', function(e) {
+                if (e.target.classList.contains('orderQtyInput')) {
+                    var idx = parseInt(e.target.getAttribute('data-idx'), 10);
+                    var newQty = parseInt(e.target.value, 10);
+                    if (!isNaN(idx) && newQty > 0 && newQty <= 10) {
+                        orders[idx].qty = newQty;
+                        renderOrderSummary();
+                    }
+                }
+            });
+            // Remove order logic
+            document.getElementById('orderSummaryList').addEventListener('click', function(e) {
+                if (e.target.classList.contains('removeOrderBtn')) {
+                    var idx = parseInt(e.target.getAttribute('data-idx'), 10);
+                    if (!isNaN(idx)) {
+                        orders.splice(idx, 1);
+                        renderOrderSummary();
+                    }
+                }
+            });
+            // Enable/disable clear button for customer name
+            var customerNameInput = document.getElementById('customerName');
+            var clearBtn = document.getElementById('clearCustomerName');
+            function updateClearBtn() {
+                clearBtn.disabled = !customerNameInput.value.trim();
+            }
+            customerNameInput.addEventListener('input', updateClearBtn);
+            clearBtn.addEventListener('click', function() {
+                customerNameInput.value = '';
+                updateClearBtn();
+                customerNameInput.focus();
+            });
+            updateClearBtn();
+            document.getElementById('product').addEventListener('change', updateOrderPrice);
+            document.getElementById('size').addEventListener('change', updateOrderPrice);
+            var qtyInput = document.getElementById('qty');
+            if (qtyInput) qtyInput.addEventListener('input', updateOrderPrice);
+            // Add event listeners to all extras checkboxes
+            const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]');
+            extraCheckboxes.forEach(function(cb) {
+                cb.addEventListener('change', updateOrderPrice);
+            });
+            // Set orderPrice to the return value of updateOrderPrice
+            document.getElementById('orderPrice').textContent = updateOrderPrice().toFixed(2);
+
+            // Add order logic
+            document.getElementById('orderForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (orders.length >= 10) {
+                    alert('Maximum of 10 items allowed per order.');
+                    return;
+                }
+                var product = document.getElementById('product').value;
+                var size = document.getElementById('size').value;
+                var sugar = document.getElementById('sugar').value;
+                var qty = parseInt(document.getElementById('qty').value, 10) || 1;
+                var amount = updateOrderPrice();
+                var extras = Array.from(document.querySelectorAll('input[type="checkbox"][name="extras"]:checked')).map(cb => cb.value);
+                var customerName = document.getElementById('customerName').value.trim();
+                if (!product || !size) {
+                    alert('Please select a product and size.');
+                    return;
+                }
+                orders.push({ product, size, sugar, extras, qty, amount, customerName });
+                renderOrderSummary();
+                // Optionally reset form fields, but do NOT clear customer name
+                var prevCustomerName = orders.length > 1 ? orders[orders.length-2].customerName : null;
+                var currentCustomerName = document.getElementById('customerName').value;
+                document.getElementById('orderForm').reset();
+                document.getElementById('qty').value = 1;
+                // Always restore customer name after reset
+                document.getElementById('customerName').value = currentCustomerName;
+                updateOrderPrice();
+
+            // Add a function to clear all orders and the total amount
+            function clearOrderSummary() {
+                orders.length = 0;
+                renderOrderSummary();
+                document.getElementById('orderForm').reset();
+                document.getElementById('qty').value = 1;
+                updateOrderPrice();
+                document.getElementById('totalAmountSummary').textContent = '';
+            }
+            });
+
+            renderOrderSummary();
+        });
+    </script>
+    <a href="/" class="btn">Homepage</a>
 </body>
+
 </html>

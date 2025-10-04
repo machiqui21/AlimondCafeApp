@@ -1,3 +1,207 @@
+/* Responsive Headings */
+h1, .hero h1 {
+  font-size: 2.5em;
+  margin: 0.5em 0 0.3em 0;
+  line-height: 1.1;
+}
+h2 {
+  font-size: 1.7em;
+  margin: 0.7em 0 0.4em 0;
+  line-height: 1.15;
+}
+h3 {
+  font-size: 1.2em;
+  margin: 0.5em 0 0.2em 0;
+  line-height: 1.18;
+}
+@media (max-width: 700px) {
+  h1, .hero h1 {
+    font-size: 1.5em;
+  }
+  h2 {
+    font-size: 1.15em;
+  }
+  h3 {
+    font-size: 1em;
+  }
+}
+/* General responsive layout for sections */
+section, .footer {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (max-width: 700px) {
+  section, .footer {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+
+/* Responsive About section */
+.about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2em;
+  margin-bottom: 2em;
+}
+.about-text {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+.about-image img {
+  width: 220px;
+  max-width: 100%;
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto;
+}
+@media (max-width: 700px) {
+  .about {
+    flex-direction: column;
+    gap: 1em;
+    padding: 0;
+  }
+  .about-image img {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+/* Responsive Menu Highlights section already handled by marquee styles */
+
+/* Responsive Order Section */
+.order-section {
+  width: 100%;
+  margin: 0 auto 2em auto;
+  box-sizing: border-box;
+}
+
+/* Responsive Footer */
+.footer {
+  background: #f3e9dd;
+  color: #7c4700;
+  text-align: center;
+  padding: 1.2em 0 1.2em 0;
+  font-size: 1em;
+  border-radius: 0 0 12px 12px;
+  margin-top: 2em;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 700px) {
+  .footer {
+    font-size: 0.98em;
+    padding: 0.7em 0 0.7em 0;
+    border-radius: 0 0 8px 8px;
+  }
+}
+
+/* Responsive Buttons */
+button, .btn {
+  font-size: 1.1em;
+  padding: 0.6em 1.4em;
+  border-radius: 6px;
+  border: none;
+  background: #d4a373;
+  color: #fff;
+  cursor: pointer;
+  margin: 0.5em 0.3em;
+  transition: background 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  display: inline-block;
+}
+button:hover, .btn:hover {
+  background: #b97a56;
+}
+@media (max-width: 700px) {
+  button, .btn {
+    font-size: 1em;
+    padding: 0.5em 1em;
+    width: 100%;
+    max-width: 320px;
+    margin: 0.4em auto;
+    display: block;
+  }
+}
+/* Center order form on homepage */
+.order-form-center {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 600px;
+}
+@media (max-width: 700px) {
+  .order-form-center {
+    max-width: 100%;
+    padding: 0 8px;
+  }
+}
+/* Highlights Marquee Styles */
+.highlights-marquee-container {
+  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 2em auto;
+  background: #fff7ed;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 1em 0;
+}
+.highlights-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 18s linear infinite;
+  align-items: center;
+}
+.highlight-item {
+  flex: 0 0 260px;
+  margin: 0 18px;
+  background: #f8f3ee;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  text-align: center;
+  padding: 0.5em 1em 1em 1em;
+}
+.highlight-item img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0.5em;
+}
+.highlight-item h3 {
+  margin: 0.5em 0 0.2em 0;
+  font-size: 1.1em;
+  color: #7c4700;
+}
+.highlight-item p {
+  margin: 0 0 0.5em 0;
+  font-size: 0.98em;
+  color: #5a4632;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@media (max-width: 700px) {
+  .highlight-item {
+    flex: 0 0 180px;
+    padding: 0.5em 0.5em 1em 0.5em;
+  }
+  .highlight-item img {
+    height: 90px;
+  }
+  .highlights-marquee-container {
+    padding: 0.5em 0;
+  }
+}
 :root {
   --bg-light: #fdf6f0;
   --bg-dark: #1e1e1e;
@@ -22,16 +226,38 @@ body {
   color: white;
 }
 
+.logo {
+
+  float: left;
+  width: 140px;
+  /* adjust based on your design */
+  height: auto;
+  margin: 0;
+}
+
+
 .tagline {
   font-style: italic;
   margin-top: 0.5rem;
+}
+
+button {
+  background-color: #6b4f3b; /* warm coffee brown */
+  color: #fff;
+  padding: 0.75em 1.5em;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .btn {
   display: inline-block;
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background-color: var(--highlight);
+  background-color: var(--highlight); 
   color: white;
   text-decoration: none;
   border-radius: 5px;
@@ -74,6 +300,74 @@ body {
   border-radius: 8px;
 }
 
+.order-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 60vh;
+  flex-wrap: wrap;
+}
+
+.order-now-form {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  gap: 32px;
+}
+
+#orderForm {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.95);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  min-width: 260px;
+}
+
+/* Responsive styles for order form and summary */
+@media (max-width: 900px) {
+  .order-now-form {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .order-now-form > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  #orderForm {
+    max-width: 100%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .order-section {
+    min-height: unset;
+    padding: 0 0.5rem;
+  }
+  .order-now-form {
+    gap: 8px;
+  }
+  #orderForm {
+    padding: 0.5rem;
+    font-size: 0.98em;
+  }
+  .order-now-form label,
+  .order-now-form input,
+  .order-now-form select,
+  .order-now-form button {
+    font-size: 1em;
+  }
+  .order-now-form [style*="width: 500px"] {
+    width: 100% !important;
+    flex-wrap: wrap;
+  }
+}
 .footer {
   text-align: center;
   padding: 1.5rem;
@@ -87,7 +381,10 @@ body.dark-mode {
   color: var(--text-dark);
 }
 
-body.dark-mode .hero {color: var(--text-dark);}
+body.dark-mode .hero {
+  background-color: #333;
+  color: var(--text-dark);
+}
 
 body.dark-mode .footer {
   background-color: #333;
@@ -108,5 +405,10 @@ body.dark-mode .about {
 }
 
 body.dark-mode .about-text {
+  color: var(--text-dark);
+}
+body.dark-mode button,
+body.dark-mode .btn {
+  background-color: #555;
   color: var(--text-dark);
 }
