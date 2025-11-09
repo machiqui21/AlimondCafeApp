@@ -1,382 +1,437 @@
+<!doctype html>
 <html lang="en">
-
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Menu</title>
     <link rel="stylesheet" href="/menu.css">
+    <%- include('partials/navbar_menu.ejs') %>
+    
 </head>
-
 <body>
-    <div style="text-align:right; margin-bottom:10px;">
-        <a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a>
-    </div>
+    <div style="text-align:right; margin-bottom:10px;"><a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a></div>
     <header class="hero">
-        <img class="logo" src="/images/AlimondsCafe.jpeg">
-        <h1>Our Menu</h1>
-    </header>
-    <div class="menu-flex-container">
-        <div class="menu-table-section">
-            <h2><%= __('Product List') %></h2>
-            <table class="menu-table">
-                <tr>
-                    <th><%= __('Product') %></th>
-                    <th><%= __('Description') %></th>
-                </tr>
-                <% if (ProductData && ProductData.length> 0) {
-                    ProductData.forEach(function(product) { %>
-                    <tr>
-                        <td>
-                            <%= product.Name %>
-                        </td>
-                        <td>
-                            <%= product.Description %>
-                        </td>
-                    </tr>
-                    <% }); } else { %>
-                        <tr>
-                            <td colspan="2"><%= __('No products available.') %></td>
-                        </tr>
-                        <% } %>
-            </table>
-        </div>
-        <div class="menu-table-section">
-            <h2><%= __('Price List') %></h2>
-            <table class="menu-table">
-                <tr>
-                    <th><%= __('Size') %></th>
-                    <th><%= __('Price') %></th>
-                </tr>
-                <% if (PriceData && PriceData.length> 0) {
-                    PriceData.forEach(function(pricelist) { %>
-                    <tr>
-                        <td>
-                            <%= pricelist.Item %>
-                        </td>
-                        <td>₱<%= pricelist.Amount %>
-                        </td>
-                    </tr>
-                    <% }); } else { %>
-                        <tr>
-                            <td colspan="2"><%= __('No prices available.') %></td>
-                        </tr>
-                        <% } %>
-            </table>
-        </div>
-        <div class="menu-table-section">
-            <h2><%= __('Extras') %></h2>
-            <table class="menu-table">
-                <tr>
-                    <th><%= __('Item') %></th>
-                    <th><%= __('Price') %></th>
-                </tr>
-                <% if (ExtraPriceData && ExtraPriceData.length> 0) {
-                    ExtraPriceData.forEach(function(extraPricelist) { %>
-                    <tr>
-                        <td>
-                            <%= extraPricelist.Item %>
-                        </td>
-                        <td>₱<%= extraPricelist.Amount %>
-                        </td>
-                    </tr>
-                    <% }); } else { %>
-                        <tr>
-                            <td colspan="2"><%= __('No extras available.') %></td>
-                        </tr>
-                        <% } %>
-            </table>
-        </div>
-    </div>
-    <div class="order-now-form">
-        <div style="display: flex; flex-direction: row; gap: 32px;">
-            <div style="flex: 1;">
-                <h2>Order Now</h2>
-                <form id="orderForm" action="/order" method="POST">
-            <label for="customerName">Customer Name:</label>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; width: 500px;">
-                <input type="text" id="customerName" name="customerName" required style="flex:1; width:120px;">
-                <button type="button" id="clearCustomerName" class="btn" style="display: flex;margin-top: 0rem;" disabled>Clear</button>
-            </div>
-            <label for="product">Select Product:</label>
-            <select id="product" name="product" required>
-                <option value="" selected>None</option>
-                <% if (ProductData && ProductData.length> 0) { %>
-                    <% ProductData.forEach(function(product) { %>
-                        <option value="<%= product.Name %>"><%= product.Name %></option>
+           <img class="logo" src="/images/AlimondsCafe.jpeg" >
+                     <h1><%= __('Alimond\'s Café Menu') %></h1>
+                     <h3>
+                         <a href="/menu/type/Tea%20Latte"><%= __('Tea Latte') %></a> <a>|</a>
+                         <a href="/menu/type/Espresso%20Beverage"><%= __('Espresso Beverage') %></a> <a>|</a>
+                         <a href="/menu/type/Brewed%20Coffee"><%= __('Brewed Coffee') %></a> <a>|</a>
+                         <a href="/menu/type/Espresso%20Beverage%20(Iced)"><%= __('Espresso Beverage (Iced)') %></a> <a>|</a>
+                         <a href="/menu/type/Milk-Based%20Beverage"><%= __('Milk-Based Beverage') %></a> <a>|</a>
+                         <a href="/menu/type/Tea"><%= __('Tea') %></a> <a>|</a>
+                         <a href="/menu/type/Pastry"><%= __('Pastry') %></a>
+                     </h3>
+     </header>
+    <main>
+        <div class="menu-flex-container">
+            <div class="menu-table-section">
+
+                <% if (ProductData && ProductData.length > 0) { %>
+                    <% var groups = {}; ProductData.forEach(function(p){ var key = p.Type || p.Category || 'Other'; (groups[key] = groups[key] || []).push(p); }); %>
+
+                    <div class="products-by-type">
+                    <% Object.keys(groups).forEach(function(groupName){ %>
+                        <div class="type-column" aria-label="<%= groupName %>">
+                            <h3><%= groupName %></h3>
+                            <% groups[groupName].forEach(function(product){ %>
+                                <% var isSelected = selectedProductId && selectedProductId == product.ProductID; %>
+                                <div class="product-card <%= isSelected ? 'selected-product' : '' %>" id="<%= product.ProductID %>">
+                                    <% /* simple filename normalization: take last path segment */ %>
+                                    <% var pic = product.Picture || ''; var fname = (pic && pic.toString()) ? (pic.toString().split('/').pop().split('\\').pop()) : null; var imgSrc = fname ? ('/images/' + fname) : null; %>
+                                    <% if (imgSrc) { %>
+                                        <img src="<%= imgSrc %>" alt="<%= product.Name %>">
+                                    <% } else { %>
+                                        <div style="width:100%;height:180px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">No image</div>
+                                    <% } %>
+                                    <div class="card-content">
+                                        <h3><%= product.Name %></h3>
+                                        <p><%= product.Description %></p>
+                                        <% /* Base price: if product has no sizes, use products.Price; otherwise 0 until a size is chosen */ %>
+                                        <% var basePrice = (!product.HasSizes ? parseFloat(product.Price || product.price || 0) : 0); %>
+                                        <form action="/order" method="POST" data-baseprice="<%= basePrice %>">
+                                            <input type="hidden" name="productId" value="<%= product.ProductID %>">
+                                            <input type="hidden" name="productName" value="<%= product.Name %>">
+
+                                            <% if (product.HasSizes) { %>
+                                                <div><strong>Size</strong> <span class="size-legend-wrapper"><img class="size-legend" src="/images/size-legend.jpg" alt="S M L" title="Small / Medium / Large"><span class="size-legend-text">S M L</span></span></div>
+                                                <div class="sizes-group">
+                                                    <% 
+                                                        var matched = (typeof SizePriceData !== 'undefined' ? SizePriceData.filter(function(sp){
+                                                            if ((sp.ProductID && sp.ProductID == product.ProductID) || (sp.product_id && sp.product_id == product.ProductID) || (sp.product && sp.product == product.Name)) return true;
+                                                            var spType = (sp.Type || sp.type || sp.productType || '').toString().trim().toLowerCase();
+                                                            var prodType = (product.Type || product.type || '').toString().trim().toLowerCase();
+                                                            if (spType && prodType && spType === prodType) return true;
+                                                            return false;
+                                                        }) : []);
+                                                        // sort preferred order: small, medium, large
+                                                        var orderKeys = ['small','medium','large'];
+                                                        matched.sort(function(a,b){
+                                                            function key(x){ var label = (x.size || x.Item || x.Size || x.sizeName || x.label || '').toString().trim().toLowerCase();
+                                                                if (!label) return orderKeys.length;
+                                                                if (label.indexOf('small') !== -1) return 0;
+                                                                if (label.indexOf('medium') !== -1) return 1;
+                                                                if (label.indexOf('large') !== -1) return 2;
+                                                                return orderKeys.length;
+                                                            }
+                                                            return key(a) - key(b);
+                                                        });
+                                                        matched.forEach(function(sp){ %>
+                                                        <% var sizeLabel = sp.size || sp.Item || sp.Size || sp.sizeName || sp.label || ''; var sizeAmt = parseFloat(sp.price || sp.Amount || sp.amount || sp.Price || 0) || 0; %>
+                                                        <label><input type="radio" name="size" value="<%= sizeLabel %>" data-price="<%= sizeAmt %>" required> <%= sizeLabel %> - ₱<%= sizeAmt.toFixed(2) %></label>
+                                                    <% }); %>
+                                                </div>
+                                            <% } else { %>
+                                                <% /* For items without sizes, show the base price from products table */ %>
+                                                <div class="priceDisplay" style="margin-top:8px;font-weight:bold;">
+                                                    <span>Base Price: ₱<%= basePrice.toFixed(2) %></span>
+                                                </div>
+                                            <% } %>
+
+                                            <% if (product.HasExtras) { %>
+                                                <div><strong>Toppings</strong></div>
+                                                <select name="extras">
+                                                    <option value="">-- None --</option>
+                                                    <% (typeof ExtraPriceData !== 'undefined' ? ExtraPriceData : []).forEach(function(e){ %>
+                                                        <option value="<%= e.Item || e.option || e.name %>" data-price="<%= parseFloat(e.Amount||e.price||0) %>" data-description="<%= (e.description||'') %>"><%= (e.Item || e.option || e.name) %> (₱<%= parseFloat(e.Amount||e.price||0).toFixed(2) %>)</option>
+                                                    <% }); %>
+                                                </select>
+                                                <div class="select-description" data-for="extras"></div>
+                                            <% } %>
+
+                                            <% if (product.HasCustom) { %>
+                                                <% var milkOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='milk'; }); %>
+                                                <% if (milkOpts && milkOpts.length) { %>
+                                                    <div><strong>Milk</strong></div>
+                                                    <select name="customOption">
+                                                        <option value="">None</option>
+                                                        <% milkOpts.forEach(function(m){ %>
+                                                            <option value="<%= m.option %>" data-price="<%= parseFloat(m.price||0) %>" data-description="<%= (m.description||'') %>"><%= (m.option||m.Item||m.name) %> (₱<%= parseFloat(m.price||0).toFixed(2) %>)</option>
+                                                        <% }); %>
+                                                    </select>
+                                                    <div class="select-description" data-for="customOption"></div>
+                                                <% } %>
+
+                                                <% var sugarOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='sweetener'; }); %>
+                                                <% if (sugarOpts && sugarOpts.length) { %>
+                                                    <div><strong>Sweetener</strong></div>
+                                                    <select name="sugar">
+                                                        <option value="">-- None --</option>
+                                                        <% sugarOpts.forEach(function(s){ %>
+                                                            <option value="<%= (s.description && s.description.trim()) ? s.description : (s.option || s.Item || s.name) %>" data-price="<%= parseFloat(s.price||s.Amount||0) %>" data-description="<%= (s.description||'') %>"><%= (s.description||'') %> (₱<%= parseFloat(s.price||s.Amount||0).toFixed(2) %>)</option>
+                                                        <% }); %>
+                                                    </select>
+                                                    <div class="select-description" data-for="sugar"></div>
+                                                <% } %>
+                                            <% } %>
+
+                                            <div style="margin-top:8px;">
+                                                <label>Qty <input type="number" name="qty" value="1" min="1" max="10"></label>
+                                            </div>
+
+                                            <div class="priceDisplay" style="margin-top:8px;font-weight:bold;">Price / Item: ₱<span class="pricePerItem">0.00</span> | Total: ₱<span class="priceTotal">0.00</span></div>
+                                            <div style="margin-top:8px;"><button type="submit" class="btn">Add to Order</button></div>
+                                        </form>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
                     <% }); %>
-                <% } else { %>
-                    <option value="">No products available</option>
-                <% } %>
-            </select>
-            <br><br>
-            <label for="size">Select Size:</label>
-            <select id="size" name="size" required>
-                <option value="" selected>None</option>
-                <% if (PriceData && PriceData.length> 0) { %>
-                    <% PriceData.forEach(function(price) { %>
-                        <option value="<%= price.Item %>"><%= price.Item %></option>
-                    <% }); %>
-                <% } else { %>
-                    <option value="">No sizes available</option>
-                <% } %>
-            </select>
-   <br><br>
-            <label>Extras:</label><br>
-            <% if (ExtraPriceData && ExtraPriceData.length> 0) { %>
-                <% ExtraPriceData.forEach(function(extra, idx) { %>
-                    <input type="checkbox" id="extra_<%= idx %>" name="extras" value="<%= extra.Item %>">
-                    <label for="extra_<%= idx %>">
-                        <%= extra.Item %>
-                    </label><br>
-                    <% }); %>
-                        <% } else { %>
-                            <span>No extras available</span><br>
-                            <% } %>
-                                <br>
-                                <label for="sugar">Sugar Level:</label>
-                                <select id="sugar" name="sugar" required>
-                                    <option value="No Sugar">No Sugar</option>
-                                    <option value="Less Sugar">Less Sugar</option>
-                                    <option value="Regular Sugar">Regular Sugar</option>
-                                    <option value="Extra Sugar">Extra Sugar</option>
-                                </select>
-                                <br>
-                                <label for="qty">Qty:</label>
-                                <input type="number" id="qty" name="qty" min="1" max="10" value="1" style="width:60px;">
-                                <br>
-                                <br>
-                                <div id="priceDisplay" style="font-weight:bold;">Order Amount: ₱<span
-                                        id="orderPrice">0.00</span></div>
-                                <br>
-                                <button type="submit" class="btn">Add order</button>
-                </form>
-            </div>
-            <div style="flex: 1; border: 1px solid #ccc; border-radius: 8px; padding: 16px; background: #f9f9f9; min-width: 220px; max-width: 320px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="margin: 0;">Order Summary</h3>
-                </div>
-                <p style="color: #b00; font-size: 0.95em; margin-bottom: 8px;">* Maximum of 10 items per order.</p>
-                <div id="orderSummary">
-                    <div id="orderSummaryList">
-                        <!-- Orders will be listed here -->
                     </div>
-                    <div id="totalAmountSummary" style="text-align: right; font-weight: bold; margin-top: 8px;"></div>
-                    <!-- Submit Order button removed as per request -->
-                </div>
+        <% } else { %>
+            <p>No products available.</p>
+        <% } %>
+
+                <div style="margin-top:16px;"></div>
             </div>
+
+            <aside class="order-sidebar" id="orderSidebar">
+                <h3>Your Order</h3>
+                <div id="ordersList">
+                    <% if (orders && orders.length) { %>
+                        <% orders.forEach(function(o){ %>
+                            <div class="order-item">
+                                <div class="info">
+                                    <div class="meta"><%= o.product %></div>
+                                                <% var details = [];
+                                                    if (o.size) details.push({label:'Size', value:o.size});
+                                                    if (o.sugar) details.push({label:'Sweetener', value:o.sugar});
+                                                    if (o.customSelected) details.push({label:'Milk', value:o.customSelected});
+                                                    if (o.extras) details.push({label:'Extras', value:o.extras});
+                                    %>
+                                    <% if (details.length) { %>
+                                        <ul class="order-details">
+                                            <% details.forEach(function(d){ %>
+                                                <li><strong><%= d.label %>:</strong> <span><%= d.value %></span></li>
+                                            <% }); %>
+                                        </ul>
+                                    <% } %>
+                                </div>
+                                <div class="controls">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="font-size: 0.9em;">Qty:</label>
+                                        <input type="number" class="order-qty" value="<%= o.qty %>" min="1" data-id="<%= o._localId || o.id %>" style="width: 50px;">
+                                        <div class="amount" style="margin-left: auto;">₱<%= parseFloat(o.totalAmount||0).toFixed(2) %></div>
+                                    </div>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="remove-btn btn" data-id="<%= o._localId || o.id %>">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="empty">No order available</div>
+                    <% } %>
+                </div>
+                <div class="order-total">Total: ₱<span id="orderGrandTotal">0.00</span></div>
+                <div style="margin-top:12px;"><a href="/order-summary" class="btn" id="checkoutBtn">Checkout</a></div>
+            </aside>
         </div>
-    </div>
+    </main>
+
     <footer class="footer">
         <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
-        <p>Follow us @alimondscafe | Open daily 9am–7pm</p>
     </footer>
     <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
-    <script>
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-        }
-    </script>
-    <script>
-        var priceList = <%- JSON.stringify(PriceData || []) %>;
-        var extraList = <%- JSON.stringify(ExtraPriceData || []) %>;
+    <a href="/" class="btn">View Homepage</a>
 
-        // Store orders in an array
-        var orders = [];
+    <script>
+    var PRICE_DATA = <%- JSON.stringify(typeof PriceData !== 'undefined' ? PriceData : []) %>;
+    var EXTRA_DATA = <%- JSON.stringify(typeof ExtraPriceData !== 'undefined' ? ExtraPriceData : []) %>;
+    var CUSTOM_DATA = <%- JSON.stringify(typeof CustomPriceData !== 'undefined' ? CustomPriceData : []) %>;
+    var ORDERS_DATA = <%- JSON.stringify(typeof orders !== 'undefined' ? orders : []) %>;
 
-        function getPrice(product, size) {
-            const found = priceList.find(p =>
-                p.Item && p.Item.toString().trim().toLowerCase() === size.toString().trim().toLowerCase()
-            );
-            return found ? found.Amount : 0;
-        }
-        function getExtraPrice(extra) {
-            const found = extraList.find(e => e.Item === extra);
-            return found ? found.Amount : 0;
-        }
-        function updateOrderPrice() {
-            const product = document.getElementById('product').value;
-            const size = document.getElementById('size').value;
-            let qty = parseInt(document.getElementById('qty').value, 10);
-            if (isNaN(qty) || qty < 1) qty = 1;
-            document.getElementById('qty').value = qty; // force UI to stay in range
-            // Enable/disable Add order button based on qty
-            var submitBtn = document.querySelector('#orderForm button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = (qty < 1);
+    function toNumber(v){ return parseFloat(v||0); }
+
+    function toggleDarkMode(){
+        var isDark = document.body.classList.toggle('dark-mode');
+        try{ localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e){}
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+            // restore saved dark mode pref
+            try { var saved = localStorage.getItem('darkMode'); if (saved === '1') document.body.classList.add('dark-mode'); } catch(e){}
+            // setup scroller buttons for product groups
+            Array.from(document.querySelectorAll('.products-scroller')).forEach(function(wrapper){
+                var track = wrapper.querySelector('.products-track');
+                var prev = wrapper.querySelector('.scroller-btn.prev');
+                var next = wrapper.querySelector('.scroller-btn.next');
+                if (!track) return;
+                function cardWidth(){ var c = track.querySelector('.product-card'); return c ? (c.offsetWidth + 20) : track.clientWidth; }
+                if (next) next.addEventListener('click', function(){ track.scrollBy({ left: cardWidth(), behavior: 'smooth' }); });
+                if (prev) prev.addEventListener('click', function(){ track.scrollBy({ left: -cardWidth(), behavior: 'smooth' }); });
+                // hide buttons if no overflow
+                function updateButtons(){ if(!next || !prev) return; if (track.scrollWidth <= track.clientWidth + 4) { next.style.display='none'; prev.style.display='none'; } else { next.style.display='block'; prev.style.display='block'; } }
+                updateButtons(); window.addEventListener('resize', updateButtons);
+            });
+            var forms = document.querySelectorAll('.product-card form');
+            // show fallback text for size legend if image is missing
+            Array.from(document.querySelectorAll('.size-legend-wrapper')).forEach(function(w){
+                var img = w.querySelector('img.size-legend');
+                var txt = w.querySelector('.size-legend-text');
+                try {
+                    if (img && img.complete && img.naturalWidth > 0) { if (txt) txt.style.display='none'; }
+                    else { if (txt) txt.style.display='inline'; }
+                    img.addEventListener('error', function(){ if (txt) txt.style.display='inline'; img.style.display='none'; });
+                    img.addEventListener('load', function(){ if (txt) txt.style.display='none'; img.style.display='inline'; });
+                } catch(e){}
+            });
+            var ordersList = document.getElementById('ordersList');
+            var grandTotalEl = document.getElementById('orderGrandTotal');
+
+            function getOrderId(o){ return (o && (o._localId || o.id)) ? (o._localId || o.id) : null; }
+            function findOrderById(id){ return (ORDERS_DATA||[]).find(function(o){ return getOrderId(o) === id; }); }
+            function debounce(fn, wait){ var t; return function(){ var ctx=this, args=arguments; clearTimeout(t); t=setTimeout(function(){ fn.apply(ctx,args); }, wait||250); }; }
+
+            function renderSidebar() {
+                if (!ordersList) return;
+                ordersList.innerHTML = '';
+                if (!ORDERS_DATA || ORDERS_DATA.length === 0) {
+                    ordersList.innerHTML = '<div class="empty">No items yet</div>';
+                    if (grandTotalEl) grandTotalEl.textContent = '0.00';
+                    return;
+                }
+                var total = 0;
+                ORDERS_DATA.forEach(function(o){
+                    var id = getOrderId(o);
+                    var div = document.createElement('div'); div.className = 'order-item';
+                    var details = [];
+                    if (o.size) details.push({label:'Size', value:o.size});
+                    if (o.sugar) details.push({label:'Sweetener', value:o.sugar});
+                    if (o.customSelected) details.push({label:'Milk', value:o.customSelected});
+                    if (o.extras) details.push({label:'Extras', value:o.extras});
+                    var listHtml = '';
+                    if (details.length) {
+                        listHtml = '<ul class="order-details">' + details.map(function(d){ return '<li><strong>'+ d.label +':</strong> <span>'+ d.value +'</span></li>'; }).join('') + '</ul>';
+                    }
+                    div.innerHTML = '<div class="info">'+
+                                        '<div class="meta">'+ (o.product||'') +'</div>'+
+                                        listHtml +
+                                    '</div>'+
+                                    '<div class="controls">'+
+                                       '<div style="display: flex; align-items: center; gap: 8px;">'+
+                                          '<label style="font-size: 0.9em;">Qty:</label>'+
+                                          '<input type="number" class="order-qty" value="'+ (o.qty||1) +'" min="1" data-id="'+ id +'" style="width: 50px;">'+
+                                          '<div class="amount" style="margin-left: auto;">₱'+ (parseFloat(o.totalAmount||0).toFixed(2)) +'</div>'+
+                                       '</div>'+
+                                       '<div style="display: flex; gap: 5px;">'+
+                                           '<button type="button" class="remove-btn btn" data-id="'+ id +'">Remove</button>'+
+                                       '</div>'+
+                                    '</div>';
+                    ordersList.appendChild(div);
+                    total += parseFloat(o.totalAmount || 0);
+                });
+                if (grandTotalEl) grandTotalEl.textContent = total.toFixed(2);
+
+                // wire qty change handlers
+                Array.from(ordersList.querySelectorAll('input.order-qty')).forEach(function(inp){
+                    inp.addEventListener('input', debounce(function(){
+                        var id = this.getAttribute('data-id');
+                        var newQty = parseInt(this.value,10); if (!newQty || newQty < 1) { newQty = 1; this.value = '1'; }
+                        fetch('/order-update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept':'application/json' },
+                            body: JSON.stringify({ id: id, qty: newQty })
+                        }).then(function(r){ return r.json(); }).then(function(json){
+                            if (!json || !json.success) return;
+                            var o = findOrderById(id);
+                            if (o) {
+                                o.qty = newQty;
+                                var per = parseFloat(o.amountPerItem||0) || 0;
+                                o.totalAmount = per * newQty; // keep numeric; format at render time
+                            }
+                            renderSidebar();
+                        }).catch(function(err){ console.error('qty update failed', err); });
+                    }, 250));
+                });
+
+                // wire remove buttons
+                Array.from(ordersList.querySelectorAll('button.remove-btn')).forEach(function(btn){
+                    btn.addEventListener('click', function(){
+                        var id = this.getAttribute('data-id');
+                        fetch('/order-remove', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept':'application/json' },
+                            body: JSON.stringify({ id: id })
+                        }).then(function(r){ return r.json(); }).then(function(json){
+                            if (!json || !json.success) return;
+                            // remove locally and re-render
+                            ORDERS_DATA = (ORDERS_DATA||[]).filter(function(o){ return getOrderId(o) !== id; });
+                            renderSidebar();
+                        }).catch(function(err){ console.error('remove failed', err); });
+                    });
+                });
+
+                // edit button removed; no edit wiring needed
             }
-            let price = 0;
-            if (product && size) {
-                price = getPrice(product, size);
-                // Sum all checked extras (checkboxes)
-                const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]:checked');
-                extraCheckboxes.forEach(function (cb) {
-                    price += getExtraPrice(cb.value);
+
+            renderSidebar();
+
+            forms.forEach(function(form){
+                var qty = form.querySelector('input[name="qty"]');
+                var pricePer = form.querySelector('.pricePerItem');
+                var priceTot = form.querySelector('.priceTotal');
+
+                function update(){
+                    var base=0;
+                    // prefer explicit product base price if provided on the form
+                    var baseAttr = form.dataset && form.dataset.baseprice ? parseFloat(form.dataset.baseprice) : 0;
+                    if (baseAttr && baseAttr > 0) {
+                        base = baseAttr;
+                    } else {
+                        var size = form.querySelector('input[name="size"]:checked'); if(size) base = toNumber(size.dataset.price);
+                    }
+                    var extra=0; var eSel = form.querySelector('select[name="extras"]'); if(eSel && eSel.selectedOptions.length) extra = toNumber(eSel.selectedOptions[0].dataset.price);
+                    var custom=0; var cSel = form.querySelector('select[name="customOption"]'); if(cSel && cSel.selectedOptions.length) custom = toNumber(cSel.selectedOptions[0].dataset.price);
+                    var sugar=0;
+                    var s = form.querySelector('input[name="sugar"]:checked');
+                    if (s) {
+                        sugar = toNumber(s.dataset.price);
+                    } else {
+                        var sSel = form.querySelector('select[name="sugar"]');
+                        if (sSel && sSel.selectedOptions.length) sugar = toNumber(sSel.selectedOptions[0].dataset.price || sSel.selectedOptions[0].getAttribute('data-price'));
+                    }
+                    var q = qty ? (parseInt(qty.value,10)||1) : 1; var per = base+extra+custom+sugar; var tot = per * q;
+                    if(pricePer) pricePer.textContent = per.toFixed(2); if(priceTot) priceTot.textContent = tot.toFixed(2);
+
+                    // update description display areas for selects (extras, customOption, sugar)
+                    try {
+                        var descSel = form.querySelector('.select-description[data-for="extras"]');
+                        if (descSel) {
+                            if (eSel && eSel.selectedOptions.length) {
+                                descSel.textContent = eSel.selectedOptions[0].dataset.description || '';
+                                descSel.style.display = descSel.textContent ? 'block' : 'none';
+                            } else { descSel.textContent = ''; descSel.style.display = 'none'; }
+                        }
+                        var descCustom = form.querySelector('.select-description[data-for="customOption"]');
+                        if (descCustom) {
+                            if (cSel && cSel.selectedOptions.length) {
+                                descCustom.textContent = cSel.selectedOptions[0].dataset.description || '';
+                                descCustom.style.display = descCustom.textContent ? 'block' : 'none';
+                            } else { descCustom.textContent = ''; descCustom.style.display = 'none'; }
+                        }
+                        var sSel = form.querySelector('select[name="sugar"]');
+                        var descSugar = form.querySelector('.select-description[data-for="sugar"]');
+                        if (descSugar) {
+                            if (sSel && sSel.selectedOptions.length) {
+                                descSugar.textContent = sSel.selectedOptions[0].dataset.description || '';
+                                descSugar.style.display = descSugar.textContent ? 'block' : 'none';
+                            } else { descSugar.textContent = ''; descSugar.style.display = 'none'; }
+                        }
+                    } catch (e) { /* non-fatal */ }
+                }
+
+                form.addEventListener('change', update); if(qty) qty.addEventListener('input', update);
+                update();
+
+                // intercept submit to use AJAX and update sidebar live
+                form.addEventListener('submit', function(ev){
+                    ev.preventDefault();
+                    var fd = new FormData(form);
+                    var body = new URLSearchParams();
+                    for (var pair of fd.entries()) { body.append(pair[0], pair[1]); }
+                    fetch('/order', { method: 'POST', body: body, headers: { 'Accept': 'application/json' } })
+                        .then(function(r){ return r.json(); })
+                        .then(function(json){
+                            if (json && json.success) {
+                                ORDERS_DATA = json.orders || ORDERS_DATA;
+                                renderSidebar();
+                            } else {
+                                alert('Failed to add item to order');
+                            }
+                        }).catch(function(err){
+                            console.error('Add-to-order failed', err);
+                            alert('Failed to add item to order');
+                        });
+                });
+            });
+
+            // scroll to selected product if one was specified
+            var selectedProduct = selectedProductId ? document.getElementById(selectedProductId) : null;
+            if (selectedProduct) {
+                setTimeout(function() {
+                    selectedProduct.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 100);
+            }
+
+            // dark-mode toggle: remember preference
+            var toggle = document.getElementById('toggleDark');
+            function setDark(enabled){ if (enabled) document.body.classList.add('dark-mode'); else document.body.classList.remove('dark-mode'); }
+            try {
+                var saved = localStorage.getItem('darkMode');
+                setDark(saved === '1');
+            } catch (e) {}
+            if (toggle) {
+                toggle.addEventListener('click', function(){
+                    var isDark = document.body.classList.toggle('dark-mode');
+                    try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e){}
                 });
             }
-            const total = (qty === 0) ? 0 : price * qty;
-            document.getElementById('orderPrice').textContent = total.toFixed(2);
-            return total;
-        }
-
-        function renderOrderSummary() {
-            var summaryDiv = document.getElementById('orderSummaryList');
-            summaryDiv.innerHTML = '';
-            var totalAmountDiv = document.getElementById('totalAmountSummary');
-            if (orders.length === 0) {
-                summaryDiv.innerHTML = '<p>No orders yet.</p>';
-                if (totalAmountDiv) {
-                    totalAmountDiv.style.display = 'none';
-                    totalAmountDiv.textContent = '';
-                }
-                return;
-            }
-            // Show total amount
-            var total = orders.reduce((sum, order) => {
-                // If qty is 0, amount should be 0 for this order
-                var qty = (order.qty === 0) ? 0 : (order.qty || 1);
-                return sum + (order.amount * qty);
-            }, 0);
-            if (totalAmountDiv) {
-                totalAmountDiv.textContent = `Total: ₱${total.toFixed(2)}`;
-                totalAmountDiv.style.display = 'block';
-            }
-            // Always display the Add order button; only disable it if the order form's amount is 0
-            var submitBtn = document.querySelector('#orderForm button[type="submit"]');
-            if (submitBtn) {
-                var orderPrice = parseFloat(document.getElementById('orderPrice').textContent);
-                submitBtn.style.display = '';
-                submitBtn.disabled = isNaN(orderPrice) || orderPrice === 0;
-            }
-            orders.forEach(function(order, idx) {
-                // If qty is 0, show amount as 0 (regardless of order.amount)
-                var displayAmount = (order.qty === 0) ? 0 : order.amount * order.qty;
-                summaryDiv.innerHTML += `<div style=\"border-bottom:1px solid #eee; margin-bottom:8px; padding-bottom:4px;\">
-                    <div style=\"display: flex; justify-content: space-between; align-items: flex-start;\"><strong>Item #${idx+1}</strong><span style=\"font-weight: bold; min-width: 140px; text-align: right;\">Customer: ${order.customerName ? order.customerName : '-'}</span></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Product:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.product}</span></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Size:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.size}</span></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Sugar:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.sugar}</span></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Extras:</span> <span style=\"font-weight: bold; font-size:0.97em;\">${order.extras && order.extras.length ? order.extras.join(', ') : '-'}</span></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Qty:</span> <input type=\"number\" class=\"orderQtyInput\" data-idx=\"${idx}\" min=\"0\" max=\"10\" value=\"${order.qty}\" style=\"width:50px; margin-left:8px;\"></div>
-                    <div><span style=\"color:#666; font-size:0.97em; min-width:70px; display:inline-block;\">Amount:</span> <span style=\"font-weight: bold; font-size:0.97em;\">₱${(order.qty === 0 ? 0 : order.amount * order.qty).toFixed(2)}</span></div>
-                    <button type=\"button\" class=\"removeOrderBtn\" data-idx=\"${idx}\" style=\"margin-top:4px; color:#ffffff; background:#b00; border:none; border-radius:2px; padding:2px 2px; cursor:pointer;\">Remove</button>
-                </div>`;
-            });
-            // Show customer name at right of summary header
-            // No customer name in summary header
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Hide total amount on initial load if no orders
-            if (orders.length === 0) {
-                var totalAmountDiv = document.getElementById('totalAmountSummary');
-                if (totalAmountDiv) {
-                    totalAmountDiv.style.display = 'none';
-                    totalAmountDiv.textContent = '';
-                }
-            }
-            // Qty change logic in summary
-            document.getElementById('orderSummaryList').addEventListener('input', function(e) {
-                if (e.target.classList.contains('orderQtyInput')) {
-                    var idx = parseInt(e.target.getAttribute('data-idx'), 10);
-                    var newQty = parseInt(e.target.value, 10);
-                    if (!isNaN(idx) && newQty >= 0 && newQty <= 10) {
-                        orders[idx].qty = newQty;
-                        // Always recalculate amount based on original price and extras
-                        var basePrice = getPrice(orders[idx].product, orders[idx].size);
-                        var extrasTotal = 0;
-                        if (orders[idx].extras && Array.isArray(orders[idx].extras)) {
-                            orders[idx].extras.forEach(function(extra) {
-                                extrasTotal += getExtraPrice(extra);
-                            });
-                        }
-                        var pricePerItem = basePrice + extrasTotal;
-                        orders[idx].amount = (newQty === 0) ? 0 : pricePerItem;
-                        renderOrderSummary();
-                    }
-                }
-            });
-            // Remove order logic
-            document.getElementById('orderSummaryList').addEventListener('click', function(e) {
-                if (e.target.classList.contains('removeOrderBtn')) {
-                    var idx = parseInt(e.target.getAttribute('data-idx'), 10);
-                    if (!isNaN(idx)) {
-                        orders.splice(idx, 1);
-                        renderOrderSummary();
-                    }
-                }
-            });
-            // Enable/disable clear button for customer name
-            var customerNameInput = document.getElementById('customerName');
-            var clearBtn = document.getElementById('clearCustomerName');
-            function updateClearBtn() {
-                clearBtn.disabled = !customerNameInput.value.trim();
-            }
-            customerNameInput.addEventListener('input', updateClearBtn);
-            clearBtn.addEventListener('click', function() {
-                customerNameInput.value = '';
-                updateClearBtn();
-                customerNameInput.focus();
-            });
-            updateClearBtn();
-            document.getElementById('product').addEventListener('change', updateOrderPrice);
-            document.getElementById('size').addEventListener('change', updateOrderPrice);
-            var qtyInput = document.getElementById('qty');
-            if (qtyInput) qtyInput.addEventListener('input', updateOrderPrice);
-            // Add event listeners to all extras checkboxes
-            const extraCheckboxes = document.querySelectorAll('input[type="checkbox"][name="extras"]');
-            extraCheckboxes.forEach(function(cb) {
-                cb.addEventListener('change', updateOrderPrice);
-            });
-            // Set orderPrice to the return value of updateOrderPrice
-            document.getElementById('orderPrice').textContent = updateOrderPrice().toFixed(2);
-
-            // Add order logic
-            document.getElementById('orderForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (orders.length >= 10) {
-                    alert('Maximum of 10 items allowed per order.');
-                    return;
-                }
-                var product = document.getElementById('product').value;
-                var size = document.getElementById('size').value;
-                var sugar = document.getElementById('sugar').value;
-                var qty = parseInt(document.getElementById('qty').value, 10);
-                if (isNaN(qty)) qty = 0;
-                var amount = updateOrderPrice();
-                var extras = Array.from(document.querySelectorAll('input[type="checkbox"][name="extras"]:checked')).map(cb => cb.value);
-                var customerName = document.getElementById('customerName').value.trim();
-                if (!product || !size) {
-                    alert('Please select a product and size.');
-                    return;
-                }
-                if (qty < 1) {
-                    alert('Quantity must be at least 1.');
-                    return;
-                }
-                orders.push({ product, size, sugar, extras, qty, amount, customerName });
-                renderOrderSummary();
-                // Optionally reset form fields, but do NOT clear customer name
-                var prevCustomerName = orders.length > 1 ? orders[orders.length-2].customerName : null;
-                var currentCustomerName = document.getElementById('customerName').value;
-                document.getElementById('orderForm').reset();
-                document.getElementById('qty').value = 1;
-                // Always restore customer name after reset
-                document.getElementById('customerName').value = currentCustomerName;
-                updateOrderPrice();
-
-            // Add a function to clear all orders and the total amount
-            function clearOrderSummary() {
-                orders.length = 0;
-                renderOrderSummary();
-                document.getElementById('orderForm').reset();
-                document.getElementById('qty').value = 1;
-                updateOrderPrice();
-                document.getElementById('totalAmountSummary').textContent = '';
-            }
-            });
-
-            renderOrderSummary();
         });
     </script>
-    <a href="/" class="btn">Homepage</a>
-</body>
 
+</body>
 </html>

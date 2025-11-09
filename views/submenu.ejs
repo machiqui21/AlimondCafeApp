@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= typeName %> • Menu</title>
+  <link rel="stylesheet" href="/menu.css">
+  <%- include('partials/navbar_menu.ejs') %>
+</head>
+<body class="submenu-page">
+  <div style="text-align:right; margin-bottom:10px;"><a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a></div>
+  <header class="hero">
+    <img class="logo" src="/images/AlimondsCafe.jpeg">
+    <h1><%= __('Alimond\'s Café – ' + typeName) %></h1>
+    <div style="margin-top:6px;"><a class="btn" href="/menu">← Back to all menu</a></div>
+  </header>
+
+  <main>
+    <div class="menu-flex-container">
+      <div class="menu-table-section">
+        <% if (ProductData && ProductData.length) { %>
+          <div class="products-by-type">
+            <div class="type-column" aria-label="<%= typeName %>">
+              <h3><%= typeName %></h3>
+              <% ProductData.forEach(function(product){ %>
+                <div class="product-card compact" id="p_<%= product.ProductID %>">
+                  <% 
+                    var rawPic = (product.Picture||'').toString().trim();
+                    var imgSrc = null;
+                    if (rawPic && /^https?:\/\//i.test(rawPic)) {
+                      imgSrc = rawPic; // use URL directly
+                    } else if (rawPic) {
+                      var fname = rawPic.split('/').pop().split('\\').pop();
+                      imgSrc = fname ? ('/images/' + fname) : null; // served from local /images
+                    }
+                  %>
+                  <div class="media-wrapper">
+                  <% if (imgSrc) { %>
+                    <img class="product-thumb" src="<%= imgSrc %>" alt="<%= product.Name %>">
+                  <% } else { %>
+                    <div class="product-thumb placeholder">No image</div>
+                  <% } %>
+                  </div>
+                  <div class="card-content">
+                    <h3><%= product.Name %></h3>
+                    <p><%= product.Description %></p>
+                    <% var basePrice = (!product.HasSizes ? parseFloat(product.Price || product.price || 0) : 0); %>
+                    <form action="/order" method="POST" data-baseprice="<%= basePrice %>">
+                      <input type="hidden" name="productId" value="<%= product.ProductID %>">
+                      <input type="hidden" name="productName" value="<%= product.Name %>">
+
+                      <% if (product.HasSizes) { %>
+                        <div><strong>Size</strong> <span class="size-legend-wrapper"><img class="size-legend" src="/images/size-legend.jpg" alt="S M L" title="Small / Medium / Large"><span class="size-legend-text">S M L</span></span></div>
+                        <div class="sizes-group">
+                          <% 
+                            var matched = (typeof SizePriceData !== 'undefined' ? SizePriceData.filter(function(sp){
+                              if ((sp.ProductID && sp.ProductID == product.ProductID) || (sp.product_id && sp.product_id == product.ProductID) || (sp.product && sp.product == product.Name)) return true;
+                              var spType = (sp.Type || sp.type || sp.productType || '').toString().trim().toLowerCase();
+                              var prodType = (product.Type || product.type || '').toString().trim().toLowerCase();
+                              if (spType && prodType && spType === prodType) return true;
+                              return false;
+                            }) : []);
+                            var orderKeys = ['small','medium','large'];
+                            matched.sort(function(a,b){
+                              function key(x){ var label = (x.size || x.Item || x.Size || x.sizeName || x.label || '').toString().trim().toLowerCase();
+                                if (!label) return orderKeys.length;
+                                if (label.indexOf('small') !== -1) return 0;
+                                if (label.indexOf('medium') !== -1) return 1;
+                                if (label.indexOf('large') !== -1) return 2;
+                                return orderKeys.length;
+                              }
+                              return key(a) - key(b);
+                            });
+                            matched.forEach(function(sp){ %>
+                              <% var sizeLabel = sp.size || sp.Item || sp.Size || sp.sizeName || sp.label || ''; var sizeAmt = parseFloat(sp.price || sp.Amount || sp.amount || sp.Price || 0) || 0; %>
+                              <label><input type="radio" name="size" value="<%= sizeLabel %>" data-price="<%= sizeAmt %>" required> <%= sizeLabel %> - ₱<%= sizeAmt.toFixed(2) %></label>
+                          <% }); %>
+                        </div>
+                      <% } else { %>
+                        <div class="priceDisplay" style="margin-top:8px;font-weight:bold;">
+                          <span>Base Price: ₱<%= basePrice.toFixed(2) %></span>
+                        </div>
+                      <% } %>
+
+                      <% if (product.HasExtras) { %>
+                        <div><strong>Toppings</strong></div>
+                        <select name="extras">
+                          <option value="">-- None --</option>
+                          <% (typeof ExtraPriceData !== 'undefined' ? ExtraPriceData : []).forEach(function(e){ %>
+                            <option value="<%= e.Item || e.option || e.name %>" data-price="<%= parseFloat(e.Amount||e.price||0) %>" data-description="<%= (e.description||'') %>"><%= (e.Item || e.option || e.name) %> (₱<%= parseFloat(e.Amount||e.price||0).toFixed(2) %>)</option>
+                          <% }); %>
+                        </select>
+                        <div class="select-description" data-for="extras"></div>
+                      <% } %>
+
+                      <% if (product.HasCustom) { %>
+                        <% var milkOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='milk'; }); %>
+                        <% if (milkOpts && milkOpts.length) { %>
+                          <div><strong>Milk</strong></div>
+                          <select name="customOption">
+                            <option value="">None</option>
+                            <% milkOpts.forEach(function(m){ %>
+                              <option value="<%= m.option %>" data-price="<%= parseFloat(m.price||0) %>" data-description="<%= (m.description||'') %>"><%= (m.option||m.Item||m.name) %> (₱<%= parseFloat(m.price||0).toFixed(2) %>)</option>
+                            <% }); %>
+                          </select>
+                          <div class="select-description" data-for="customOption"></div>
+                        <% } %>
+
+                        <% var sugarOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='sweetener'; }); %>
+                        <% if (sugarOpts && sugarOpts.length) { %>
+                          <div><strong>Sweetener</strong></div>
+                          <select name="sugar">
+                            <option value="">-- None --</option>
+                            <% sugarOpts.forEach(function(s){ %>
+                              <option value="<%= (s.description && s.description.trim()) ? s.description : (s.option || s.Item || s.name) %>" data-price="<%= parseFloat(s.price||s.Amount||0) %>" data-description="<%= (s.description||'') %>"><%= (s.description||'') %> (₱<%= parseFloat(s.price||s.Amount||0).toFixed(2) %>)</option>
+                            <% }); %>
+                          </select>
+                          <div class="select-description" data-for="sugar"></div>
+                        <% } %>
+                      <% } %>
+
+                      <div style="margin-top:8px;">
+                        <label>Qty <input type="number" name="qty" value="1" min="1" max="10"></label>
+                      </div>
+
+                      <div class="priceDisplay" style="margin-top:8px;font-weight:bold;">Price / Item: ₱<span class="pricePerItem">0.00</span> | Total: ₱<span class="priceTotal">0.00</span></div>
+                      <div style="margin-top:8px;"><button type="submit" class="btn">Add to Order</button></div>
+                    </form>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        <% } else { %>
+          <p>No products available for this type.</p>
+        <% } %>
+      </div>
+
+      <aside class="order-sidebar" id="orderSidebar">
+        <h3>Your Order</h3>
+        <div id="ordersList"></div>
+        <div class="order-total">Total: ₱<span id="orderGrandTotal">0.00</span></div>
+        <div style="margin-top:12px;"><a href="/order-summary" class="btn" id="checkoutBtn">Checkout</a></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
+  </footer>
+
+  <script>
+    var SizePriceData = <%- JSON.stringify(typeof SizePriceData !== 'undefined' ? SizePriceData : []) %>;
+    var ExtraPriceData = <%- JSON.stringify(typeof ExtraPriceData !== 'undefined' ? ExtraPriceData : []) %>;
+    var CustomPriceData = <%- JSON.stringify(typeof CustomPriceData !== 'undefined' ? CustomPriceData : []) %>;
+    var ORDERS_DATA = <%- JSON.stringify(typeof orders !== 'undefined' ? orders : []) %>;
+
+    function toNumber(v){ return parseFloat(v||0); }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var ordersList = document.getElementById('ordersList');
+      var grandTotalEl = document.getElementById('orderGrandTotal');
+      var checkoutBtn = document.getElementById('checkoutBtn');
+
+      function getOrderId(o){ return (o && (o._localId || o.id)) ? (o._localId || o.id) : null; }
+      function renderSidebar(){
+        if (!ordersList) return;
+        ordersList.innerHTML = '';
+        if (!ORDERS_DATA || !ORDERS_DATA.length) {
+          ordersList.innerHTML = '<div class="empty">No items yet</div>';
+          if (grandTotalEl) grandTotalEl.textContent = '0.00';
+          if (checkoutBtn) checkoutBtn.style.display = 'none';
+          return;
+        }
+        if (checkoutBtn) checkoutBtn.style.display = 'inline-block';
+        var total=0;
+        ORDERS_DATA.forEach(function(o){
+          var id = getOrderId(o);
+          var div = document.createElement('div'); div.className='order-item';
+          var details=[]; if (o.size) details.push({label:'Size', value:o.size}); if (o.sugar) details.push({label:'Sweetener', value:o.sugar}); if (o.customSelected) details.push({label:'Milk', value:o.customSelected}); if (o.extras) details.push({label:'Extras', value:o.extras});
+          var listHtml = details.length ? ('<ul class="order-details">' + details.map(function(d){ return '<li><strong>'+d.label+':</strong> <span>'+d.value+'</span></li>'; }).join('') + '</ul>') : '';
+          div.innerHTML = '<div class="info">'+
+                            '<div class="meta">'+ (o.product||'') +'</div>'+ listHtml +
+                          '</div>'+
+                          '<div class="controls">'+
+                            '<div style="display:flex;align-items:center;gap:8px;">'+
+                              '<label style="font-size:0.9em;">Qty:</label>'+
+                              '<input type="number" class="order-qty" value="'+(o.qty||1)+'" min="1" data-id="'+id+'" style="width:50px;">'+
+                              '<div class="amount" style="margin-left:auto;">₱'+ (parseFloat(o.totalAmount||0).toFixed(2)) +'</div>'+
+                            '</div>'+
+                            '<div style="display:flex;gap:5px;">'+
+                              '<button type="button" class="remove-btn btn" data-id="'+id+'">Remove</button>'+
+                            '</div>'+
+                          '</div>';
+          ordersList.appendChild(div);
+          total += parseFloat(o.totalAmount||0);
+        });
+        if (grandTotalEl) grandTotalEl.textContent = total.toFixed(2);
+      }
+
+      renderSidebar();
+
+      // price calculator per product card
+      Array.from(document.querySelectorAll('.product-card form')).forEach(function(form){
+        var qty = form.querySelector('input[name="qty"]');
+        var pricePer = form.querySelector('.pricePerItem');
+        var priceTot = form.querySelector('.priceTotal');
+        function update(){
+          var base = 0;
+          var baseAttr = form.dataset && form.dataset.baseprice ? parseFloat(form.dataset.baseprice) : 0;
+          if (baseAttr && baseAttr > 0) base = baseAttr; else { var size = form.querySelector('input[name="size"]:checked'); if (size) base = parseFloat(size.dataset.price||0); }
+          var eSel = form.querySelector('select[name="extras"]'); var extra = (eSel && eSel.selectedOptions.length) ? parseFloat(eSel.selectedOptions[0].dataset.price||0) : 0;
+          var cSel = form.querySelector('select[name="customOption"]'); var custom = (cSel && cSel.selectedOptions.length) ? parseFloat(cSel.selectedOptions[0].dataset.price||0) : 0;
+          var sSel = form.querySelector('select[name="sugar"]'); var sugar = (sSel && sSel.selectedOptions.length) ? parseFloat(sSel.selectedOptions[0].dataset.price||0) : 0;
+          var q = qty ? (parseInt(qty.value,10)||1) : 1;
+          var per = base + extra + custom + sugar; var tot = per * q;
+          if (pricePer) pricePer.textContent = per.toFixed(2);
+          if (priceTot) priceTot.textContent = tot.toFixed(2);
+          // show descriptions for selects
+          try {
+            var descE = form.querySelector('.select-description[data-for="extras"]'); if (descE) { descE.textContent = (eSel && eSel.selectedOptions.length) ? (eSel.selectedOptions[0].dataset.description||'') : ''; descE.style.display = descE.textContent ? 'block' : 'none'; }
+            var descC = form.querySelector('.select-description[data-for="customOption"]'); if (descC) { descC.textContent = (cSel && cSel.selectedOptions.length) ? (cSel.selectedOptions[0].dataset.description||'') : ''; descC.style.display = descC.textContent ? 'block' : 'none'; }
+            var descS = form.querySelector('.select-description[data-for="sugar"]'); if (descS) { descS.textContent = (sSel && sSel.selectedOptions.length) ? (sSel.selectedOptions[0].dataset.description||'') : ''; descS.style.display = descS.textContent ? 'block' : 'none'; }
+          } catch(e){}
+        }
+        form.addEventListener('change', update); if (qty) qty.addEventListener('input', update);
+        update();
+        form.addEventListener('submit', function(ev){
+          ev.preventDefault();
+          var fd = new FormData(form); var body = new URLSearchParams(); for (var p of fd.entries()) body.append(p[0], p[1]);
+          fetch('/order', { method: 'POST', body: body, headers: { 'Accept':'application/json' } }).then(r=>r.json()).then(function(json){
+            if (json && json.success) { ORDERS_DATA = json.orders || ORDERS_DATA; renderSidebar(); } else { alert('Failed to add item to order'); }
+          }).catch(function(err){ console.error('Add-to-order failed', err); alert('Failed to add item to order'); });
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 <div class="order-now-form">
+    
         <div style="display: flex; flex-direction: row; gap: 32px;">
             <div style="flex: 1;">
                 <h2>Order Now</h2>
@@ -17,11 +18,22 @@
                 <% } %>
             </select>
             <br><br>
-            <label for="size">Select Size:</label>
-            <select id="size" name="size" required>
+            <label for="size">Select Size <span class="size-legend-wrapper inline"><img class="size-legend inline" src="/images/size-legend.jpg" alt="S M L" title="Small / Medium / Large"><span class="size-legend-text">S M L</span></span></label>
+            <select id="size" name="size" required class="size-select">
                 <option value="" selected>None</option>
-                <% if (PriceData && PriceData.length > 0) { %>
-                    <% PriceData.forEach(function(price) { %>
+                <% 
+                    // order sizes Small -> Medium -> Large when possible
+                    var orderedSizes = (PriceData || []).slice();
+                    var orderKeys = ['small','medium','large'];
+                    orderedSizes.sort(function(a,b){
+                        var ka = (a.Item||a.size||a.Size||'').toString().trim().toLowerCase();
+                        var kb = (b.Item||b.size||b.Size||'').toString().trim().toLowerCase();
+                        function key(label){ if(!label) return orderKeys.length; if (label.indexOf('small')!==-1) return 0; if (label.indexOf('medium')!==-1) return 1; if (label.indexOf('large')!==-1) return 2; return orderKeys.length; }
+                        return key(ka) - key(kb);
+                    });
+                %>
+                <% if (orderedSizes && orderedSizes.length > 0) { %>
+                    <% orderedSizes.forEach(function(price) { %>
                         <option value="<%= price.Item %>"><%= price.Item %></option>
                     <% }); %>
                 <% } else { %>
@@ -32,22 +44,45 @@
             <label>Extras:</label><br>
             <% if (ExtraPriceData && ExtraPriceData.length > 0) { %>
                 <% ExtraPriceData.forEach(function(extra, idx) { %>
-                    <input type="checkbox" id="extra_<%= idx %>" name="extras" value="<%= extra.Item %>">
+                    <input type="checkbox" id="extra_<%= idx %>" name="extras" value="<%= extra.Item %>" data-description="<%= (extra.description||extra.Description||'') %>">
                     <label for="extra_<%= idx %>">
-                        <%= extra.Item %>
+                        <%= extra.Item %> <%= (typeof extra.price !== 'undefined' ? '(₱' + parseFloat(extra.price).toFixed(2) + ')' : '') %>
                     </label><br>
                 <% }); %>
+                <div id="extrasDescriptions"></div>
             <% } else { %>
                 <span>No extras available</span><br>
             <% } %>
             <br>
-            <label for="sugar">Sugar Level:</label>
-            <select id="sugar" name="sugar" required>
-                <option value="No Sugar">No Sugar</option>
-                <option value="Less Sugar">Less Sugar</option>
-                <option value="Regular Sugar">Regular Sugar</option>
-                <option value="Extra Sugar">Extra Sugar</option>
-            </select>
+            <% var sugarOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='Sweetener'; }); %>
+            <% if (sugarOpts && sugarOpts.length > 0) { %>
+                <label for="sugar">Sugar Level:</label>
+                <select id="sugar" name="sugar">
+                    <option value="">-- None --</option>
+                    <% sugarOpts.forEach(function(s) { %>
+                        <option value="<%= s.option %>" data-price="<%= parseFloat(s.price||0) %>" data-description="<%= (s.description||'') %>"><%= (s.option||s.Item||s.name) %> (₱<%= parseFloat(s.price||0).toFixed(2) %>)</option>
+                    <% }); %>
+                </select>
+                <div id="sugarDescription"></div>
+            <% } else { %>
+                <label for="sugar">Sugar Level:</label>
+                <select id="sugar" name="sugar">
+                    <option value="">-- None --</option>
+                </select>
+            <% } %>
+
+            <% var milkOpts = (typeof CustomPriceData !== 'undefined' ? CustomPriceData : []).filter(function(c){ return (c.type||'').toString().toLowerCase()==='milk'; }); %>
+            <% if (milkOpts && milkOpts.length > 0) { %>
+                <br>
+                <label for="customOption">Milk:</label>
+                <select id="customOption" name="customOption">
+                    <option value="">None</option>
+                    <% milkOpts.forEach(function(m){ %>
+                        <option value="<%= m.option %>" data-price="<%= parseFloat(m.price||0) %>" data-description="<%= (m.description||'') %>"><%= (m.option||m.Item||m.name) %> (₱<%= parseFloat(m.price||0).toFixed(2) %>)</option>
+                    <% }); %>
+                </select>
+                <div id="customOptionDescription"></div>
+            <% } %>
             <br>
             <label for="qty">Qty:</label>
             <input type="number" id="qty" name="qty" min="1" max="10" value="1" style="width:60px;">
@@ -61,15 +96,24 @@
     <script>
         var priceList = <%- JSON.stringify(PriceData || []) %>;
         var extraList = <%- JSON.stringify(ExtraPriceData || []) %>;
+        var customList = <%- JSON.stringify(CustomPriceData || []) %>;
         function getPrice(product, size) {
-            const found = priceList.find(p =>
-                p.Item && p.Item.toString().trim().toLowerCase() === size.toString().trim().toLowerCase()
-            );
-            return found ? found.Amount : 0;
+            if (!size) return 0;
+            const want = size.toString().trim().toLowerCase();
+            const found = priceList.find(p => {
+                const label = (p.Item || p.size || p.Size || '').toString().trim().toLowerCase();
+                return label === want;
+            });
+            if (!found) return 0;
+            return parseFloat(found.Amount || found.Price || found.price || found.amount || 0);
         }
         function getExtraPrice(extra) {
-            const found = extraList.find(e => e.Item === extra);
-            return found ? found.Amount : 0;
+            const found = extraList.find(e => (e.Item && e.Item === extra) || (e.option && e.option === extra));
+            return found ? parseFloat(found.price || found.Amount || found.Price || 0) : 0;
+        }
+        function getCustomPrice(option) {
+            const found = customList.find(c => (c.option && c.option === option) || (c.Item && c.Item === option));
+            return found ? parseFloat(found.price || found.Price || 0) : 0;
         }
         function updateOrderPrice() {
             const product = document.getElementById('product').value;
@@ -83,9 +127,42 @@
                 extraCheckboxes.forEach(function (cb) {
                     price += getExtraPrice(cb.value);
                 });
+                // add custom selection like milk
+                var customSel = document.getElementById('customOption');
+                if (customSel && customSel.selectedOptions.length && customSel.selectedOptions[0].value) {
+                    price += getCustomPrice(customSel.selectedOptions[0].value);
+                }
             }
             const total = price * qty;
             document.getElementById('orderPrice').textContent = total.toFixed(2);
+            // update description boxes
+            try {
+                var sugarSel = document.getElementById('sugar');
+                var sugarDescEl = document.getElementById('sugarDescription');
+                if (sugarDescEl) {
+                    if (sugarSel && sugarSel.selectedOptions.length) {
+                        sugarDescEl.textContent = sugarSel.selectedOptions[0].dataset.description || '';
+                        sugarDescEl.style.display = sugarDescEl.textContent ? 'block' : 'none';
+                    } else { sugarDescEl.textContent = ''; sugarDescEl.style.display = 'none'; }
+                }
+                var customSel = document.getElementById('customOption');
+                var customDescEl = document.getElementById('customOptionDescription');
+                if (customDescEl) {
+                    if (customSel && customSel.selectedOptions.length) {
+                        customDescEl.textContent = customSel.selectedOptions[0].dataset.description || '';
+                        customDescEl.style.display = customDescEl.textContent ? 'block' : 'none';
+                    } else { customDescEl.textContent = ''; customDescEl.style.display = 'none'; }
+                }
+                // extras: list descriptions of checked extras
+                var extrasDesc = document.getElementById('extrasDescriptions');
+                if (extrasDesc) {
+                    var checked = Array.from(document.querySelectorAll('input[type="checkbox"][name="extras"]:checked'));
+                    if (checked.length) {
+                        extrasDesc.innerHTML = checked.map(function(cb){ var d = cb.dataset.description || ''; return d ? ('<div>' + (cb.value || '') + ': ' + d + '</div>') : ''; }).join('');
+                        extrasDesc.style.display = extrasDesc.innerHTML ? 'block' : 'none';
+                    } else { extrasDesc.innerHTML = ''; extrasDesc.style.display = 'none'; }
+                }
+            } catch (e) { /* non-fatal */ }
             return total;
         }
         document.addEventListener('DOMContentLoaded', function() {
@@ -100,6 +177,8 @@
             extraCheckboxes.forEach(function(cb) {
                 cb.addEventListener('change', updateOrderPrice);
             });
+            var sugarSel = document.getElementById('sugar'); if (sugarSel) sugarSel.addEventListener('change', updateOrderPrice);
+            var customSel = document.getElementById('customOption'); if (customSel) customSel.addEventListener('change', updateOrderPrice);
             // Set orderPrice to the return value of updateOrderPrice
             var orderPriceSpan = document.getElementById('orderPrice');
             if (orderPriceSpan) orderPriceSpan.textContent = updateOrderPrice().toFixed(2);

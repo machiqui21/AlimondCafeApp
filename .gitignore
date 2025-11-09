@@ -1,0 +1,25 @@
+# Dependency directories
+node_modules/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+server.log
+app-start.log
+
+# VS Code settings
+.vscode/
+
+# OS / misc
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+/playwright-report/
+.playwright-mcp/
+
+# npm debug logs
+npm-debug.log*

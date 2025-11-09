@@ -1,8 +1,17 @@
 {
   "dependencies": {
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.17.3",
     "i18n": "^0.15.2",
     "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "puppeteer": "^20.7.0"
+  },
+  "scripts": {
+    "test:puppeteer": "node tests/menu-preview.test.js",
+    "db:check": "node scripts/db-check.js"
   }
 }

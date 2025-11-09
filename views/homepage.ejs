@@ -6,9 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alimond Café</title>
   <link rel="stylesheet" href="/styles.css">
+  <%- include('partials/navbar_home.ejs') %>
+  
 </head>
-
 <body>
+  
   <div style="text-align:right; margin-bottom:10px;">
     <a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a>
   </div>
@@ -16,70 +18,285 @@
     <img class="logo" src="/images/AlimondsCafe.jpeg" >
     <h1><%= __('Welcome to Alimond\'s Café') %></h1>
   </header>
+  
+ 
+
+  <!-- Featured Products Section -->
+  <% if (HighlightedProducts && HighlightedProducts.length > 0) { %>
+  <section class="featured-products-section">
+    <h2 style="text-align: center; margin: 2rem 0; color: #7c4700; font-size: 2.2rem;"><%= __('Featured Specialties') %></h2>
+    <p style="text-align: center; margin: 0 auto 2rem auto; max-width: 600px; color: #5a4632; font-size: 1.1rem; font-style: italic;">
+      <%= __('Discover our carefully curated selection of signature drinks and treats, each with its own unique story and flavor profile.') %>
+    </p>
+    
+    <div class="product-carousel-container featured-carousel">
+      <div class="product-carousel" id="featuredCarousel">
+        <% HighlightedProducts.forEach(function(product, index) { 
+           const imagePath = product.Picture && product.Picture.trim() ? 
+                           (product.Picture.startsWith('http') ? product.Picture : '/images/' + product.Picture.split(/[/\\]/).pop()) : 
+                           'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80';
+        %>
+          <div class="product-slide featured-slide">
+            <div class="product-image">
+              <img src="<%= imagePath %>" alt="<%= product.Name %>" onerror="this.src='https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80'">
+              <div class="featured-overlay">
+                <span class="featured-label"><%= __('Featured') %></span>
+              </div>
+            </div>
+            <div class="product-info featured-info">
+              <h3><%= product.Name %></h3>
+              <div class="highlight-description">
+                <p style="font-size: 1.2rem; font-weight: 500; color: #7c4700; margin-bottom: 0.5rem;">
+                  <%= product.HighlightDescription %>
+                </p>
+                <p style="font-size: 1rem; color: #5a4632; margin-bottom: 1rem;">
+                  <%= product.Description %>
+                </p>
+              </div>
+              <% if (product.Price && product.HasSizes !== 1) { %>
+                <div class="product-price featured-price">₱<%= parseFloat(product.Price).toFixed(2) %></div>
+              <% } else if (product.HasSizes === 1) { %>
+                <div class="product-price featured-price"><%= __('Multiple sizes available') %></div>
+              <% } %>
+              <a href="/menu?productId=<%= product.ProductID %>" class="order-btn featured-order-btn">
+                <%= __('Order This Special') %>
+              </a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+      
+      <!-- Navigation Arrows -->
+      <button class="carousel-nav prev" onclick="previousFeaturedSlide()">❮</button>
+      <button class="carousel-nav next" onclick="nextFeaturedSlide()">❯</button>
+    </div>
+    
+    <!-- Carousel Indicators -->
+    <div class="carousel-indicators">
+      <% HighlightedProducts.forEach(function(product, index) { %>
+        <% var className = index === 0 ? 'indicator active' : 'indicator'; %>
+        <div class="<%= className %>" data-slide="<%= index %>" data-carousel="featured"></div>
+      <% }); %>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- All Products Section -->
+  <% if (OtherProducts && OtherProducts.length > 0) { %>
+  <section class="all-products-section">
+    <h2 style="text-align: center; margin: 3rem 0 2rem 0; color: #7c4700;"><%= __('Other Menu') %></h2>
+    
+    <div class="product-carousel-container">
+      <div class="product-carousel" id="allProductsCarousel">
+        <% OtherProducts.forEach(function(product, index) { 
+           const imagePath = product.Picture && product.Picture.trim() ? 
+                           (product.Picture.startsWith('http') ? product.Picture : '/images/' + product.Picture.split(/[/\\]/).pop()) : 
+                           'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80';
+        %>
+          <div class="product-slide">
+            <div class="product-image">
+              <img src="<%= imagePath %>" alt="<%= product.Name %>" onerror="this.src='https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80'">
+            </div>
+            <div class="product-info">
+              <h3><%= product.Name %></h3>
+              <p><%= product.Description %></p>
+              <% if (product.Price && product.HasSizes !== 1) { %>
+                <div class="product-price">₱<%= parseFloat(product.Price).toFixed(2) %></div>
+              <% } else if (product.HasSizes === 1) { %>
+                <div class="product-price"><%= __('Multiple sizes available') %></div>
+              <% } %>
+              <a href="/menu?productId=<%= product.ProductID %>" class="order-btn">
+                <%= __('Order Now') %>
+              </a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+      
+      <!-- Navigation Arrows -->
+      <button class="carousel-nav prev" onclick="previousAllSlide()">❮</button>
+      <button class="carousel-nav next" onclick="nextAllSlide()">❯</button>
+    </div>
+    
+    <!-- Carousel Indicators -->
+    <div class="carousel-indicators">
+      <% OtherProducts.forEach(function(product, index) { %>
+        <% var className = index === 0 ? 'indicator active' : 'indicator'; %>
+        <div class="<%= className %>" data-slide="<%= index %>" data-carousel="all"></div>
+      <% }); %>
+    </div>
+  </section>
+  <% } %>
+  <!-- End of All Products Section -->
+    <% 
+    var about = typeof AboutData !== 'undefined' ? AboutData : null; 
+    if (about) { 
+      var aboutTitle = about.Title || about.title || __('About Us');
+      var aboutDesc = about.Description || about.description || '';
+      var aboutImg = about.Image || about.image || '';
+      var aboutImgSrc = null;
+      if (aboutImg && /^https?:\/\//i.test(aboutImg.toString())) {
+        aboutImgSrc = aboutImg;
+      } else if (aboutImg) {
+        var fname = aboutImg.toString().split('/').pop().split('\\').pop();
+        aboutImgSrc = fname ? ('/images/' + fname) : null;
+      }
+    }
+  %>
+  <% if (about) { %>
   <section class="about">
     <div class="about-text">
-      <h2><%= __('Our Story') %></h2>
-      <p><%= __('This café was born from the unwavering commitment of Jessette and Mike, a devoted couple whose dream was simple yet powerful: to serve the best and most affordable coffee to their neighborhood. Though Mike has since passed, his legacy lives on in every cup we brew and every smile we share.') %></p>
-      <p><%= __('Their beloved sons have stood by them from the beginning—whether behind the counter or greeting customers, their helping hands and warm hearts have shaped this café into a true family endeavor.') %></p>
+      <h2><%= aboutTitle %></h2>
+      <p><%= aboutDesc %></p>
     </div>
     <div class="about-image">
-      <img src="founders.jpg" alt="Jessette and Mike" />
+      <% if (aboutImgSrc) { %>
+        <img src="<%= aboutImgSrc %>" alt="<%= aboutTitle %>">
+      <% } %>
     </div>
   </section>
-  <section id="menu" class="menu-preview">
-    <h2><%= __('Menu Highlights') %></h2>
-    <div class="highlights-marquee-container">
-      <div class="highlights-marquee">
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Kapeng Barako">
-          <h3><%= __('Kapeng Barako') %></h3>
-          <p><%= __('Strong, bold, and proudly local.') %></p>
-        </div>
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80" alt="Sweet Gatas Latte">
-          <h3><%= __('Sweet Gatas Latte') %></h3>
-          <p><%= __('Comfort in a cup, creamy and smooth.') %></p>
-        </div>
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Tambay Iced Brew">
-          <h3><%= __('Tambay Iced Brew') %></h3>
-          <p><%= __('Chill vibes, cold brew style.') %></p>
-        </div>
-        <!-- Duplicate for seamless loop -->
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Kapeng Barako">
-          <h3><%= __('Kapeng Barako') %></h3>
-          <p><%= __('Strong, bold, and proudly local.') %></p>
-        </div>
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=400&q=80" alt="Sweet Gatas Latte">
-          <h3><%= __('Sweet Gatas Latte') %></h3>
-          <p><%= __('Comfort in a cup, creamy and smooth.') %></p>
-        </div>
-        <div class="highlight-item">
-          <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Tambay Iced Brew">
-          <h3><%= __('Tambay Iced Brew') %></h3>
-          <p><%= __('Chill vibes, cold brew style.') %></p>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="order-section">
-    <div class="order-form-center">
-      <%- include('orderForm', { ProductData: ProductData, PriceData: PriceData, ExtraPriceData: ExtraPriceData, __: __ }) %>
-    </div>
-  </section>
-<footer class="footer">
-  <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
-  <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
-</footer>
-<button onclick="toggleDarkMode()">🌙 <%= __('Toggle Dark Mode') %></button>
-<a href="/menu" class="btn"><%= __('View menu') %></a>
-<script>
-  function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-  }
-  // No JS needed for marquee, handled by CSS animation
-</script>
+  <% } %>
+
+  <footer class="footer">
+    <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
+    <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
+  </footer>
+  
+  <button onclick="toggleDarkMode()">🌙 <%= __('Toggle Dark Mode') %></button>
+  <a href="/menu" class="btn"><%= __('View Full Menu') %></a>
+
+  <script>
+    // Carousel state management
+    const carousels = {
+      featured: {
+        currentSlide: 0,
+        slides: null,
+        indicators: null,
+        totalSlides: 0,
+        autoAdvanceInterval: null
+      },
+      all: {
+        currentSlide: 0,
+        slides: null,
+        indicators: null,
+        totalSlides: 0,
+        autoAdvanceInterval: null
+      }
+    };
+    
+    function initializeCarousels() {
+      // Initialize featured carousel
+      const featuredCarousel = document.getElementById('featuredCarousel');
+      if (featuredCarousel) {
+        carousels.featured.slides = featuredCarousel.querySelectorAll('.product-slide');
+        carousels.featured.indicators = document.querySelectorAll('.indicator[data-carousel="featured"]');
+        carousels.featured.totalSlides = carousels.featured.slides.length;
+        
+        // Auto-advance featured carousel every 6 seconds
+        carousels.featured.autoAdvanceInterval = setInterval(() => nextFeaturedSlide(), 6000);
+      }
+      
+      // Initialize all products carousel
+      const allCarousel = document.getElementById('allProductsCarousel');
+      if (allCarousel) {
+        carousels.all.slides = allCarousel.querySelectorAll('.product-slide');
+        carousels.all.indicators = document.querySelectorAll('.indicator[data-carousel="all"]');
+        carousels.all.totalSlides = carousels.all.slides.length;
+        
+        // Auto-advance all products carousel every 8 seconds
+        carousels.all.autoAdvanceInterval = setInterval(() => nextAllSlide(), 8000);
+      }
+    }
+    
+    function showSlide(carouselType, index) {
+      const carousel = carousels[carouselType];
+      if (!carousel.slides || !carousel.indicators) return;
+      
+      const carouselElement = carouselType === 'featured' ? 
+        document.getElementById('featuredCarousel') : 
+        document.getElementById('allProductsCarousel');
+      
+      carouselElement.style.transform = `translateX(-${index * 100}%)`;
+      
+      // Update indicators
+      carousel.indicators.forEach((indicator, i) => {
+        indicator.classList.toggle('active', i === index);
+      });
+      
+      carousel.currentSlide = index;
+    }
+    
+    // Featured carousel functions
+    function nextFeaturedSlide() {
+      const carousel = carousels.featured;
+      if (carousel.totalSlides === 0) return;
+      const nextIndex = (carousel.currentSlide + 1) % carousel.totalSlides;
+      showSlide('featured', nextIndex);
+    }
+    
+    function previousFeaturedSlide() {
+      const carousel = carousels.featured;
+      if (carousel.totalSlides === 0) return;
+      const prevIndex = (carousel.currentSlide - 1 + carousel.totalSlides) % carousel.totalSlides;
+      showSlide('featured', prevIndex);
+    }
+    
+    // All products carousel functions
+    function nextAllSlide() {
+      const carousel = carousels.all;
+      if (carousel.totalSlides === 0) return;
+      const nextIndex = (carousel.currentSlide + 1) % carousel.totalSlides;
+      showSlide('all', nextIndex);
+    }
+    
+    function previousAllSlide() {
+      const carousel = carousels.all;
+      if (carousel.totalSlides === 0) return;
+      const prevIndex = (carousel.currentSlide - 1 + carousel.totalSlides) % carousel.totalSlides;
+      showSlide('all', prevIndex);
+    }
+    
+    function goToSlide(carouselType, index) {
+      showSlide(carouselType, index);
+      
+      // Reset auto-advance timer for the specific carousel
+      const carousel = carousels[carouselType];
+      if (carousel.autoAdvanceInterval) {
+        clearInterval(carousel.autoAdvanceInterval);
+        const delay = carouselType === 'featured' ? 6000 : 8000;
+        const nextFunction = carouselType === 'featured' ? nextFeaturedSlide : nextAllSlide;
+        carousel.autoAdvanceInterval = setInterval(nextFunction, delay);
+      }
+    }
+    
+    // Initialize everything when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCarousels();
+      
+      // Add click event listeners to indicators
+      document.querySelectorAll('.indicator').forEach(function(indicator) {
+        indicator.addEventListener('click', function() {
+          const slideIndex = parseInt(this.getAttribute('data-slide'));
+          const carouselType = this.getAttribute('data-carousel');
+          if (carouselType) {
+            goToSlide(carouselType, slideIndex);
+          }
+        });
+      });
+    });
+    
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+    
+    // Keyboard navigation - controls featured carousel by default
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowLeft') {
+        previousFeaturedSlide();
+      } else if (event.key === 'ArrowRight') {
+        nextFeaturedSlide();
+      }
+    });
+  </script>
 </body>
 </html>

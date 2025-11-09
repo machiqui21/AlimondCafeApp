@@ -1,0 +1,64 @@
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alimond Café</title>
+  <link rel="stylesheet" href="/styles.css">
+  <%- include('partials/navbar_login.ejs') %>
+</head>
+<body>
+  <div style="text-align:right; margin-bottom:10px;">
+    <a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a>
+  </div>
+  <header class="hero">
+    <img class="logo" src="/images/AlimondsCafe.jpeg" >
+    <h1><%= __('Welcome to Alimond\'s Café') %></h1>
+  </header>
+<!-- Trigger Buttons -->
+<div style="text-align:left; margin-top:20px;">
+  <button onclick="openModal('loginModal')">Login</button>
+  <button onclick="openModal('registerModal')">Register</button>
+</div>
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('loginModal')">&times;</span>
+    <h2><%= __('Member Login') %></h2>
+    <form action="/auth" method="post">
+      <input type="text" name="username" placeholder="User Name" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <input type="submit" value="Login">
+    </form>
+  </div>
+</div>
+<!-- Register Modal -->
+<div id="registerModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('registerModal')">&times;</span>
+    <h2><%= __('Register') %></h2>
+    <form action="/register" method="post">
+      <input type="text" name="username" placeholder="User Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <input type="submit" value="Register">
+    </form>
+  </div>
+</div>
+</body>
+<script>
+  function openModal(id) {
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    const login = document.getElementById('loginModal');
+    const register = document.getElementById('registerModal');
+    if (event.target === login) login.style.display = 'none';
+    if (event.target === register) register.style.display = 'none';
+  }
+</script>
+

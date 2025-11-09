@@ -1,0 +1,159 @@
+<html>
+<head>
+    <title>Order Summary</title>
+    <link rel="stylesheet" href="/menu.css">
+</head>
+<body>
+    <header class="hero">
+        <img class="logo" src="/images/AlimondsCafe.jpeg">
+        <h1>Order Details</h1>
+    </header>
+    <% if (typeof placedOrderId !== 'undefined' && placedOrderId) { %>
+        <div style="max-width:900px;margin:16px auto; padding:12px 16px; background:#fff7ed; border:1px solid #f3d4b6; border-radius:8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:1.1rem; font-weight:600;">Order placed!</div>
+                <div>Order ID: <strong>#<%= placedOrderId %></strong></div>
+                <div>Status: <strong><%= placedStatus || 'Pending' %></strong></div>
+                <div style="margin-left:auto; display:flex; gap:8px;">
+                    <a class="btn" href="/payment?method=cash&orderId=<%= placedOrderId %>">Pay: Cash</a>
+                    <a class="btn" href="/payment?method=online&orderId=<%= placedOrderId %>">Pay: Online</a>
+                    <a class="btn" href="/order/<%= placedOrderId %>">View Order</a>
+                </div>
+            </div>
+        </div>
+    <% } %>
+    <div style="max-width:900px; margin:20px auto;">
+        <% if (typeof orders === 'undefined' || !orders || orders.length === 0) { %>
+            <p>No order available. <a href="/menu">Return to menu</a></p>
+        <% } else { %>
+            <table class="menu-table" style="width:100%;">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Size</th>
+                    <th>Milk</th>
+                    <th>Sweetener</th>
+                    <th>Toppings</th>
+                    <th>Qty</th>
+                    <th>Price/Item</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="ordersTbody">
+                <% let grand = 0; orders.forEach(function(o, idx) { %>
+                        <tr data-id="<%= o.id || o._localId || '' %>">
+                            <td class="col-index"><%= idx+1 %></td>
+                            <td class="col-customer"><input class="customer-input" type="text" value="<%= o.customerName ? o.customerName.replace(/\"/g,'&quot;') : '' %>" placeholder="Customer name"></td>
+                            <td class="col-product"><%= o.product %></td>
+                            <td class="col-size"><%= o.size %></td>
+                            <td class="col-custom"><%= o.customSelected && o.customSelected.length ? o.customSelected : '-' %></td>
+                            <td class="col-sugar"><%= o.sugar && o.sugar.length ? o.sugar : '-' %></td>
+                            <td class="col-extras"><%= o.extras && o.extras.length ? o.extras.join(', ') : '-' %></td>
+                            <td class="col-qty"><input type="number" min="0" class="qty-input" value="<%= o.qty %>"></td>
+                            <td class="col-per">₱<span class="per-val"><%= parseFloat(o.amountPerItem || o.amount || 0).toFixed(2) %></span></td>
+                            <td class="col-line">₱<span class="line-val"><%= parseFloat(o.totalAmount || (o.amountPerItem * o.qty) || 0).toFixed(2) %></span></td>
+                            <td class="col-actions">
+                                <button class="btn remove-btn" data-id="<%= o.id || o._localId || '' %>">Remove</button>
+                            </td>
+                        </tr>
+                <% grand += parseFloat(o.totalAmount || (o.amountPerItem * o.qty) || 0) || 0; }); %>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="9" style="text-align:right; font-weight:bold;">Grand Total</td>
+                    <td style="font-weight:bold;" id="grandTotal">₱<%= (parseFloat(grand)||0).toFixed(2) %></td>
+                    <td></td>
+                </tr>
+                </tfoot>
+            </table>
+            <div style="margin-top:16px; display:flex; gap:12px; align-items:center;">
+                <a href="/menu" class="btn">Back to Menu</a>
+                <!-- Checkout form: customer name required (will POST to /checkout to finalize) -->
+                <form id="checkoutForm" action="/checkout" method="POST" style="display:flex; gap:8px; align-items:center; margin-left:auto;">
+                    <label style="margin:0;">Customer name <input id="checkoutCustomer" type="text" name="customerName" required placeholder="Your name" style="margin-left:8px; padding:6px 8px;"></label>
+                    <button type="submit" class="btn">Submit</button>
+                </form>
+            </div>
+
+            <script>
+                (function(){
+                    function q(sel,ctx){return (ctx||document).querySelector(sel);} function qa(sel,ctx){return Array.from((ctx||document).querySelectorAll(sel));}
+                    var tbody = q('#ordersTbody');
+                    var grandEl = q('#grandTotal');
+                    var checkoutCustomer = q('#checkoutCustomer');
+
+                    function recalcGrand(){
+                        var sum = 0; qa('#ordersTbody tr').forEach(function(r){ var v = parseFloat((r.querySelector('.line-val')||{textContent:'0'}).textContent||0) || 0; sum += v; });
+                        if (grandEl) grandEl.textContent = '₱' + sum.toFixed(2);
+                    }
+
+                    function showNoOrdersMessage(){
+                        var container = document.querySelector('div[style*="max-width:900px"]');
+                        container.innerHTML = '<p>No order available. <a href="/menu">Return to menu</a></p>';
+                    }
+
+                    // Attach listeners to each row: qty change, customer name change, remove
+                    qa('#ordersTbody tr').forEach(function(row){
+                        var id = row.dataset.id;
+                        var qtyInput = row.querySelector('.qty-input');
+                        var custInput = row.querySelector('.customer-input');
+                        var per = parseFloat((row.querySelector('.per-val')||{textContent:'0'}).textContent) || 0;
+                        var lineEl = row.querySelector('.line-val');
+                        var removeBtn = row.querySelector('.remove-btn');
+
+                        // initialize checkout customer name from first row if blank
+                        if (checkoutCustomer && custInput && !checkoutCustomer.value) {
+                            if (custInput.value && custInput.value.trim()) checkoutCustomer.value = custInput.value.trim();
+                        }
+
+                        qtyInput.addEventListener('change', function(){
+                            var newQ = parseInt(qtyInput.value,10) || 0;
+                            var newLine = per * newQ; if (lineEl) lineEl.textContent = newLine.toFixed(2); recalcGrand();
+                            if (!id) return; // session-only client local change already reflected
+                            fetch('/order-edit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, qty: newQ }) })
+                                .then(r=>r.json()).then(function(js){ if (!js || !js.success) alert('Failed to update qty'); });
+                        });
+
+                        if (custInput) {
+                            var tId = null;
+                            custInput.addEventListener('input', function(){
+                                // debounce
+                                if (tId) clearTimeout(tId);
+                                tId = setTimeout(function(){
+                                    var v = custInput.value || '';
+                                    if (checkoutCustomer && !checkoutCustomer.value) checkoutCustomer.value = v;
+                                    if (!id) return;
+                                    fetch('/order-edit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, customerName: v }) })
+                                        .then(r=>r.json()).then(function(js){ if (!js || !js.success) console.warn('Failed to update customerName'); });
+                                }, 400);
+                            });
+                        }
+
+                        if (removeBtn) {
+                            removeBtn.addEventListener('click', function(){
+                                var isLast = (qa('#ordersTbody tr').length === 1);
+                                var proceed = true;
+                                if (isLast) proceed = confirm('Remove last order?');
+                                if (!proceed) return;
+                                if (!id) {
+                                    row.remove(); recalcGrand(); if (qa('#ordersTbody tr').length === 0) showNoOrdersMessage(); return;
+                                }
+                                fetch('/order-remove', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id }) })
+                                    .then(r=>r.json()).then(function(js){ if (js && js.success) {
+                                        row.remove(); recalcGrand(); if ((js.remaining||0) === 0) showNoOrdersMessage();
+                                    } else { alert('Failed to remove order'); } }).catch(function(){ alert('Remove failed'); });
+                            });
+                        }
+                    });
+
+                    // keep grand accurate on load
+                    recalcGrand();
+                })();
+            </script>
+        <% } %>
+    </div>
+</body>
+</html>
