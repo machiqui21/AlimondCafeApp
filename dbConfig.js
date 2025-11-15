@@ -55,11 +55,19 @@ pool.on('error', function (err) {
     }
 });
 
-// Optional keep-alive ping to keep the pool warm and detect drops early
+// Optional keep-alive ping to keep the pool warm and detect drops early.
+// Interval can be tuned via KEEPALIVE_MS (default 30000). Set KEEPALIVE_MS=0 to disable.
 try {
-    setInterval(function () {
-        pool.query('SELECT 1', function () { /* keep-alive */ });
-    }, 30 * 1000);
+    var KEEPALIVE_MS = parseInt(env('KEEPALIVE_MS', '30000'), 10) || 0;
+    if (KEEPALIVE_MS > 0) {
+        setInterval(function () {
+            pool.query('SELECT 1', function (err) {
+                if (err && err.code) {
+                    console.warn('MySQL keep-alive failed:', err.code, err.message || err);
+                }
+            });
+        }, KEEPALIVE_MS).unref(); // allow process to exit naturally
+    }
 } catch (e) { /* non-fatal */ }
 
 // Proactive warmup to establish a connection at startup and surface handshake issues early
@@ -87,5 +95,29 @@ pool.warmup = function warmup(attempts) {
         })(attempts);
     });
 };
+
+// Graceful shutdown helper so the application can call this on exit to minimize aborted connections.
+function shutdownPool(label){
+    try {
+        console.log('[db] shutting down pool' + (label ? ' ('+label+')' : ''));
+        pool.end(function(err){
+            if (err) console.warn('[db] pool.end error:', err.message || err);
+            else console.log('[db] pool closed');
+        });
+    } catch(e){ console.warn('[db] pool shutdown threw:', e && e.message || e); }
+}
+
+// Export a simple health check (returns Promise<boolean>)
+function healthCheck(){
+    return new Promise(function(resolve){
+        pool.query('SELECT 1 AS ok', function(err, rows){
+            if (err) return resolve(false);
+            resolve(Array.isArray(rows));
+        });
+    });
+}
+
+pool.shutdown = shutdownPool;
+pool.healthCheck = healthCheck;
 
 module.exports = pool;
