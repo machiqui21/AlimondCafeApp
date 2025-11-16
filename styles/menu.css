@@ -627,9 +627,9 @@ body.submenu-page .type-column h3 { grid-column: 1 / -1; text-align: left; margi
     display: flex;
     flex-direction: column;
 }
-.product-card.compact .media-wrapper { width: 100%; height: 140px; overflow: hidden; background:#f8f5f2; }
-.product-card.compact .product-thumb { width: 100%; height: 100%; object-fit: cover; display:block; }
-.product-card.compact .product-thumb.placeholder { display:flex; align-items:center; justify-content:center; color:#777; background:#f0f0f0; }
+.product-card.compact .media-wrapper { width: 100%; height: 200px; overflow: hidden; background:#f8f5f2; display:flex; align-items:center; justify-content:center; }
+.product-card.compact .product-thumb { width: 100%; height: 100%; object-fit: contain; display:block; }
+.product-card.compact .product-thumb.placeholder { display:flex; align-items:center; justify-content:center; color:#777; background:#f0f0f0; height:100%; width:100%; }
 .product-card.compact .card-content { padding: 10px; }
 .product-card.compact h3 { font-size: 1rem; margin: 6px 0 2px; }
 .product-card.compact p { font-size: 0.85rem; -webkit-line-clamp: 2; line-clamp: 2; }
