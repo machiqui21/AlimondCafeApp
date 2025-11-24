@@ -19,9 +19,32 @@
         <div><strong>Customer:</strong> <%= header && header.CustomerName || '-' %></div>
         <div><strong>Date:</strong> <%= header && (header.CreatedAt || header.Created_at || header.created_at) %></div>
         <div><strong>Total:</strong> ₱<%= (parseFloat(header && header.TotalAmount || 0)||0).toFixed(2) %></div>
-        <div style="margin-left:auto;"><a class="btn" href="/payment?method=cash&orderId=<%= (header && (header.OrderID||header.ID)) %>">Pay Cash</a> <a class="btn" href="/payment?method=online&orderId=<%= (header && (header.OrderID||header.ID)) %>">Pay Online</a></div>
+        <% if (header && header.PaymentMethod) { %>
+          <div><strong>Payment:</strong> <span style="color:#16a34a; font-weight:600;"><%= header.PaymentMethod %></span></div>
+        <% } %>
       </div>
     </section>
+
+    <% if (header && header.PaymentMethod === 'Cash' && header.StatusDescription === 'Pending') { %>
+      <section style="margin-top:16px; background:#fff3cd; border-left:4px solid #ffc107; padding:16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <p style="margin:0; color:#856404; font-size:1.1rem; font-weight:500;">
+          💵 <strong>Thank you!</strong> Please proceed to the cashier to complete your payment.
+        </p>
+      </section>
+    <% } %>
+
+    <% if (typeof qrCodeDataUrl !== 'undefined' && qrCodeDataUrl) { %>
+      <section style="margin-top:16px; background:#fff; border-radius:8px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); text-align:center;">
+        <h3 style="margin-top:0; color:#7c4700;">Scan to Pay</h3>
+        <img src="<%= qrCodeDataUrl %>" alt="Payment QR Code" style="max-width:300px; border:2px solid #e5e7eb; border-radius:8px; padding:8px;"/>
+        <p style="margin-top:12px; color:#666;">
+          Scan this QR code with your payment app<br/>
+          <strong>Account:</strong> 09265363860<br/>
+          <strong>Amount:</strong> ₱<%= (parseFloat(header && header.TotalAmount || 0)||0).toFixed(2) %><br/>
+          <strong>Order ID:</strong> #<%= (header && (header.OrderID||header.ID)) %>
+        </p>
+      </section>
+    <% } %>
 
     <section style="margin-top:16px;">
       <table class="menu-table" style="width:100%;">
@@ -38,10 +61,13 @@
           <% (items||[]).forEach(function(it, idx){ %>
             <tr>
               <td><%= idx+1 %></td>
-              <td><%= it.ProductName || ('#'+(it.ProductID||'')) %></td>
-              <td><%= it.qty %></td>
-              <td>₱<%= (parseFloat(it.Price||0)||0).toFixed(2) %></td>
-              <td>₱<%= (parseFloat(it.LineTotal||0)||0).toFixed(2) %></td>
+              <td>
+                <%= it.ProductName || ('#'+(it.ProductID||'')) %>
+                <% if (it.Size) { %><br/><small>Size: <%= it.Size %></small><% } %>
+              </td>
+              <td><%= it.Quantity || it.qty || 1 %></td>
+              <td>₱<%= (parseFloat(it.UnitPrice||it.Price||0)||0).toFixed(2) %></td>
+              <td>₱<%= (parseFloat(it.Subtotal||it.LineTotal||0)||0).toFixed(2) %></td>
             </tr>
           <% }); %>
         </tbody>
@@ -78,9 +104,9 @@
 
       <div style="flex:1 1 260px; background:#fff; padding:12px 16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
         <h3>Toppings</h3>
-        <% if (opts.Toppings && opts.Toppings.length) { %>
+        <% if (opts.Topping && opts.Topping.length) { %>
           <ul>
-            <% opts.Toppings.forEach(function(o){ %>
+            <% opts.Topping.forEach(function(o){ %>
               <li><%= o.name %> <small>(₱<%= (parseFloat(o.price||0)||0).toFixed(2) %>)</small></li>
             <% }); %>
           </ul>
@@ -92,8 +118,25 @@
 
     <div style="margin-top:16px; display:flex; gap:12px;">
       <a class="btn" href="/menu">Back to Menu</a>
-      <a class="btn" href="/order-summary">Back to Summary</a>
+      <a class="btn" href="/">Back to Homepage</a>
     </div>
   </main>
+  
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #8b5a3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+  <script>
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+    
+    // Restore saved dark mode preference
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+  </script>
 </body>
 </html>

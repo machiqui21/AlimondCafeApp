@@ -56,9 +56,9 @@ pool.on('error', function (err) {
 });
 
 // Optional keep-alive ping to keep the pool warm and detect drops early.
-// Interval can be tuned via KEEPALIVE_MS (default 30000). Set KEEPALIVE_MS=0 to disable.
+// Interval can be tuned via KEEPALIVE_MS (default 60000). Set KEEPALIVE_MS=0 to disable.
 try {
-    var KEEPALIVE_MS = parseInt(env('KEEPALIVE_MS', '30000'), 10) || 0;
+    var KEEPALIVE_MS = parseInt(env('KEEPALIVE_MS', '60000'), 10) || 0;
     if (KEEPALIVE_MS > 0) {
         setInterval(function () {
             pool.query('SELECT 1', function (err) {

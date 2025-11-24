@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login • Alimond Café</title>
+  <title>Registration Successful • Alimond Café</title>
   <link rel="stylesheet" href="/styles.css">
   <%- include('partials/navbar_login.ejs') %>
   <script type="text/javascript">
@@ -17,13 +17,14 @@
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   <style>
-    .auth-card { max-width: 560px; margin: 32px auto; padding: 32px; border: 1px solid #e9e9e9; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.08); background:#fff; }
+    .auth-card { max-width: 640px; margin: 32px auto; padding: 32px; border: 1px solid #e9e9e9; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.08); background:#fff; }
     .auth-card h2 { margin: 0 0 18px; font-size: 26px; }
-    .auth-field { height: 46px; padding: 10px 14px; font-size: 16px; border-radius: 10px; border: 1.5px solid #d6d6d6; outline: none; transition: border-color .15s, box-shadow .15s; }
-    .auth-field:focus { border-color: #b07a50; box-shadow: 0 0 0 3px rgba(176,122,80,.15); }
-    .auth-btn { height: 46px; border-radius: 10px; border: none; background: #6b4a2c; color: #fff; font-size: 16px; cursor: pointer; }
-    .auth-btn:hover { background: #5f4127; }
-    .auth-meta { margin-top: 12px; font-size: 14px; }
+    .kv { display: grid; grid-template-columns: 160px 1fr; gap: 10px 16px; margin: 10px 0 18px; }
+    .kv .k { color:#555; }
+    .cta { display:flex; gap:10px; margin-top: 12px; }
+    .btn { height: 42px; padding: 0 16px; border-radius: 10px; border: none; background: #6b4a2c; color: #fff; font-size: 15px; cursor: pointer; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn.alt { background:#eee; color:#333; }
+    .meta { color:#666; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -39,20 +40,25 @@
   </header>
 
   <div class="auth-card">
-    <h2>Member Login</h2>
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div style="background:#fee; border:1px solid #fcc; padding:10px 12px; margin-bottom:14px; border-radius:8px; color:#c33;">
-        <%= error %>
-      </div>
-    <% } %>
-    <form action="/auth" method="post" style="display:flex; flex-direction:column; gap:12px;">
-      <input class="auth-field" type="text" name="username" placeholder="User Name" required>
-      <input class="auth-field" type="password" name="password" placeholder="Password" required>
-      <button class="auth-btn" type="submit">Login</button>
-    </form>
-    <div class="auth-meta" style="text-align: center; margin-top: 20px;">
-      <p style="margin: 0 0 10px 0; color: #666;">Don't have an account?</p>
-      <a href="/register" style="display: inline-block; padding: 10px 24px; background: #e8e8e8; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.3s;" onmouseover="this.style.background='#d4d4d4'" onmouseout="this.style.background='#e8e8e8'">Create Account</a>
+    <h2>Registration Successful</h2>
+    <p class="meta">Your account has been created. Here are your details:</p>
+    <div class="kv">
+      <div class="k">First Name</div>
+      <div class="v"><%= (user && user.FirstName) ? user.FirstName : '' %></div>
+      <div class="k">Last Name</div>
+      <div class="v"><%= (user && user.LastName) ? user.LastName : '' %></div>
+      <div class="k">Username</div>
+      <div class="v"><%= (user && user.Username) ? user.Username : '' %></div>
+      <div class="k">Email</div>
+      <div class="v"><%= (user && user.Email) ? user.Email : 'Not provided' %></div>
+      <div class="k">Mobile Phone</div>
+      <div class="v"><%= (user && user.MobilePhone) ? user.MobilePhone : '' %></div>
+      <div class="k">Created</div>
+      <div class="v"><%= (user && user.CreatedAt) ? user.CreatedAt : 'Just now' %></div>
+    </div>
+    <div class="cta">
+      <a class="btn" href="/login">Go to Login</a>
+      <a class="btn alt" href="/menu">Browse Menu</a>
     </div>
   </div>
   
@@ -76,4 +82,3 @@
   </script>
 </body>
 </html>
-

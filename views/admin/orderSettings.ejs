@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management Settings - Alimond Café</title>
+  <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/admin.css">
+  <style>
+    .settings-card {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    .settings-card h3 {
+      color: #7c4700;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .settings-card p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .form-group select,
+    .form-group input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-warning:hover {
+      background: #f57c00;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+    .alert-success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .alert-error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .alert-info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .stat-box {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #7c4700;
+    }
+    .stat-label {
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    .warning-box {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="admin-nav">
+    <div class="admin-nav-left">
+      <strong class="admin-nav-title">Order Management Settings</strong>
+      <span class="admin-user-badge">🔐 <%= adminUser.Username %></span>
+    </div>
+    <div class="admin-nav-right">
+      <a href="/admin/dashboard" class="admin-nav-link">All Orders</a>
+      <a href="/admin/queue" class="admin-nav-link">Order Queue</a>
+      <a href="/admin/completed" class="admin-nav-link">Order History</a>
+      <a href="/menu" class="admin-nav-link">Menu</a>
+      <a href="/logout" class="admin-logout-link">Logout</a>
+    </div>
+  </nav>
+
+  <main style="max-width: 1000px; margin: 20px auto; padding: 0 20px;">
+    <h1 style="color: #7c4700;">Order Data Management</h1>
+
+    <% if (!stats.archiveTablesExist) { %>
+    <!-- Warning: Tables not created -->
+    <div class="settings-card" style="background: #fff3cd; border: 2px solid #ffc107;">
+      <h3 style="color: #856404;">⚠️ Archive Tables Not Found</h3>
+      <p style="color: #856404;">The archive tables have not been created yet. You need to run the database migration first.</p>
+      
+      <div style="background: white; padding: 15px; border-radius: 4px; margin: 15px 0;">
+        <strong>Setup Instructions:</strong>
+        <ol style="margin: 10px 0; padding-left: 20px;">
+          <li>Open phpMyAdmin</li>
+          <li>Select your database: <code>alimondcafe</code></li>
+          <li>Click "SQL" tab</li>
+          <li>Open the file: <code>migrations/create-archive-tables.sql</code></li>
+          <li>Copy and paste the SQL into phpMyAdmin</li>
+          <li>Click "Go" to execute</li>
+          <li>Refresh this page</li>
+        </ol>
+      </div>
+      
+      <p><strong>File location:</strong> <code>AlimondCafeApp/migrations/create-archive-tables.sql</code></p>
+    </div>
+    <% } %>
+
+    <!-- Statistics -->
+    <div class="settings-card">
+      <h3>📊 Database Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number"><%= stats.totalOrders %></div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number"><%= stats.completedOrders %></div>
+          <div class="stat-label">Completed Orders</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number"><%= stats.archivedOrders %></div>
+          <div class="stat-label">Archived Orders</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number"><%= stats.oldestOrderDays %></div>
+          <div class="stat-label">Days Since Oldest Order</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archive Old Orders -->
+    <div class="settings-card">
+      <h3>🗄️ Archive Old Orders</h3>
+      <p>Move completed and cancelled orders older than the specified period to the archive. This improves database performance while preserving historical data.</p>
+      
+      <% if (!stats.archiveTablesExist) { %>
+        <div class="alert alert-error">
+          <strong>⚠️ Archive tables not created.</strong> Please run the database migration first (see instructions above).
+        </div>
+      <% } else { %>
+      
+      <div class="warning-box">
+        <strong>⚠️ Important:</strong> Archived orders are moved to a separate archive table but NOT deleted. You can view them in the "View Archived Orders" section below.
+      </div>
+
+      <form id="archiveForm">
+        <div class="form-group">
+          <label for="monthsOld">Archive orders older than:</label>
+          <select name="monthsOld" id="monthsOld" required>
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="12" selected>12 months (1 year)</option>
+            <option value="18">18 months</option>
+            <option value="24">24 months (2 years)</option>
+            <option value="36">36 months (3 years)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="confirmArchive" required>
+            I understand this will move old orders to the archive
+          </label>
+        </div>
+
+        <button type="submit" class="btn-warning">Archive Old Orders</button>
+      </form>
+
+      <div id="archiveResult"></div>
+      <% } %>
+    </div>
+
+    <!-- View Archived Orders -->
+    <div class="settings-card">
+      <h3>📚 View Archived Orders</h3>
+      <p>Access orders that have been moved to the archive for historical reference.</p>
+      <% if (!stats.archiveTablesExist) { %>
+        <button class="btn-secondary" disabled style="opacity: 0.5; cursor: not-allowed;">View Archived Orders (Tables not created)</button>
+      <% } else { %>
+        <a href="/admin/archived-orders" class="btn-secondary">View Archived Orders</a>
+      <% } %>
+    </div>
+
+    <!-- Permanent Deletion (7+ years) -->
+    <div class="settings-card">
+      <h3>🗑️ Permanent Deletion</h3>
+      <p>Permanently delete archived orders older than 7 years. This action cannot be undone.</p>
+      
+      <div class="alert alert-info">
+        <strong>Note:</strong> Most jurisdictions require keeping transaction records for 7 years for tax and legal purposes. Only delete data after consulting with your accountant or legal advisor.
+      </div>
+
+      <% if (!stats.archiveTablesExist) { %>
+        <div class="alert alert-error">
+          <strong>⚠️ Archive tables not created.</strong> Please run the database migration first.
+        </div>
+      <% } else { %>
+
+      <form id="deleteForm">
+        <div class="form-group">
+          <label for="yearsOld">Permanently delete archived orders older than:</label>
+          <select name="yearsOld" id="yearsOld" required>
+            <option value="7" selected>7 years</option>
+            <option value="10">10 years</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="confirmDelete" required>
+            I understand this PERMANENTLY deletes data and cannot be undone
+          </label>
+        </div>
+
+        <button type="submit" class="btn-warning" style="background: #dc3545;">Permanently Delete Old Archives</button>
+      </form>
+
+      <div id="deleteResult"></div>
+      <% } %>
+    </div>
+  </main>
+
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+  <script>
+    // Archive old orders
+    document.getElementById('archiveForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const monthsOld = document.getElementById('monthsOld').value;
+      const confirmCheckbox = document.getElementById('confirmArchive');
+      
+      if (!confirmCheckbox.checked) {
+        alert('Please confirm that you understand the action');
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to archive all completed/cancelled orders older than ${monthsOld} months?\n\nThis will move them to the archive table.`)) {
+        return;
+      }
+
+      const resultDiv = document.getElementById('archiveResult');
+      resultDiv.innerHTML = '<div class="alert alert-info">Processing... Please wait.</div>';
+
+      try {
+        const response = await fetch('/admin/archive-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ monthsOld: parseInt(monthsOld) })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          resultDiv.innerHTML = `<div class="alert alert-success">
+            <strong>✓ Success!</strong><br>
+            ${result.message}<br>
+            Orders archived: ${result.archivedCount}
+          </div>`;
+          
+          // Reload page after 2 seconds to update stats
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          resultDiv.innerHTML = `<div class="alert alert-error">
+            <strong>✗ Error:</strong> ${result.message}
+          </div>`;
+        }
+      } catch (error) {
+        console.error('Archive error:', error);
+        resultDiv.innerHTML = `<div class="alert alert-error">
+          <strong>✗ Error:</strong> Failed to archive orders. Please try again.
+        </div>`;
+      }
+
+      confirmCheckbox.checked = false;
+    });
+
+    // Permanently delete old archives
+    document.getElementById('deleteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const yearsOld = document.getElementById('yearsOld').value;
+      const confirmCheckbox = document.getElementById('confirmDelete');
+      
+      if (!confirmCheckbox.checked) {
+        alert('Please confirm that you understand this action is permanent');
+        return;
+      }
+
+      if (!confirm(`⚠️ WARNING ⚠️\n\nAre you ABSOLUTELY SURE you want to PERMANENTLY DELETE all archived orders older than ${yearsOld} years?\n\nThis action CANNOT be undone!\n\nClick OK to proceed with permanent deletion.`)) {
+        return;
+      }
+
+      const resultDiv = document.getElementById('deleteResult');
+      resultDiv.innerHTML = '<div class="alert alert-info">Processing... Please wait.</div>';
+
+      try {
+        const response = await fetch('/admin/delete-archived-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ yearsOld: parseInt(yearsOld) })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          resultDiv.innerHTML = `<div class="alert alert-success">
+            <strong>✓ Success!</strong><br>
+            ${result.message}<br>
+            Orders permanently deleted: ${result.deletedCount}
+          </div>`;
+          
+          // Reload page after 2 seconds to update stats
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          resultDiv.innerHTML = `<div class="alert alert-error">
+            <strong>✗ Error:</strong> ${result.message}
+          </div>`;
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        resultDiv.innerHTML = `<div class="alert alert-error">
+          <strong>✗ Error:</strong> Failed to delete archived orders. Please try again.
+        </div>`;
+      }
+
+      confirmCheckbox.checked = false;
+    });
+
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>

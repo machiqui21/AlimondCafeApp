@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Orders - Alimond's Café</title>
+  <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/navbar.css">
+  <style>
+    .orders-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    
+    .order-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      transition: box-shadow 0.3s ease;
+    }
+    
+    .order-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .order-id {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #7c4700;
+    }
+    
+    .order-status {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #dbeafe; color: #1e40af; }
+    .status-preparing { background: #fde68a; color: #78350f; }
+    .status-ready { background: #d1fae5; color: #065f46; }
+    .status-completed { background: #d1fae5; color: #065f46; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+    
+    .order-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .info-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    
+    .info-value {
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .order-items {
+      margin-top: 16px;
+    }
+    
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .item-details {
+      flex: 1;
+    }
+    
+    .item-name {
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .item-meta {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    
+    .item-price {
+      font-weight: 600;
+      color: #7c4700;
+      white-space: nowrap;
+    }
+    
+    .order-total {
+      text-align: right;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 2px solid #7c4700;
+    }
+    
+    .total-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #374151;
+    }
+    
+    .total-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #7c4700;
+    }
+    
+    .view-details-btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #7c4700;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    
+    .view-details-btn:hover {
+      background: #5a3300;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    
+    .empty-state h2 {
+      color: #7c4700;
+      margin-bottom: 16px;
+    }
+    
+    .empty-state p {
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+    
+    .btn-primary {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #7c4700;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: #5a3300;
+    }
+    
+    .page-header {
+      background: linear-gradient(135deg, #7c4700 0%, #a15c00 100%);
+      color: white;
+      padding: 40px 20px;
+      margin-bottom: 30px;
+      border-radius: 0 0 16px 16px;
+      text-align: center;
+    }
+    
+    .page-header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar_menu') %>
+  
+  <div class="page-header">
+    <h1>📋 My Orders</h1>
+  </div>
+  
+  <div class="orders-container">
+    <% if (orders && orders.length > 0) { %>
+      <% orders.forEach(function(order) { %>
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-id">Order #<%= order.OrderID %></div>
+            <div class="order-status status-<%= (order.StatusName || 'pending').toLowerCase() %>">
+              <%= order.StatusName || 'Pending' %>
+            </div>
+          </div>
+          
+          <div class="order-info">
+            <div class="info-item">
+              <div class="info-label">Date</div>
+              <div class="info-value">
+                <%= order.CreatedAt ? new Date(order.CreatedAt).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'N/A' %>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-label">Customer Name</div>
+              <div class="info-value"><%= order.CustomerName || 'N/A' %></div>
+            </div>
+            
+            <% if (order.PaymentMethod) { %>
+            <div class="info-item">
+              <div class="info-label">Payment Method</div>
+              <div class="info-value"><%= order.PaymentMethod %></div>
+            </div>
+            <% } %>
+          </div>
+          
+          <% if (order.items && order.items.length > 0) { %>
+          <div class="order-items">
+            <h4 style="margin-top: 0; color: #7c4700;">Order Items</h4>
+            <% order.items.forEach(function(item) { %>
+              <div class="item-row">
+                <div class="item-details">
+                  <div class="item-name"><%= item.ProductName || 'Product #' + item.ProductID %></div>
+                  <div class="item-meta">
+                    Qty: <%= item.Quantity %> 
+                    <% if (item.Size) { %> | Size: <%= item.Size %><% } %>
+                    <% if (item.Notes) { %> | <%= item.Notes %><% } %>
+                  </div>
+                  <% if (item.options && item.options.length > 0) { %>
+                    <div class="item-meta">
+                      <%= item.options.map(o => o.OptionName + ': ' + o.OptionValue).join(', ') %>
+                    </div>
+                  <% } %>
+                </div>
+                <div class="item-price">₱<%= parseFloat(item.Subtotal || 0).toFixed(2) %></div>
+              </div>
+            <% }); %>
+          </div>
+          <% } %>
+          
+          <div class="order-total">
+            <span class="total-label">Total: </span>
+            <span class="total-amount">₱<%= parseFloat(order.TotalAmount || 0).toFixed(2) %></span>
+          </div>
+          
+          <a href="/order/<%= order.OrderID %>" class="view-details-btn">View Full Details</a>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <div class="empty-state">
+        <h2>No Orders Yet</h2>
+        <p>You haven't placed any orders. Start browsing our menu to place your first order!</p>
+        <a href="/menu" class="btn-primary">Browse Menu</a>
+      </div>
+    <% } %>
+  </div>
+  
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #8b5a3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+  <script>
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+    
+    // Restore saved dark mode preference
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>

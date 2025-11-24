@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Completed Orders - Alimond Café</title>
+  <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <nav class="admin-nav">
+    <div class="admin-nav-left">
+      <strong class="admin-nav-title">Completed Orders</strong>
+      <span class="admin-user-badge">🔐 <%= adminUser.Username %></span>
+    </div>
+    <div class="admin-nav-right">
+      <a href="/admin/dashboard" class="admin-nav-link">All Orders</a>
+      <a href="/admin/queue" class="admin-nav-link">Order Queue</a>
+      <a href="/admin/completed" class="admin-nav-link active">Order History</a>
+      <a href="/menu" class="admin-nav-link">Menu</a>
+      <a href="/admin/order-settings" class="admin-nav-link">⚙️ Settings</a>
+      <a href="/logout" class="admin-logout-link">Logout</a>
+    </div>
+  </nav>
+
+  <main style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+    <% 
+      // Set defaults for template variables
+      const currentSortBy = sortBy || 'orderid_desc';
+    %>
+    <h1 style="color: #7c4700;">Order History - Completed & Cancelled</h1>
+    
+    <!-- Filter Section -->
+    <div style="background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 20px 0;">
+      <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <label style="font-weight: 600;">Filter by Status:</label>
+          <select id="statusFilter" name="status" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;" onchange="applyFilters()">
+            <option value="">All</option>
+            <option value="Completed" <%= statusFilter === 'Completed' ? 'selected' : '' %>>Completed</option>
+            <option value="Cancelled" <%= statusFilter === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+          </select>
+        </div>
+        
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <label style="font-weight: 600;">Sort by:</label>
+          <select id="sortBy" name="sortBy" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;" onchange="applyFilters()">
+            <option value="orderid_desc" <%= currentSortBy === 'orderid_desc' ? 'selected' : '' %>>Order ID (Newest First)</option>
+            <option value="orderid_asc" <%= currentSortBy === 'orderid_asc' ? 'selected' : '' %>>Order ID (Oldest First)</option>
+            <option value="date_desc" <%= currentSortBy === 'date_desc' ? 'selected' : '' %>>Date (Newest First)</option>
+            <option value="date_asc" <%= currentSortBy === 'date_asc' ? 'selected' : '' %>>Date (Oldest First)</option>
+          </select>
+        </div>
+        
+        <% if (statusFilter || (currentSortBy && currentSortBy !== 'orderid_desc')) { %>
+          <a href="/admin/completed" style="padding: 8px 20px; background: #666; color: white; text-decoration: none; border-radius: 4px;">Clear Filters</a>
+        <% } %>
+      </div>
+    </div>
+    
+    <!-- Responsive Table Wrapper -->
+    <div style="overflow-x: auto;">
+      <table class="menu-table" style="width: 100%; margin-top: 20px;">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (orders && orders.length > 0) { %>
+            <% orders.forEach(function(order) { %>
+              <tr>
+                <td>#<%= order.OrderID %></td>
+                <td><%= order.CustomerName || '-' %></td>
+                <td>₱<%= parseFloat(order.TotalAmount || 0).toFixed(2) %></td>
+                <td><%= order.PaymentMethod || 'N/A' %></td>
+                <td>
+                  <% 
+                    var statusClass = 'status-completed';
+                    var statusName = order.StatusName || 'Unknown';
+                    if (statusName === 'Cancelled') statusClass = 'status-cancelled';
+                  %>
+                  <span class="status-badge <%= statusClass %>"><%= statusName %></span>
+                </td>
+                <td><%= new Date(order.CreatedAt).toLocaleString() %></td>
+                <td>
+                  <a href="/admin/order/<%= order.OrderID %>" class="btn" style="padding: 6px 12px; font-size: 0.9rem;">View</a>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+                <%= statusFilter ? 'No ' + statusFilter + ' orders found' : 'No completed or cancelled orders' %>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin: 30px 0; flex-wrap: wrap;">
+        <% if (currentPage > 1) { %>
+          <a href="/admin/completed?page=<%= currentPage - 1 %><%= statusFilter ? '&status=' + encodeURIComponent(statusFilter) : '' %><%= currentSortBy ? '&sortBy=' + encodeURIComponent(currentSortBy) : '' %>" 
+             style="padding: 10px 16px; background: #7c4700; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
+            ← Previous
+          </a>
+        <% } else { %>
+          <span style="padding: 10px 16px; background: #ccc; color: #666; border-radius: 6px; font-weight: 500;">← Previous</span>
+        <% } %>
+        
+        <span style="padding: 10px 16px; background: #f0f0f0; border-radius: 6px; font-weight: 600;">
+          Page <%= currentPage %> of <%= totalPages %>
+        </span>
+        
+        <% if (currentPage < totalPages) { %>
+          <a href="/admin/completed?page=<%= currentPage + 1 %><%= statusFilter ? '&status=' + encodeURIComponent(statusFilter) : '' %><%= currentSortBy ? '&sortBy=' + encodeURIComponent(currentSortBy) : '' %>" 
+             style="padding: 10px 16px; background: #7c4700; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
+            Next →
+          </a>
+        <% } else { %>
+          <span style="padding: 10px 16px; background: #ccc; color: #666; border-radius: 6px; font-weight: 500;">Next →</span>
+        <% } %>
+      </div>
+    <% } %>
+  </main>
+  
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+  <script>
+    function applyFilters() {
+      const status = document.getElementById('statusFilter').value;
+      const sortBy = document.getElementById('sortBy').value;
+      
+      let url = '/admin/completed?';
+      const params = [];
+      
+      if (status) {
+        params.push('status=' + encodeURIComponent(status));
+      }
+      if (sortBy) {
+        params.push('sortBy=' + encodeURIComponent(sortBy));
+      }
+      
+      url += params.join('&');
+      window.location.href = url;
+    }
+    
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+    
+    // Restore saved dark mode preference
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+  </script>
+</body>
+</html>

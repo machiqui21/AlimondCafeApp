@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Menu - Alimond's Café</title>
+  <link rel="stylesheet" href="/menu.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .admin-nav {
+      background: #7c4700;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .admin-nav h1 {
+      font-size: 1.5em;
+    }
+    .admin-nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.3s;
+    }
+    .admin-nav a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .admin-nav a.disabled {
+      background: rgba(255,255,255,0.3);
+      cursor: not-allowed;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .tabs-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      background: #f8f8f8;
+    }
+    .tab {
+      padding: 15px 30px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+    .tab:hover {
+      background: rgba(124, 71, 0, 0.05);
+      color: #7c4700;
+    }
+    .tab.active {
+      color: #7c4700;
+      background: white;
+      border-bottom-color: #7c4700;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .menu-section {
+      margin-bottom: 30px;
+    }
+    .type-header {
+      background: #7c4700;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px 8px 0 0;
+      font-size: 1.3em;
+      font-weight: bold;
+    }
+    .products-list {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+    }
+    .product-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto auto;
+      gap: 15px;
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .product-item:hover {
+      background: #f9f9f9;
+    }
+    .product-item:last-child {
+      border-bottom: none;
+    }
+    .product-thumb {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7em;
+      color: #999;
+    }
+    .product-info h4 {
+      margin: 0 0 5px 0;
+      color: #7c4700;
+      font-size: 1.1em;
+    }
+    .product-info p {
+      margin: 0 0 8px 0;
+      color: #666;
+      font-size: 0.9em;
+    }
+    .product-meta {
+      font-size: 0.85em;
+      color: #888;
+    }
+    .product-price {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #28a745;
+      text-align: right;
+    }
+    .product-actions-inline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .order-form-inline {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    .order-form-inline input,
+    .order-form-inline select {
+      width: 100%;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .order-form-inline label {
+      display: block;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #7c4700;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5c3400;
+    }
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #218838;
+    }
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    .btn-small {
+      padding: 5px 12px;
+      font-size: 12px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    .modal.active {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 700px;
+      margin: 20px auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .modal-header h2 {
+      color: #7c4700;
+    }
+    .close {
+      font-size: 28px;
+      font-weight: bold;
+      color: #aaa;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .close:hover {
+      color: #000;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .checkbox-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .product-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #7c4700;
+    }
+    .product-category {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-bottom: 8px;
+    }
+    .product-type {
+      display: inline-block;
+      background: #fff3e0;
+      color: #f57c00;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
+    .product-description {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .product-price {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #28a745;
+      margin-bottom: 12px;
+    }
+    .product-flags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .flag {
+      font-size: 0.75em;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #f0f0f0;
+      color: #555;
+    }
+    .flag.active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .product-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 15px;
+    }
+    .product-actions .btn {
+      flex: 1;
+      min-width: 70px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .size-prices-section {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+    .size-price-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: end;
+    }
+    .filter-section {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .filter-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .filter-item label {
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #555;
+    }
+    .filter-item select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .unavailable {
+      opacity: 0.6;
+    }
+    .unavailable .product-name::after {
+      content: " (Unavailable)";
+      font-size: 0.8em;
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <nav class="admin-nav">
+    <h1>Admin Menu</h1>
+    <div>
+      <a href="/admin/dashboard">Dashboard</a>
+      <a href="/admin/queue">Order Queue</a>
+      <a href="/admin/menu" class="disabled">Menu</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('menu-tab')">Menu & Orders</button>
+        <button class="tab" onclick="switchTab('manage-tab')">Manage Products</button>
+      </div>
+
+      <!-- Menu & Orders Tab -->
+      <div id="menu-tab" class="tab-content active">
+        <h2 style="margin-bottom: 20px;">Product Menu - Process Customer Orders</h2>
+        <p style="color: #666; margin-bottom: 20px;">View products and process orders for customers. Orders created here will be marked as "Processing" until payment is confirmed.</p>
+        
+        <% if (ProductData && ProductData.length > 0) { %>
+          <% 
+            var groups = {};
+            ProductData.forEach(function(p) {
+              if (p.Category === 'Standard' || !p.Category) {
+                var key = p.Type || 'Other';
+                (groups[key] = groups[key] || []).push(p);
+              }
+            });
+          %>
+          
+          <% Object.keys(groups).forEach(function(groupName) { %>
+            <div class="menu-section">
+              <div class="type-header"><%= groupName %></div>
+              <div class="products-list">
+                <% groups[groupName].forEach(function(product) { %>
+                  <div class="product-item">
+                    <div class="product-thumb">
+                      <% 
+                        var pic = product.Picture || '';
+                        var fname = (pic && pic.toString()) ? (pic.toString().split('/').pop().split('\\').pop()) : null;
+                        var imgSrc = fname ? ('/images/' + fname) : null;
+                      %>
+                      <% if (imgSrc) { %>
+                        <img src="<%= imgSrc %>" alt="<%= product.Name %>" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+                      <% } else { %>
+                        No image
+                      <% } %>
+                    </div>
+                    
+                    <div class="product-info">
+                      <h4><%= product.Name %></h4>
+                      <% if (product.Description) { %>
+                        <p><%= product.Description %></p>
+                      <% } %>
+                      <div class="product-meta">
+                        <% if (product.HasSizes) { %>
+                          <span>Has Sizes</span> •
+                        <% } %>
+                        <% if (product.HasExtras) { %>
+                          <span>Has Extras</span> •
+                        <% } %>
+                        <% if (product.HasCustom) { %>
+                          <span>Has Custom</span> •
+                        <% } %>
+                        <span style="color: <%= product.IsAvailable ? '#28a745' : '#dc3545' %>">
+                          <%= product.IsAvailable ? 'Available' : 'Unavailable' %>
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div class="product-price">
+                      <% if (product.HasSizes) { %>
+                        <% var productSizes = SizePriceData ? SizePriceData.filter(function(sp) { return sp.ProductID === product.ProductID; }) : []; %>
+                        <% if (productSizes.length > 0) { %>
+                          <div style="font-size: 0.75em; color: #666; margin-bottom: 5px;">Sizes:</div>
+                          <% productSizes.forEach(function(sp) { %>
+                            <div style="font-size: 0.85em; color: #666;">
+                              <%= sp.Size %>: ₱<%= sp.Price.toFixed(2) %>
+                            </div>
+                          <% }); %>
+                        <% } else { %>
+                          Multiple Sizes
+                        <% } %>
+                      <% } else if (product.Price) { %>
+                        ₱<%= product.Price.toFixed(2) %>
+                      <% } else { %>
+                        <span style="color: #999; font-size: 0.9em;">No price</span>
+                      <% } %>
+                    </div>
+                    
+                    <div class="product-actions-inline">
+                      <% if (product.IsAvailable) { %>
+                        <button class="btn btn-primary btn-small" onclick="showOrderForm(<%= product.ProductID %>)">
+                          + Add to Order
+                        </button>
+                      <% } else { %>
+                        <button class="btn btn-small" style="background: #ddd; color: #999; cursor: not-allowed;" disabled>
+                          + Add to Order
+                        </button>
+                        <div style="color: #dc3545; font-weight: bold; font-size: 0.9em; margin-top: 5px;">Product Unavailable</div>
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                  <!-- Order Form (hidden by default) -->
+                  <div id="orderForm_<%= product.ProductID %>" class="order-form-inline" style="display: none;">
+                    <form id="productOrderForm_<%= product.ProductID %>" onsubmit="return showPaymentPopup(event, <%= product.ProductID %>)">
+                      <input type="hidden" name="productId" value="<%= product.ProductID %>">
+                      <input type="hidden" name="productName" value="<%= product.Name %>">
+                      <input type="hidden" name="basePrice" value="<%= product.Price || 0 %>">
+                      <input type="hidden" name="hasSizes" value="<%= product.HasSizes ? 1 : 0 %>">
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                          <label>Customer Name *</label>
+                          <input type="text" name="customerName" required>
+                        </div>
+                        
+                        <div>
+                          <label>Quantity *</label>
+                          <input type="number" name="quantity" value="1" min="1" required class="order-qty-input" data-product-id="<%= product.ProductID %>">
+                        </div>
+                      </div>
+                      
+                      <% if (product.HasSizes && SizePriceData) { %>
+                        <% var productSizes = SizePriceData.filter(function(sp) { return sp.ProductID === product.ProductID; }); %>
+                        <% if (productSizes.length > 0) { %>
+                          <label>Size *</label>
+                          <select name="size" required class="size-select" data-product-id="<%= product.ProductID %>">
+                            <option value="" data-price="0">Select Size</option>
+                            <% productSizes.forEach(function(sp) { %>
+                              <option value="<%= sp.Size %>" data-price="<%= sp.Price %>">
+                                <%= sp.Size %> - ₱<%= sp.Price.toFixed(2) %>
+                              </option>
+                            <% }); %>
+                          </select>
+                        <% } %>
+                      <% } %>
+                      
+                      <% if (product.HasExtras && ExtraPriceData) { %>
+                        <label>Toppings</label>
+                        <select name="extras" class="extras-select" data-product-id="<%= product.ProductID %>">
+                          <option value="" data-price="0">-- None --</option>
+                          <% ExtraPriceData.forEach(function(e) { %>
+                            <option value="<%= e.Item || e.option || e.name %>" data-price="<%= parseFloat(e.Amount || e.price || 0) %>">
+                              <%= e.Item || e.option || e.name %> (+₱<%= parseFloat(e.Amount || e.price || 0).toFixed(2) %>)
+                            </option>
+                          <% }); %>
+                        </select>
+                      <% } %>
+                      
+                      <% if (product.HasCustom && CustomPriceData) { %>
+                        <% var milkOpts = CustomPriceData.filter(function(c) { return (c.type || '').toString().toLowerCase() === 'milk'; }); %>
+                        <% if (milkOpts && milkOpts.length > 0) { %>
+                          <label>Milk</label>
+                          <select name="milk" class="milk-select" data-product-id="<%= product.ProductID %>">
+                            <option value="" data-price="0">None</option>
+                            <% milkOpts.forEach(function(m) { %>
+                              <option value="<%= m.option || m.Item || m.name %>" data-price="<%= parseFloat(m.price || 0) %>">
+                                <%= m.option || m.Item || m.name %> (+₱<%= parseFloat(m.price || 0).toFixed(2) %>)
+                              </option>
+                            <% }); %>
+                          </select>
+                        <% } %>
+                        
+                        <% var sugarOpts = CustomPriceData.filter(function(c) { return (c.type || '').toString().toLowerCase() === 'sweetener'; }); %>
+                        <% if (sugarOpts && sugarOpts.length > 0) { %>
+                          <label>Sweetener</label>
+                          <select name="sweetener" class="sweetener-select" data-product-id="<%= product.ProductID %>">
+                            <option value="" data-price="0">-- None --</option>
+                            <% sugarOpts.forEach(function(s) { %>
+                              <option value="<%= s.description || s.option || s.Item || s.name %>" data-price="<%= parseFloat(s.price || s.Amount || 0) %>">
+                                <%= s.description || s.option || s.Item || s.name %> (+₱<%= parseFloat(s.price || s.Amount || 0).toFixed(2) %>)
+                              </option>
+                            <% }); %>
+                          </select>
+                        <% } %>
+                      <% } %>
+                      
+                      <label>Notes (optional)</label>
+                      <input type="text" name="notes" placeholder="Special instructions...">
+                      
+                      <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                        <strong>Total: ₱<span id="totalPrice_<%= product.ProductID %>">0.00</span></strong>
+                      </div>
+                      
+                      <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button type="submit" class="btn btn-success btn-small">Add to Order</button>
+                        <button type="button" class="btn btn-secondary btn-small" onclick="hideOrderForm(<%= product.ProductID %>)">Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div style="text-align: center; padding: 40px; color: #666;">
+            No products found. Add products in the "Manage Products" tab.
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Manage Products Tab -->
+      <!-- Manage Products Tab -->
+      <div id="manage-tab" class="tab-content">
+        <div class="header-section">
+          <h2>Product Management</h2>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add New Product</button>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-group">
+            <div class="filter-item">
+              <label>Category</label>
+              <select id="filterCategory" onchange="filterProducts()">
+                <option value="">All Categories</option>
+                <option value="Standard">Standard</option>
+                <option value="Custom">Custom</option>
+                <option value="Extras">Extras</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>Type</label>
+              <select id="filterType" onchange="filterProducts()">
+                <option value="">All Types</option>
+                <% if (productTypes && productTypes.length > 0) { %>
+                  <% productTypes.forEach(function(type) { %>
+                    <option value="<%= type %>"><%= type %></option>
+                  <% }); %>
+                <% } %>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>Availability</label>
+              <select id="filterAvailability" onchange="filterProducts()">
+                <option value="">All</option>
+                <option value="1">Available</option>
+                <option value="0">Unavailable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="products-grid" id="productsGrid">
+      <% if (ProductData && ProductData.length > 0) { %>
+        <% ProductData.forEach(function(product) { %>
+          <div class="product-card <%= product.IsAvailable ? '' : 'unavailable' %>" 
+               data-category="<%= product.Category || '' %>"
+               data-type="<%= product.Type || '' %>"
+               data-available="<%= product.IsAvailable %>">
+            <div class="product-header">
+              <div>
+                <div class="product-name"><%= product.Name %></div>
+                <div>
+                  <% if (product.Category) { %>
+                    <span class="product-category"><%= product.Category %></span>
+                  <% } %>
+                  <% if (product.Type) { %>
+                    <span class="product-type"><%= product.Type %></span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            
+            <% if (product.Description) { %>
+              <div class="product-description"><%= product.Description %></div>
+            <% } %>
+            
+            <% if (product.Picture) { %>
+              <div style="margin-bottom: 10px; color: #666; font-size: 0.85em;">
+                📷 <%= product.Picture %>
+              </div>
+            <% } %>
+            
+            <div class="product-price">
+              <% if (product.HasSizes) { %>
+                Multiple Sizes
+              <% } else if (product.Price) { %>
+                ₱<%= product.Price.toFixed(2) %>
+              <% } else { %>
+                No price set
+              <% } %>
+            </div>
+            
+            <div class="product-flags">
+              <span class="flag <%= product.HasSizes ? 'active' : '' %>">
+                <%= product.HasSizes ? '✓' : '✗' %> Has Sizes
+              </span>
+              <span class="flag <%= product.HasExtras ? 'active' : '' %>">
+                <%= product.HasExtras ? '✓' : '✗' %> Has Extras
+              </span>
+              <span class="flag <%= product.HasCustom ? 'active' : '' %>">
+                <%= product.HasCustom ? '✓' : '✗' %> Has Custom
+              </span>
+            </div>
+            
+            <% if (product.HasSizes && SizePriceData) { %>
+              <% var productSizes = SizePriceData.filter(function(sp) { return sp.ProductID === product.ProductID; }); %>
+              <% if (productSizes.length > 0) { %>
+                <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                  <strong>Sizes:</strong>
+                  <% productSizes.forEach(function(sp, idx) { %>
+                    <%= sp.Size %>: ₱<%= sp.Price.toFixed(2) %><%= idx < productSizes.length - 1 ? ', ' : '' %>
+                  <% }); %>
+                </div>
+              <% } %>
+            <% } %>
+            
+            <div class="product-actions">
+              <button class="btn btn-secondary btn-small" onclick="editProduct(<%= product.ProductID %>)">Edit</button>
+              <button class="btn btn-small <%= product.IsAvailable ? 'btn-secondary' : 'btn-success' %>" 
+                      onclick="toggleAvailability(<%= product.ProductID %>, <%= product.IsAvailable %>)">
+                <%= product.IsAvailable ? 'Disable' : 'Enable' %>
+              </button>
+              <% 
+                // Only show Delete button if product has no existing orders
+                const hasOrders = productsWithOrders && productsWithOrders.includes(product.ProductID);
+              %>
+              <% if (!hasOrders) { %>
+                <button class="btn btn-danger btn-small" onclick="deleteProduct(<%= product.ProductID %>, '<%= product.Name %>')">Delete</button>
+              <% } else { %>
+                <button class="btn btn-small" style="background: #ddd; color: #999; cursor: not-allowed;" disabled title="Cannot delete - product has order history">
+                  Delete
+                </button>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #666;">
+          No products found. Click "Add New Product" to get started.
+        </div>
+      <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Product Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Product</h2>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      <form id="productForm" onsubmit="return saveProduct(event)">
+        <input type="hidden" id="productId" name="productId">
+        
+        <div class="form-group">
+          <label for="productName">Product Name *</label>
+          <input type="text" id="productName" name="name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="productCategory">Category *</label>
+          <select id="productCategory" name="category" required>
+            <option value="">Select Category</option>
+            <option value="Standard">Standard</option>
+            <option value="Custom">Custom</option>
+            <option value="Extras">Extras</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="productType">Type</label>
+          <select id="productType" name="type">
+            <option value="">Select Type</option>
+            <% if (productTypes && productTypes.length > 0) { %>
+              <% productTypes.forEach(function(type) { %>
+                <option value="<%= type %>"><%= type %></option>
+              <% }); %>
+            <% } %>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="productDescription">Description</label>
+          <textarea id="productDescription" name="description"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="productPicture">Picture Filename (e.g., coffee.jpg)</label>
+          <input type="text" id="productPicture" name="picture" placeholder="image.jpg">
+        </div>
+        
+        <div class="form-group">
+          <label>Product Options</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="hasSizes" name="hasSizes" value="1" onchange="toggleSizeSection()">
+              <label for="hasSizes">Has Sizes (S/M/L)</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="hasExtras" name="hasExtras" value="1">
+              <label for="hasExtras">Has Extras (Toppings)</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="hasCustom" name="hasCustom" value="1">
+              <label for="hasCustom">Has Custom (Milk/Sweetener)</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="isAvailable" name="isAvailable" value="1" checked>
+              <label for="isAvailable">Available</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group" id="basePriceGroup">
+          <label for="productPrice">Base Price (₱)</label>
+          <input type="number" id="productPrice" name="price" step="0.01" min="0" placeholder="Leave empty if product has sizes">
+        </div>
+        
+        <div id="sizePricesSection" class="size-prices-section" style="display: none;">
+          <label style="display: block; margin-bottom: 10px; font-weight: 600;">Size Prices</label>
+          <div id="sizePricesList">
+            <div class="size-price-item">
+              <div>
+                <input type="text" name="sizeNames[]" placeholder="Size (e.g., Small, Medium)" class="form-control">
+              </div>
+              <div>
+                <input type="number" name="sizePrices[]" placeholder="Price" step="0.01" min="0" class="form-control">
+              </div>
+              <div>
+                <button type="button" class="btn btn-danger btn-small" onclick="this.parentElement.parentElement.remove()">Remove</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-small" onclick="addSizePrice()" style="margin-top: 10px;">+ Add Size</button>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-primary">Save Product</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Processing Modal -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Process Payment</h2>
+        <span class="close" onclick="closePaymentModal()">&times;</span>
+      </div>
+      <div id="paymentOrderSummary" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <!-- Order summary will be inserted here -->
+      </div>
+      
+      <div id="paymentError" style="display: none; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 15px;">
+        <!-- Error message will be shown here -->
+      </div>
+      
+      <div id="changeDisplay" style="display: none; background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px; border-radius: 4px; margin-bottom: 15px; font-weight: bold;">
+        <!-- Change amount will be shown here -->
+      </div>
+      
+      <form id="paymentForm" action="/admin/process-order" method="POST" onsubmit="return validatePayment()">
+        <input type="hidden" id="paymentFormData" name="orderData">
+        <input type="hidden" id="changeAmount" name="changeAmount">
+        
+        <div class="form-group">
+          <label>Payment Method *</label>
+          <select id="paymentMethod" name="paymentMethod" required onchange="toggleAmountReceived()">
+            <option value="">Select Payment Method</option>
+            <option value="Cash">Cash</option>
+            <option value="GCash">GCash</option>
+            <option value="Card">Card</option>
+            <option value="Online">Online Payment</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="amountReceivedGroup" style="display: none;">
+          <label>Amount Received (₱) *</label>
+          <input type="number" id="amountReceived" name="amountReceived" step="0.01" min="0" placeholder="Enter amount received" oninput="calculateChange()">
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button type="submit" class="btn btn-success">Complete Order</button>
+          <button type="button" class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const products = <%- JSON.stringify(ProductData || []) %>;
+    const sizePrices = <%- JSON.stringify(SizePriceData || []) %>;
+    
+    // Price calculation for order forms
+    function calculatePrice(productId) {
+      const form = document.getElementById('productOrderForm_' + productId);
+      if (!form) return;
+      
+      const hasSizes = form.querySelector('[name="hasSizes"]').value === '1';
+      const basePrice = parseFloat(form.querySelector('[name="basePrice"]').value) || 0;
+      const qty = parseInt(form.querySelector('[name="quantity"]').value) || 1;
+      
+      let itemPrice = 0;
+      
+      // Get size price if applicable
+      if (hasSizes) {
+        const sizeSelect = form.querySelector('.size-select');
+        if (sizeSelect) {
+          const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+          itemPrice = parseFloat(selectedOption.dataset.price) || 0;
+        }
+      } else {
+        itemPrice = basePrice;
+      }
+      
+      // Add extras price
+      const extrasSelect = form.querySelector('.extras-select');
+      if (extrasSelect) {
+        const selectedOption = extrasSelect.options[extrasSelect.selectedIndex];
+        itemPrice += parseFloat(selectedOption.dataset.price) || 0;
+      }
+      
+      // Add milk price
+      const milkSelect = form.querySelector('.milk-select');
+      if (milkSelect) {
+        const selectedOption = milkSelect.options[milkSelect.selectedIndex];
+        itemPrice += parseFloat(selectedOption.dataset.price) || 0;
+      }
+      
+      // Add sweetener price
+      const sweetenerSelect = form.querySelector('.sweetener-select');
+      if (sweetenerSelect) {
+        const selectedOption = sweetenerSelect.options[sweetenerSelect.selectedIndex];
+        itemPrice += parseFloat(selectedOption.dataset.price) || 0;
+      }
+      
+      const totalPrice = itemPrice * qty;
+      const totalDisplay = document.getElementById('totalPrice_' + productId);
+      if (totalDisplay) {
+        totalDisplay.textContent = totalPrice.toFixed(2);
+      }
+      
+      return totalPrice;
+    }
+    
+    // Attach price calculation listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Attach listeners to all order forms
+      document.querySelectorAll('[id^="productOrderForm_"]').forEach(function(form) {
+        const productId = form.id.replace('productOrderForm_', '');
+        
+        // Attach to all inputs that affect price
+        form.querySelectorAll('.size-select, .extras-select, .milk-select, .sweetener-select, .order-qty-input').forEach(function(elem) {
+          elem.addEventListener('change', function() {
+            calculatePrice(productId);
+          });
+        });
+        
+        // Initial calculation
+        calculatePrice(productId);
+      });
+    });
+    
+    // Payment popup
+    let currentOrderData = null;
+    
+    function showPaymentPopup(event, productId) {
+      event.preventDefault();
+      
+      const form = document.getElementById('productOrderForm_' + productId);
+      const formData = new FormData(form);
+      
+      // Validate required fields
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return false;
+      }
+      
+      // Calculate total
+      const totalPrice = calculatePrice(productId);
+      
+      // Build order data
+      const orderData = {
+        productId: formData.get('productId'),
+        productName: formData.get('productName'),
+        customerName: formData.get('customerName'),
+        quantity: formData.get('quantity'),
+        size: formData.get('size') || null,
+        extras: formData.get('extras') || null,
+        milk: formData.get('milk') || null,
+        sweetener: formData.get('sweetener') || null,
+        notes: formData.get('notes') || null,
+        totalAmount: totalPrice
+      };
+      
+      currentOrderData = orderData;
+      
+      // Build summary HTML
+      let summaryHTML = '<h3 style="margin-top:0;">Order Summary</h3>';
+      summaryHTML += '<p><strong>Product:</strong> ' + orderData.productName + '</p>';
+      summaryHTML += '<p><strong>Customer:</strong> ' + orderData.customerName + '</p>';
+      summaryHTML += '<p><strong>Quantity:</strong> ' + orderData.quantity + '</p>';
+      if (orderData.size) summaryHTML += '<p><strong>Size:</strong> ' + orderData.size + '</p>';
+      if (orderData.extras) summaryHTML += '<p><strong>Toppings:</strong> ' + orderData.extras + '</p>';
+      if (orderData.milk) summaryHTML += '<p><strong>Milk:</strong> ' + orderData.milk + '</p>';
+      if (orderData.sweetener) summaryHTML += '<p><strong>Sweetener:</strong> ' + orderData.sweetener + '</p>';
+      if (orderData.notes) summaryHTML += '<p><strong>Notes:</strong> ' + orderData.notes + '</p>';
+      summaryHTML += '<p style="font-size:1.2em; font-weight:bold; color:#28a745; margin-top:15px;">Total: ₱' + totalPrice.toFixed(2) + '</p>';
+      
+      document.getElementById('paymentOrderSummary').innerHTML = summaryHTML;
+      document.getElementById('paymentFormData').value = JSON.stringify(orderData);
+      document.getElementById('paymentModal').classList.add('active');
+      
+      return false;
+    }
+    
+    function closePaymentModal() {
+      document.getElementById('paymentModal').classList.remove('active');
+      document.getElementById('paymentError').style.display = 'none';
+      document.getElementById('changeDisplay').style.display = 'none';
+      document.getElementById('amountReceived').value = '';
+      currentOrderData = null;
+    }
+    
+    function toggleAmountReceived() {
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const amountReceivedGroup = document.getElementById('amountReceivedGroup');
+      const amountReceivedInput = document.getElementById('amountReceived');
+      
+      if (paymentMethod === 'Cash') {
+        amountReceivedGroup.style.display = 'block';
+        amountReceivedInput.setAttribute('required', 'required');
+      } else {
+        amountReceivedGroup.style.display = 'none';
+        amountReceivedInput.removeAttribute('required');
+        amountReceivedInput.value = '';
+        document.getElementById('changeDisplay').style.display = 'none';
+        document.getElementById('paymentError').style.display = 'none';
+      }
+    }
+    
+    function calculateChange() {
+      const amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
+      const totalAmount = currentOrderData ? parseFloat(currentOrderData.totalAmount) : 0;
+      
+      document.getElementById('paymentError').style.display = 'none';
+      document.getElementById('changeDisplay').style.display = 'none';
+      
+      if (amountReceived > 0 && totalAmount > 0) {
+        if (amountReceived < totalAmount) {
+          document.getElementById('paymentError').innerHTML = '⚠️ Insufficient amount! Amount received (₱' + amountReceived.toFixed(2) + ') is less than total (₱' + totalAmount.toFixed(2) + ')';
+          document.getElementById('paymentError').style.display = 'block';
+        } else if (amountReceived > totalAmount) {
+          const change = amountReceived - totalAmount;
+          document.getElementById('changeDisplay').innerHTML = '💵 Change: ₱' + change.toFixed(2);
+          document.getElementById('changeDisplay').style.display = 'block';
+          document.getElementById('changeAmount').value = change.toFixed(2);
+        }
+      }
+    }
+    
+    function validatePayment() {
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const amountReceived = parseFloat(document.getElementById('amountReceived').value) || 0;
+      const totalAmount = currentOrderData ? parseFloat(currentOrderData.totalAmount) : 0;
+      
+      document.getElementById('paymentError').style.display = 'none';
+      
+      if (paymentMethod === 'Cash') {
+        if (amountReceived <= 0) {
+          document.getElementById('paymentError').innerHTML = '⚠️ Please enter the amount received';
+          document.getElementById('paymentError').style.display = 'block';
+          return false;
+        }
+        
+        if (amountReceived < totalAmount) {
+          document.getElementById('paymentError').innerHTML = '⚠️ Insufficient amount! Amount received (₱' + amountReceived.toFixed(2) + ') is less than total (₱' + totalAmount.toFixed(2) + ')';
+          document.getElementById('paymentError').style.display = 'block';
+          return false;
+        }
+      }
+      
+      return true;
+    }
+    
+    // Tab switching
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+    
+    // Order form functions
+    function showOrderForm(productId) {
+      document.getElementById('orderForm_' + productId).style.display = 'block';
+    }
+    
+    function hideOrderForm(productId) {
+      document.getElementById('orderForm_' + productId).style.display = 'none';
+    }
+    
+    // Product management functions
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Product';
+      document.getElementById('productForm').reset();
+      document.getElementById('productId').value = '';
+      document.getElementById('isAvailable').checked = true;
+      document.getElementById('productModal').classList.add('active');
+      toggleSizeSection();
+    }
+    
+    function editProduct(productId) {
+      const product = products.find(p => p.ProductID === productId);
+      if (!product) return;
+      
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('productId').value = product.ProductID;
+      document.getElementById('productName').value = product.Name || '';
+      document.getElementById('productCategory').value = product.Category || '';
+      document.getElementById('productType').value = product.Type || '';
+      document.getElementById('productDescription').value = product.Description || '';
+      document.getElementById('productPicture').value = product.Picture || '';
+      document.getElementById('productPrice').value = product.Price || '';
+      document.getElementById('hasSizes').checked = product.HasSizes == 1;
+      document.getElementById('hasExtras').checked = product.HasExtras == 1;
+      document.getElementById('hasCustom').checked = product.HasCustom == 1;
+      document.getElementById('isAvailable').checked = product.IsAvailable == 1;
+      
+      // Load size prices if applicable
+      if (product.HasSizes) {
+        const productSizes = sizePrices.filter(sp => sp.ProductID === productId);
+        const sizePricesList = document.getElementById('sizePricesList');
+        sizePricesList.innerHTML = '';
+        
+        if (productSizes.length > 0) {
+          productSizes.forEach(sp => {
+            addSizePrice(sp.Size, sp.Price);
+          });
+        } else {
+          addSizePrice();
+        }
+      }
+      
+      toggleSizeSection();
+      document.getElementById('productModal').classList.add('active');
+    }
+    
+    function closeModal() {
+      document.getElementById('productModal').classList.remove('active');
+    }
+    
+    function toggleSizeSection() {
+      const hasSizes = document.getElementById('hasSizes').checked;
+      const sizePricesSection = document.getElementById('sizePricesSection');
+      const basePriceGroup = document.getElementById('basePriceGroup');
+      
+      if (hasSizes) {
+        sizePricesSection.style.display = 'block';
+        document.getElementById('productPrice').value = '';
+        document.getElementById('productPrice').removeAttribute('required');
+        basePriceGroup.style.display = 'none';
+      } else {
+        sizePricesSection.style.display = 'none';
+        basePriceGroup.style.display = 'block';
+      }
+    }
+    
+    function addSizePrice(sizeName = '', price = '') {
+      const sizePricesList = document.getElementById('sizePricesList');
+      const div = document.createElement('div');
+      div.className = 'size-price-item';
+      div.innerHTML = `
+        <div>
+          <input type="text" name="sizeNames[]" placeholder="Size (e.g., Small, Medium)" value="${sizeName}" class="form-control">
+        </div>
+        <div>
+          <input type="number" name="sizePrices[]" placeholder="Price" step="0.01" min="0" value="${price}" class="form-control">
+        </div>
+        <div>
+          <button type="button" class="btn btn-danger btn-small" onclick="this.parentElement.parentElement.remove()">Remove</button>
+        </div>
+      `;
+      sizePricesList.appendChild(div);
+    }
+    
+    function toggleAvailability(productId, currentStatus) {
+      if (confirm(`Are you sure you want to ${currentStatus ? 'disable' : 'enable'} this product?`)) {
+        fetch('/admin/products/toggle-availability', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, isAvailable: !currentStatus })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Error updating product availability');
+          }
+        });
+      }
+    }
+    
+    function deleteProduct(productId, productName) {
+      if (confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+        fetch('/admin/products/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Error deleting product: ' + (data.message || 'Unknown error'));
+          }
+        });
+      }
+    }
+    
+    function filterProducts() {
+      const category = document.getElementById('filterCategory').value;
+      const type = document.getElementById('filterType').value;
+      const availability = document.getElementById('filterAvailability').value;
+      
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach(card => {
+        const cardCategory = card.dataset.category;
+        const cardType = card.dataset.type;
+        const cardAvailable = card.dataset.available;
+        
+        const matchCategory = !category || cardCategory === category;
+        const matchType = !type || cardType === type;
+        const matchAvailability = !availability || cardAvailable === availability;
+        
+        card.style.display = matchCategory && matchType && matchAvailability ? 'block' : 'none';
+      });
+    }
+    
+    // Save product with fetch API
+    function saveProduct(event) {
+      event.preventDefault();
+      
+      const form = document.getElementById('productForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return false;
+      }
+      
+      const formData = new FormData(form);
+      const data = {};
+      
+      // Convert FormData to object
+      for (let [key, value] of formData.entries()) {
+        if (key.endsWith('[]')) {
+          const arrayKey = key.slice(0, -2);
+          if (!data[arrayKey]) data[arrayKey] = [];
+          data[arrayKey].push(value);
+        } else {
+          data[key] = value;
+        }
+      }
+      
+      // Handle checkboxes
+      data.hasSizes = document.getElementById('hasSizes').checked ? '1' : '';
+      data.hasExtras = document.getElementById('hasExtras').checked ? '1' : '';
+      data.hasCustom = document.getElementById('hasCustom').checked ? '1' : '';
+      data.isAvailable = document.getElementById('isAvailable').checked ? '1' : '';
+      
+      console.log('Saving product with data:', data);
+      
+      fetch('/admin/products/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => {
+            throw new Error(`Server error (${res.status}): ${text}`);
+          });
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data.success) {
+          alert(data.message || 'Product saved successfully!');
+          closeModal();
+          location.reload();
+        } else {
+          alert('Error: ' + (data.message || 'Failed to save product'));
+        }
+      })
+      .catch(err => {
+        console.error('Save product error:', err);
+        alert('Error saving product: ' + err.message);
+      });
+      
+      return false;
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('productModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+    
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+    
+    // Restore saved dark mode preference
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+  </script>
+  
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+</body>
+</html>
+

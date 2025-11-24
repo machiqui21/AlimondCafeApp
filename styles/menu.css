@@ -234,6 +234,122 @@ body.dark-mode .menu-table tr:hover {
     color: var(--text-dark);
 }
 
+/* Additional dark mode styles for comprehensive coverage */
+body.dark-mode .product-card {
+    background: #3a3a3a;
+    color: var(--text-dark);
+    border-color: #555;
+}
+
+body.dark-mode .product-card h3 {
+    color: var(--text-dark);
+}
+
+body.dark-mode .product-card p {
+    color: #ccc;
+}
+
+body.dark-mode .order-sidebar {
+    background: #2c2c2c;
+    color: var(--text-dark);
+    border-color: #555;
+}
+
+body.dark-mode .order-item {
+    background: #3a3a3a;
+    border-color: #555;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode select,
+body.dark-mode textarea {
+    background: #404040;
+    border-color: #555;
+    color: var(--text-dark);
+}
+
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="number"]:focus,
+body.dark-mode input[type="email"]:focus,
+body.dark-mode input[type="password"]:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    background: #4a4a4a;
+    border-color: #8b5a3c;
+}
+
+body.dark-mode .btn {
+    background: #7c4700;
+    color: white;
+}
+
+body.dark-mode .btn:hover {
+    background: #6b3d00;
+}
+
+body.dark-mode button {
+    background: #555;
+    color: var(--text-dark);
+}
+
+body.dark-mode .type-column h3 {
+    color: #d4a373;
+}
+
+body.dark-mode .scroller-btn {
+    background: #3a3a3a;
+    color: var(--text-dark);
+    border: 1px solid #555;
+}
+
+body.dark-mode .priceDisplay {
+    color: var(--text-dark);
+}
+
+body.dark-mode .select-description {
+    color: #999;
+}
+
+body.dark-mode .standard-cup {
+    color: #999;
+}
+
+body.dark-mode a {
+    color: #88b3ff;
+}
+
+body.dark-mode a:hover {
+    color: #aac8ff;
+}
+
+body.dark-mode .admin-nav {
+    background: #1a1a1a;
+    border-bottom: 1px solid #444;
+}
+
+body.dark-mode .admin-nav a {
+    color: white;
+}
+
+body.dark-mode .info-card,
+body.dark-mode .status-form {
+    background: #2c2c2c;
+    color: var(--text-dark);
+    border-color: #555;
+}
+
+body.dark-mode section {
+    background: #2c2c2c !important;
+    color: var(--text-dark) !important;
+}
+
+body.dark-mode .empty {
+    color: #999;
+}
+
 /* New layout: products grouped by Type shown as vertical columns */
 .products-by-type {
     display: grid;

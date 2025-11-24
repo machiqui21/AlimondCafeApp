@@ -638,6 +638,178 @@ body.dark-mode .btn {
   color: var(--text-dark);
 }
 
+/* Dark mode for auth pages */
+body.dark-mode .auth-card {
+  background: #2c2c2c;
+  border-color: #444;
+  color: var(--text-dark);
+}
+
+body.dark-mode .auth-field {
+  background: #3a3a3a;
+  border-color: #555;
+  color: var(--text-dark);
+}
+
+body.dark-mode .auth-field:focus {
+  border-color: #8b5a3c;
+  background: #404040;
+}
+
+body.dark-mode .auth-btn {
+  background: #8b5a3c;
+  color: white;
+}
+
+body.dark-mode .auth-btn:hover {
+  background: #7a4d30;
+}
+
+body.dark-mode .auth-meta {
+  color: #ccc;
+}
+
+body.dark-mode .auth-meta a {
+  color: #88b3ff;
+}
+
+body.dark-mode .auth-hint.ok {
+  color: #4caf50;
+}
+
+body.dark-mode .auth-hint.bad {
+  color: #f44336;
+}
+
+/* Dark mode for product carousel */
+body.dark-mode .product-carousel-container {
+  background: #2c2c2c;
+}
+
+body.dark-mode .product-slide {
+  background: #2c2c2c;
+  color: var(--text-dark);
+}
+
+body.dark-mode .product-info {
+  background: #2c2c2c;
+  color: var(--text-dark);
+}
+
+/* Dark mode for admin pages */
+body.dark-mode .admin-nav {
+  background: #1a1a1a;
+  border-bottom: 1px solid #444;
+}
+
+body.dark-mode .tabs-container {
+  background: #2c2c2c;
+}
+
+body.dark-mode .tab-button {
+  background: #3a3a3a;
+  color: var(--text-dark);
+}
+
+body.dark-mode .tab-button.active {
+  background: #7c4700;
+  color: white;
+}
+
+body.dark-mode .product-grid,
+body.dark-mode .order-list {
+  background: #2c2c2c;
+}
+
+body.dark-mode .product-card {
+  background: #3a3a3a;
+  border-color: #555;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode select,
+body.dark-mode textarea {
+  background: #3a3a3a;
+  border-color: #555;
+  color: var(--text-dark);
+}
+
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="number"]:focus,
+body.dark-mode input[type="email"]:focus,
+body.dark-mode input[type="password"]:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+  background: #404040;
+  border-color: #8b5a3c;
+}
+
+/* Dark mode for links */
+body.dark-mode a {
+  color: #88b3ff;
+}
+
+body.dark-mode a:hover {
+  color: #aac8ff;
+}
+
+/* Google Translate Widget Styling */
+#google_translate_element {
+  display: inline-block;
+}
+
+#google_translate_element select {
+  background: white;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+body.dark-mode #google_translate_element select {
+  background: #2c2c2c;
+  color: var(--text-dark);
+  border-color: #555;
+}
+
+/* Hide Google Translate banner */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.skiptranslate iframe {
+  visibility: hidden !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* Style the Google Translate dropdown */
+.goog-te-gadget {
+  font-family: inherit !important;
+}
+
+.goog-te-gadget-simple {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.goog-te-gadget-simple .goog-te-menu-value {
+  color: white !important;
+}
+
+body.dark-mode .goog-te-gadget-simple .goog-te-menu-value {
+  color: var(--text-dark) !important;
+}
+
 /* Added styles moved from inline order form */
 .size-select {
   font-size: 14px;

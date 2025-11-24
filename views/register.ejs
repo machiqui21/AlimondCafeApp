@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register • Alimond Café</title>
+  <link rel="stylesheet" href="/styles.css">
+  <%- include('partials/navbar_login.ejs') %>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,tl',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    .auth-card { max-width: 600px; margin: 32px auto; padding: 32px; border: 1px solid #e9e9e9; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.08); background:#fff; }
+    .auth-card h2 { margin: 0 0 18px; font-size: 26px; }
+    .auth-field { height: 46px; padding: 10px 14px; font-size: 16px; border-radius: 10px; border: 1.5px solid #d6d6d6; outline: none; transition: border-color .15s, box-shadow .15s; }
+    .auth-field:focus { border-color: #b07a50; box-shadow: 0 0 0 3px rgba(176,122,80,.15); }
+    .auth-btn { height: 46px; border-radius: 10px; border: none; background: #6b4a2c; color: #fff; font-size: 16px; cursor: pointer; }
+    .auth-btn:hover { background: #5f4127; }
+    .auth-hint { font-size: 13px; margin-top: 4px; }
+    .auth-hint.bad { color: #b00020; }
+    .auth-hint.ok { color: #2e7d32; }
+    .auth-meta { margin-top: 12px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div style="background: linear-gradient(135deg, #8b5a3c 0%, #d4a373 100%); padding: 12px 20px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
+    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+      <span style="color: white; font-weight: 600; font-size: 1rem;">🌐 Select Language / Pumili ng Wika:</span>
+      <div id="google_translate_element" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px;"></div>
+    </div>
+  </div>
+  <header class="hero">
+    <img class="logo" src="/images/AlimondsCafe.jpeg" >
+    <h1><%= __('Create your account') %></h1>
+  </header>
+
+  <div class="auth-card">
+    <h2>Register</h2>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div style="background:#fee; border:1px solid #fcc; padding:10px 12px; margin-bottom:14px; border-radius:8px; color:#c33;">
+        <%= error %>
+      </div>
+    <% } %>
+    <form id="registerForm" action="/register" method="post" style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <input class="auth-field" type="text" name="firstName" placeholder="First Name *" autocomplete="given-name" required>
+        <input class="auth-field" type="text" name="lastName" placeholder="Last Name *" autocomplete="family-name" required>
+      </div>
+      
+      <div>
+        <label for="regUsername" style="display: block; margin-bottom: 6px; font-weight: 500; color: #333;">Username *</label>
+        <input class="auth-field" id="regUsername" type="text" name="username" autocomplete="username" required>
+        <div id="userHint" class="auth-hint"></div>
+      </div>
+      
+      <input class="auth-field" type="email" name="email" placeholder="Email (optional)" autocomplete="email">
+      
+      <input class="auth-field" type="tel" name="mobilePhone" placeholder="Mobile Phone (optional)" pattern="[0-9]{10,15}" autocomplete="tel">
+      
+      <input class="auth-field" type="password" name="password" placeholder="Password * (min 6 chars)" minlength="6" autocomplete="new-password" required>
+      
+      <div style="font-size: 12px; color: #666; margin-top: -8px;">
+        * Required fields
+      </div>
+      
+      <button id="regSubmit" class="auth-btn" type="submit">Create Account</button>
+    </form>
+    <div class="auth-meta" style="text-align: center; margin-top: 20px;">
+      <p style="margin: 0 0 10px 0; color: #666;">Already have an account?</p>
+      <a href="/login" style="display: inline-block; padding: 10px 24px; background: #e8e8e8; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.3s;" onmouseover="this.style.background='#d4d4d4'" onmouseout="this.style.background='#e8e8e8'">Sign In</a>
+    </div>
+  </div>
+</body>
+<script>
+  (function(){
+    const u = document.getElementById('regUsername');
+    const hint = document.getElementById('userHint');
+    const btn = document.getElementById('regSubmit');
+    const form = document.getElementById('registerForm');
+    let t = null;
+    
+    function setHint(msg, ok){
+      hint.textContent = msg || '';
+      hint.className = 'auth-hint ' + (ok === true ? 'ok' : ok === false ? 'bad' : '');
+    }
+    
+    async function check(name){
+      if (!name) { setHint('', null); return; }
+      try {
+        const res = await fetch('/api/users/exists?username=' + encodeURIComponent(name));
+        const data = await res.json();
+        if (data && data.exists) { 
+          setHint('Username is already taken', false); 
+        }
+        else { 
+          setHint('Username is available', true); 
+        }
+      } catch(_){ setHint('', null); }
+    }
+    
+    u.addEventListener('input', function(){
+      clearTimeout(t);
+      const val = (u.value || '').trim();
+      t = setTimeout(function(){ check(val); }, 300);
+    });
+    
+    // Don't prevent form submission - let server handle validation
+    // Just show warning hint
+    
+    // initial check
+    check((u.value||'').trim());
+  })();
+  
+  function toggleDarkMode() {
+    var isDark = document.body.classList.toggle('dark-mode');
+    try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+  }
+  
+  // Restore saved dark mode preference
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      var saved = localStorage.getItem('darkMode');
+      if (saved === '1') document.body.classList.add('dark-mode');
+    } catch(e) {}
+  });
+</script>
+<div style="text-align: center; margin: 20px;">
+  <button onclick="toggleDarkMode()" style="padding: 10px 20px; background: #6b4a2c; color: white; border: none; border-radius: 8px; cursor: pointer;">🌙 Toggle Dark Mode</button>
+</div>
+</html>
