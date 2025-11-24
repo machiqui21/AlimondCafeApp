@@ -1,0 +1,116 @@
+/* Standardized Navbar Styles */
+.navbar {
+  background: #f8f9fa !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 8px 16px;
+}
+
+.navbar .container-fluid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-nav {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.navbar-nav.ms-auto {
+  margin-left: auto;
+}
+
+.nav-item {
+  margin: 0 4px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #333;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-weight: 400;
+}
+
+.nav-link:hover {
+  background: rgba(212, 163, 115, 0.1);
+  color: #7c4700;
+}
+
+/* User/Admin Badge Styling */
+.user-badge {
+  background: #d4a373;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-badge {
+  background: #5cb85c;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Logout Link Styling */
+.logout-link {
+  color: #d9534f !important;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.logout-link:hover {
+  background: rgba(217, 83, 79, 0.1);
+  color: #c9302c !important;
+}
+
+/* Login/Register Link */
+.login-link {
+  background: #d4a373;
+  color: white !important;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.login-link:hover {
+  background: #b97a56;
+  color: white !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar .container-fluid {
+    flex-wrap: wrap;
+  }
+  
+  .navbar-nav {
+    flex-wrap: wrap;
+  }
+  
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .user-badge,
+  .admin-badge {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+}

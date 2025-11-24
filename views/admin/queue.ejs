@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Queue - Admin</title>
+  <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <nav class="admin-nav">
+    <div class="admin-nav-left">
+      <strong class="admin-nav-title">Order Queue</strong>
+      <span class="admin-user-badge">🔐 <%= adminUser.Username %></span>
+    </div>
+    <div class="admin-nav-right">
+      <a href="/admin/dashboard" class="admin-nav-link">All Orders</a>
+      <a href="/admin/queue" class="admin-nav-link active">Order Queue</a>
+      <a href="/admin/completed" class="admin-nav-link">Order History</a>
+      <a href="/menu" class="admin-nav-link">Menu</a>
+      <a href="/admin/order-settings" class="admin-nav-link">⚙️ Settings</a>
+      <a href="/logout" class="admin-logout-link">Logout</a>
+    </div>
+  </nav>
+
+  <main style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+    <h1 style="color: #7c4700;">Order Queue</h1>
+    <p style="color: #666;">Paid orders ready to be prepared, being prepared, or ready for pickup</p>
+    
+    <table class="menu-table" style="width: 100%; margin-top: 20px;">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Time</th>
+          <th>Quick Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(function(order) { %>
+            <tr>
+              <td><strong>#<%= order.OrderID %></strong></td>
+              <td><%= order.CustomerName || '-' %></td>
+              <td>₱<%= parseFloat(order.TotalAmount || 0).toFixed(2) %></td>
+              <td><%= order.PaymentMethod %></td>
+              <td>
+                <% 
+                  var statusClass = 'status-pending';
+                  var displayStatus = order.StatusName || 'Unknown';
+                  
+                  // Only show statuses that should appear in queue
+                  if (order.StatusName === 'Paid' || order.StatusName === 'Confirmed') {
+                    statusClass = 'status-confirmed';
+                    displayStatus = 'Paid';
+                  } else if (order.StatusName === 'Preparing') {
+                    statusClass = 'status-preparing';
+                    displayStatus = 'Preparing';
+                  } else if (order.StatusName === 'Ready') {
+                    statusClass = 'status-ready';
+                    displayStatus = 'Ready';
+                  } else if (order.StatusName === 'Pending') {
+                    // This shouldn't appear in queue - show warning
+                    statusClass = 'status-pending';
+                    displayStatus = 'Pending';
+                  }
+                %>
+                <span class="status-badge <%= statusClass %>"><%= displayStatus %></span>
+              </td>
+              <td><%= new Date(order.CreatedAt).toLocaleString() %></td>
+              <td>
+                <div class="quick-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <a href="/admin/order/<%= order.OrderID %>" class="btn" style="padding: 6px 12px; font-size: 0.85rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px;">View</a>
+                  <% if (order.StatusID === 2) { %>
+                    <form action="/admin/order/<%= order.OrderID %>/status" method="POST" style="display: inline; margin: 0;">
+                      <input type="hidden" name="statusId" value="3">
+                      <button type="submit" style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">🔨 Start Preparing</button>
+                    </form>
+                  <% } %>
+                  <% if (order.StatusID === 3) { %>
+                    <form action="/admin/order/<%= order.OrderID %>/status" method="POST" style="display: inline; margin: 0;">
+                      <input type="hidden" name="statusId" value="4">
+                      <button type="submit" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">✓ Ready for Pickup</button>
+                    </form>
+                  <% } %>
+                  <% if (order.StatusID === 4) { %>
+                    <form action="/admin/order/<%= order.OrderID %>/status" method="POST" style="display: inline; margin: 0;">
+                      <input type="hidden" name="statusId" value="5">
+                      <button type="submit" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">✓ Complete</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 20px; color: #666;">No orders in queue</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </main>
+
+  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+  <script>
+    function toggleDarkMode() {
+      var isDark = document.body.classList.toggle('dark-mode');
+      try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+    }
+    
+    // Restore saved dark mode preference
+    (function() {
+      try {
+        var saved = localStorage.getItem('darkMode');
+        if (saved === '1') document.body.classList.add('dark-mode');
+      } catch(e) {}
+    })();
+    
+    // Auto-refresh every 30 seconds
+    setTimeout(function() {
+      location.reload();
+    }, 30000);
+  </script>
+</body>
+</html>

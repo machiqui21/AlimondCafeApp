@@ -24,3 +24,9 @@ Thumbs.db
 
 # npm debug logs
 npm-debug.log*
+
+# Playwright
+/test-results/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

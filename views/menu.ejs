@@ -6,10 +6,24 @@
     <title>Menu</title>
     <link rel="stylesheet" href="/menu.css">
     <%- include('partials/navbar_menu.ejs') %>
-    
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,tl',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 <body>
-    <div style="text-align:right; margin-bottom:10px;"><a href="?lang=en">English</a> | <a href="?lang=tl">Tagalog</a></div>
+    <div style="background: linear-gradient(135deg, #8b5a3c 0%, #d4a373 100%); padding: 12px 20px; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <span style="color: white; font-weight: 600; font-size: 1rem;">🌐 Select Language / Pumili ng Wika:</span>
+        <div id="google_translate_element" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px;"></div>
+      </div>
+    </div>
     <header class="hero">
            <img class="logo" src="/images/AlimondsCafe.jpeg" >
                      <h1><%= __('Alimond\'s Café Menu') %></h1>
@@ -130,7 +144,12 @@
                                             </div>
 
                                             <div class="priceDisplay" style="margin-top:8px;font-weight:bold;">Price / Item: ₱<span class="pricePerItem">0.00</span> | Total: ₱<span class="priceTotal">0.00</span></div>
-                                            <div style="margin-top:8px;"><button type="submit" class="btn">Add to Order</button></div>
+                                            <% if (product.IsAvailable) { %>
+                                                <div style="margin-top:8px;"><button type="submit" class="btn">Add to Order</button></div>
+                                            <% } else { %>
+                                                <div style="margin-top:8px;"><button type="button" class="btn" style="background: #ddd; color: #999; cursor: not-allowed;" disabled>Add to Order</button></div>
+                                                <div style="color: #dc3545; font-weight: bold; margin-top: 8px;">Product Unavailable</div>
+                                            <% } %>
                                         </form>
                                     </div>
                                 </div>
@@ -184,7 +203,9 @@
                     <% } %>
                 </div>
                 <div class="order-total">Total: ₱<span id="orderGrandTotal">0.00</span></div>
-                <div style="margin-top:12px;"><a href="/order-summary" class="btn" id="checkoutBtn">Checkout</a></div>
+                <div style="margin-top:12px;">
+                    <a href="/order-summary" class="btn" id="checkoutBtn" style="<%= (orders && orders.length > 0) ? '' : 'pointer-events: none; opacity: 0.5; cursor: not-allowed;' %>">Checkout</a>
+                </div>
             </aside>
         </div>
     </main>
@@ -246,11 +267,27 @@
             function renderSidebar() {
                 if (!ordersList) return;
                 ordersList.innerHTML = '';
+                
+                var checkoutBtn = document.getElementById('checkoutBtn');
+                
                 if (!ORDERS_DATA || ORDERS_DATA.length === 0) {
                     ordersList.innerHTML = '<div class="empty">No items yet</div>';
                     if (grandTotalEl) grandTotalEl.textContent = '0.00';
+                    if (checkoutBtn) {
+                        checkoutBtn.style.pointerEvents = 'none';
+                        checkoutBtn.style.opacity = '0.5';
+                        checkoutBtn.style.cursor = 'not-allowed';
+                    }
                     return;
                 }
+                
+                // Enable checkout button when there are orders
+                if (checkoutBtn) {
+                    checkoutBtn.style.pointerEvents = 'auto';
+                    checkoutBtn.style.opacity = '1';
+                    checkoutBtn.style.cursor = 'pointer';
+                }
+                
                 var total = 0;
                 ORDERS_DATA.forEach(function(o){
                     var id = getOrderId(o);

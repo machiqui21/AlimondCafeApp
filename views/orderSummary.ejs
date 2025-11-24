@@ -9,22 +9,85 @@
         <h1>Order Details</h1>
     </header>
     <% if (typeof placedOrderId !== 'undefined' && placedOrderId) { %>
-        <div style="max-width:900px;margin:16px auto; padding:12px 16px; background:#fff7ed; border:1px solid #f3d4b6; border-radius:8px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:1.1rem; font-weight:600;">Order placed!</div>
-                <div>Order ID: <strong>#<%= placedOrderId %></strong></div>
-                <div>Status: <strong><%= placedStatus || 'Pending' %></strong></div>
-                <div style="margin-left:auto; display:flex; gap:8px;">
-                    <a class="btn" href="/payment?method=cash&orderId=<%= placedOrderId %>">Pay: Cash</a>
-                    <a class="btn" href="/payment?method=online&orderId=<%= placedOrderId %>">Pay: Online</a>
-                    <a class="btn" href="/order/<%= placedOrderId %>">View Order</a>
+        <% 
+            var paymentMethod = typeof placedPaymentMethod !== 'undefined' ? placedPaymentMethod : null;
+            var bgColor = '#fff7ed';
+            var borderColor = '#f3d4b6';
+            if (placedStatus === 'Paid') {
+                bgColor = '#d4edda';
+                borderColor = '#c3e6cb';
+            }
+        %>
+        <div style="max-width:900px;margin:16px auto; padding:20px; background:<%= bgColor %>; border:2px solid <%= borderColor %>; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="margin-bottom: 16px;">
+                <h2 style="margin: 0 0 12px 0; color: #7c4700;">✓ Order Placed Successfully!</h2>
+                <div style="display:flex; gap:20px; align-items:center; flex-wrap: wrap;">
+                    <div><strong>Order ID:</strong> <span style="font-size:1.2rem; color:#7c4700;">#<%= placedOrderId %></span></div>
+                    <div><strong>Status:</strong> <span style="padding: 4px 12px; background: <%= placedStatus === 'Paid' ? '#28a745' : '#ffc107' %>; color: <%= placedStatus === 'Paid' ? 'white' : '#000' %>; border-radius: 12px; font-weight: 600;"><%= placedStatus || 'Pending' %></span></div>
+                    <% if (paymentMethod) { %>
+                        <div><strong>Payment Method:</strong> <%= paymentMethod %></div>
+                    <% } %>
                 </div>
+            </div>
+            
+            <% if (paymentMethod === 'Cash') { %>
+                <div style="padding: 16px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; margin-top: 12px;">
+                    <h3 style="margin: 0 0 8px 0; color: #856404;">💵 Cash Payment</h3>
+                    <p style="margin: 0; color: #856404; font-size: 1.1rem;"><strong>Please proceed to the cashier for payment.</strong></p>
+                    <p style="margin: 8px 0 0 0; color: #856404;">Show Order ID <strong>#<%= placedOrderId %></strong> at the counter.</p>
+                </div>
+            <% } else if (paymentMethod === 'GCash') { %>
+                <div style="padding: 16px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 6px; margin-top: 12px;">
+                    <h3 style="margin: 0 0 12px 0; color: #0c5460;">📱 GCash Payment</h3>
+                    <p style="margin: 0 0 12px 0; color: #0c5460;"><strong>Scan the QR code below with your GCash app to complete payment:</strong></p>
+                    <div style="text-align: center; padding: 16px; background: white; border-radius: 6px;">
+                        <div id="gcashQRCode" style="display: inline-block;"></div>
+                        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: #666;">Amount: <strong>₱<%= typeof orderTotal !== 'undefined' ? orderTotal : '0.00' %></strong></p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">Reference: Order #<%= placedOrderId %></p>
+                    </div>
+                    <p style="margin: 12px 0 0 0; color: #0c5460; font-size: 0.9rem;">After payment, please show the transaction receipt to staff.</p>
+                </div>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+                <script>
+                    (function() {
+                        var qrContainer = document.getElementById('gcashQRCode');
+                        if (qrContainer && typeof QRCode !== 'undefined') {
+                            var qrData = 'Order #<%= placedOrderId %>\nAmount: ₱<%= typeof orderTotal !== 'undefined' ? orderTotal : "0.00" %>';
+                            new QRCode(qrContainer, {
+                                text: qrData,
+                                width: 256,
+                                height: 256,
+                                colorDark: '#000000',
+                                colorLight: '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.M
+                            });
+                        } else {
+                            qrContainer.innerHTML = '<p style="color: #dc3545;">QR Code could not be generated. Please contact staff.</p>';
+                        }
+                    })();
+                </script>
+            <% } else if (paymentMethod === 'Online') { %>
+                <div style="padding: 16px; background: #e7e3fc; border: 1px solid #6f42c1; border-radius: 6px; margin-top: 12px;">
+                    <h3 style="margin: 0 0 12px 0; color: #4a148c;">💳 Online Payment</h3>
+                    <p style="margin: 0 0 12px 0; color: #4a148c;"><strong>Online payment integration coming soon!</strong></p>
+                    <p style="margin: 0; color: #4a148c;">For now, please use Cash or GCash payment options.</p>
+                    <p style="margin: 8px 0 0 0; color: #4a148c; font-size: 0.9rem;">Supported payment methods will include: PayMaya, PayPal, Credit/Debit Cards</p>
+                </div>
+            <% } %>
+            
+            <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
+                <a class="btn" href="/order/<%= placedOrderId %>" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">View Order Details</a>
+                <a class="btn" href="/menu" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Place Another Order</a>
             </div>
         </div>
     <% } %>
     <div style="max-width:900px; margin:20px auto;">
         <% if (typeof orders === 'undefined' || !orders || orders.length === 0) { %>
-            <p>No order available. <a href="/menu">Return to menu</a></p>
+            <div style="text-align: center; padding: 40px 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2 style="color: #8b5a3c; margin-bottom: 16px;">🎉 Thank You for Your Order!</h2>
+                <p style="color: #666; font-size: 1.1rem; margin-bottom: 24px;">We appreciate your business and look forward to serving you again soon.</p>
+                <a class="btn" href="/menu" style="background: #8b5a3c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Return to Menu</a>
+            </div>
         <% } else { %>
             <table class="menu-table" style="width:100%;">
                 <thead>
@@ -70,13 +133,56 @@
                 </tfoot>
             </table>
             <div style="margin-top:16px; display:flex; gap:12px; align-items:center;">
-                <a href="/menu" class="btn">Back to Menu</a>
-                <!-- Checkout form: customer name required (will POST to /checkout to finalize) -->
-                <form id="checkoutForm" action="/checkout" method="POST" style="display:flex; gap:8px; align-items:center; margin-left:auto;">
-                    <label style="margin:0;">Customer name <input id="checkoutCustomer" type="text" name="customerName" required placeholder="Your name" style="margin-left:8px; padding:6px 8px;"></label>
-                    <button type="submit" class="btn">Submit</button>
-                </form>
+                <% if (typeof placedOrderId === 'undefined' || !placedOrderId) { %>
+                    <a href="/menu" class="btn" style="background: #d4a373; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; min-width: 150px; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);">Back to Menu</a>
+                <% } else { %>
+                    <a href="/" class="btn" style="background: #7c4700; color: white; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;">Back to Homepage</a>
+                <% } %>
+                
+                <% if (typeof placedOrderId === 'undefined' || !placedOrderId) { %>
+                <!-- Payment options section -->
+                <div style="margin-left:auto; display:flex; gap:12px; align-items:center; flex-wrap: wrap;">
+                    <label style="margin:0; font-weight: 600; color: #7c4700; font-size: 1rem;">Customer name: 
+                        <input id="checkoutCustomer" type="text" required placeholder="Your name" style="margin-left:8px; padding:10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease;">
+                    </label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="font-weight: 600; color: #7c4700; font-size: 1rem;">Payment Options:</span>
+                        <form id="cashPaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
+                            <input type="hidden" name="customerName" class="customerNameInput" required>
+                            <input type="hidden" name="paymentMethod" value="Cash">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20833a 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease;">💵 Cash Payment</button>
+                        </form>
+                        <form id="gcashPaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
+                            <input type="hidden" name="customerName" class="customerNameInput" required>
+                            <input type="hidden" name="paymentMethod" value="GCash">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease;">📱 GCash Payment</button>
+                        </form>
+                        <form id="onlinePaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
+                            <input type="hidden" name="customerName" class="customerNameInput" required>
+                            <input type="hidden" name="paymentMethod" value="Online">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease;">💳 Online Payment</button>
+                        </form>
+                    </div>
+                </div>
+                <% } %>
             </div>
+            
+            <style>
+                #checkoutCustomer:focus {
+                    border-color: #7c4700;
+                    box-shadow: 0 0 0 3px rgba(124, 71, 0, 0.1);
+                }
+                
+                .btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                }
+                
+                .btn:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+            </style>
 
             <script>
                 (function(){
@@ -84,6 +190,32 @@
                     var tbody = q('#ordersTbody');
                     var grandEl = q('#grandTotal');
                     var checkoutCustomer = q('#checkoutCustomer');
+
+                    // Sync customer name to all payment forms
+                    function syncCustomerName() {
+                        var name = checkoutCustomer ? checkoutCustomer.value : '';
+                        qa('.customerNameInput').forEach(function(input) {
+                            input.value = name;
+                        });
+                    }
+
+                    if (checkoutCustomer) {
+                        checkoutCustomer.addEventListener('input', syncCustomerName);
+                    }
+
+                    // Validate customer name before submitting any payment form
+                    qa('form[id$="PaymentForm"]').forEach(function(form) {
+                        form.addEventListener('submit', function(e) {
+                            var name = checkoutCustomer ? checkoutCustomer.value.trim() : '';
+                            if (!name) {
+                                e.preventDefault();
+                                alert('Please enter customer name');
+                                if (checkoutCustomer) checkoutCustomer.focus();
+                                return false;
+                            }
+                            syncCustomerName();
+                        });
+                    });
 
                     function recalcGrand(){
                         var sum = 0; qa('#ordersTbody tr').forEach(function(r){ var v = parseFloat((r.querySelector('.line-val')||{textContent:'0'}).textContent||0) || 0; sum += v; });
@@ -106,7 +238,10 @@
 
                         // initialize checkout customer name from first row if blank
                         if (checkoutCustomer && custInput && !checkoutCustomer.value) {
-                            if (custInput.value && custInput.value.trim()) checkoutCustomer.value = custInput.value.trim();
+                            if (custInput.value && custInput.value.trim()) {
+                                checkoutCustomer.value = custInput.value.trim();
+                                syncCustomerName();
+                            }
                         }
 
                         qtyInput.addEventListener('change', function(){
@@ -124,7 +259,10 @@
                                 if (tId) clearTimeout(tId);
                                 tId = setTimeout(function(){
                                     var v = custInput.value || '';
-                                    if (checkoutCustomer && !checkoutCustomer.value) checkoutCustomer.value = v;
+                                    if (checkoutCustomer && !checkoutCustomer.value) {
+                                        checkoutCustomer.value = v;
+                                        syncCustomerName();
+                                    }
                                     if (!id) return;
                                     fetch('/order-edit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, customerName: v }) })
                                         .then(r=>r.json()).then(function(js){ if (!js || !js.success) console.warn('Failed to update customerName'); });
@@ -155,5 +293,22 @@
             </script>
         <% } %>
     </div>
+    
+    <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #8b5a3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+
+    <script>
+      function toggleDarkMode() {
+        var isDark = document.body.classList.toggle('dark-mode');
+        try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+      }
+      
+      // Restore saved dark mode preference
+      (function() {
+        try {
+          var saved = localStorage.getItem('darkMode');
+          if (saved === '1') document.body.classList.add('dark-mode');
+        } catch(e) {}
+      })();
+    </script>
 </body>
 </html>
