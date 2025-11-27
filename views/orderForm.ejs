@@ -183,4 +183,30 @@
             var orderPriceSpan = document.getElementById('orderPrice');
             if (orderPriceSpan) orderPriceSpan.textContent = updateOrderPrice().toFixed(2);
         });
-    </script>
+        </script>
+
+        <footer class="footer" style="margin-top: 32px;">
+            <p>📍 Alimond's Café – Every cup brewed with love, for the neighborhood we call home.</p>
+            <p>Follow us @alimondscafe | Open daily 9am–7pm</p>
+        </footer>
+
+        <div style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 Toggle Dark Mode</button>
+            <a href="/menu" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
+                View Full Menu
+            </a>
+        </div>
+
+        <script>
+            function toggleDarkMode() {
+                var isDark = document.body.classList.toggle('dark-mode');
+                try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
+            }
+            // Restore saved dark mode preference
+            (function() {
+                try {
+                    var saved = localStorage.getItem('darkMode');
+                    if (saved === '1') document.body.classList.add('dark-mode');
+                } catch(e) {}
+            })();
+        </script>

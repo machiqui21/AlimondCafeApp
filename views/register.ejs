@@ -49,9 +49,22 @@
       </div>
     <% } %>
     <form id="registerForm" action="/register" method="post" style="display:flex; flex-direction:column; gap:12px;">
+      <% 
+        var firstNameValue = '';
+        var lastNameValue = '';
+        if (typeof preFillName !== 'undefined' && preFillName) {
+          var nameParts = preFillName.trim().split(/\s+/);
+          if (nameParts.length === 1) {
+            firstNameValue = nameParts[0];
+          } else if (nameParts.length >= 2) {
+            firstNameValue = nameParts[0];
+            lastNameValue = nameParts.slice(1).join(' ');
+          }
+        }
+      %>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <input class="auth-field" type="text" name="firstName" placeholder="First Name *" autocomplete="given-name" required>
-        <input class="auth-field" type="text" name="lastName" placeholder="Last Name *" autocomplete="family-name" required>
+        <input class="auth-field" type="text" name="firstName" placeholder="First Name *" autocomplete="given-name" value="<%= firstNameValue %>" required>
+        <input class="auth-field" type="text" name="lastName" placeholder="Last Name *" autocomplete="family-name" value="<%= lastNameValue %>" required>
       </div>
       
       <div>
@@ -60,9 +73,9 @@
         <div id="userHint" class="auth-hint"></div>
       </div>
       
-      <input class="auth-field" type="email" name="email" placeholder="Email (optional)" autocomplete="email">
+      <input class="auth-field" type="email" name="email" placeholder="Email (optional)" autocomplete="email" value="<%= typeof preFillEmail !== 'undefined' ? preFillEmail : '' %>">
       
-      <input class="auth-field" type="tel" name="mobilePhone" placeholder="Mobile Phone (optional)" pattern="[0-9]{10,15}" autocomplete="tel">
+      <input class="auth-field" type="tel" name="mobilePhone" placeholder="Mobile Phone (optional)" pattern="[0-9]{10,15}" autocomplete="tel" value="<%= typeof preFillPhone !== 'undefined' ? preFillPhone : '' %>">
       
       <input class="auth-field" type="password" name="password" placeholder="Password * (min 6 chars)" minlength="6" autocomplete="new-password" required>
       
@@ -76,6 +89,12 @@
       <p style="margin: 0 0 10px 0; color: #666;">Already have an account?</p>
       <a href="/login" style="display: inline-block; padding: 10px 24px; background: #e8e8e8; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: background 0.3s;" onmouseover="this.style.background='#d4d4d4'" onmouseout="this.style.background='#e8e8e8'">Sign In</a>
     </div>
+  </div>
+  <div style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 <%= __('Toggle Dark Mode') %></button>
+    <a href="/register" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
+      <%= __('View Full Menu') %>
+    </a>
   </div>
 </body>
 <script>
@@ -115,7 +134,7 @@
     // Just show warning hint
     
     // initial check
-    check((u.value||'').trim());
+    });
   })();
   
   function toggleDarkMode() {
@@ -131,7 +150,16 @@
     } catch(e) {}
   });
 </script>
-<div style="text-align: center; margin: 20px;">
-  <button onclick="toggleDarkMode()" style="padding: 10px 20px; background: #6b4a2c; color: white; border: none; border-radius: 8px; cursor: pointer;">🌙 Toggle Dark Mode</button>
+
+<footer class="footer">
+  <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
+  <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
+</footer>
+
+<div style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 <%= __('Toggle Dark Mode') %></button>
+  <a href="/register" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
+    <%= __('View Full Menu') %>
+  </a>
 </div>
 </html>

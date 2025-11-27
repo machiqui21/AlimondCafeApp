@@ -228,7 +228,20 @@ app.get('/login', function (req, res) {
 // Registration page (separate window)
 app.get('/register', function(req, res){
         console.log('GET /register - rendering registration page');
-        res.render('register.ejs', { error: null, user: req.session.user || null, adminUser: req.session.adminUser || null, currentPath: req.path, __: req.__ });
+        // Get pre-fill data from query parameters (from checkout)
+        const preFillName = req.query.name || '';
+        const preFillEmail = req.query.email || '';
+        const preFillPhone = req.query.phone || '';
+        res.render('register.ejs', { 
+                error: null, 
+                user: req.session.user || null, 
+                adminUser: req.session.adminUser || null, 
+                currentPath: req.path, 
+                __: req.__,
+                preFillName: preFillName,
+                preFillEmail: preFillEmail,
+                preFillPhone: preFillPhone
+        });
 });
 
 // Username existence check (JSON)
@@ -296,10 +309,22 @@ app.post('/register', async function(req, res){
                         }
                 } catch(_) {}
 
-                return res.render('registerSuccess.ejs', {
-                        user: saved || { FirstName: firstName, LastName: lastName, Username: username, Email: email, MobilePhone: mobilePhone, CreatedAt: null },
-                        currentPath: '/register',
-                        __: req.__
+                // Auto-login the user after successful registration
+                const userForSession = saved || { UserID: result.insertId, FirstName: firstName, LastName: lastName, Username: username, Email: email, MobilePhone: mobilePhone };
+                if (!req.session) req.session = {};
+                req.session.user = userForSession;
+                console.log('User auto-logged in after registration:', userForSession.Username);
+
+                // Explicitly save the session before rendering
+                req.session.save(function(err) {
+                        if (err) {
+                                console.error('Session save error after registration:', err);
+                        }
+                        return res.render('registerSuccess.ejs', {
+                                user: userForSession,
+                                currentPath: '/register',
+                                __: req.__
+                        });
                 });
         } catch(e){
                 console.error('Register error:', e);
@@ -356,7 +381,10 @@ app.post('/auth', async function(req, res) {
                                 req.session.user = {
                                         UserID: userRow.UserID,
                                         Username: userRow.Username,
-                                        Email: userRow.Email || null
+                                        Email: userRow.Email || null,
+                                        FirstName: userRow.FirstName || null,
+                                        LastName: userRow.LastName || null,
+                                        MobilePhone: userRow.MobilePhone || null
                                 };
                                 // Regular users go to menu/home
                                 return res.redirect('/menu');
@@ -942,11 +970,26 @@ app.get('/admin/order/:orderId', requireAdmin, async function(req, res) {
     try {
         const orderId = parseInt(req.params.orderId, 10);
         
-        // Get order details
-        const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1', [orderId]);
+        // Get order details with user information
+        const orderRow = await dbQuery(`
+            SELECT o.*, s.StatusName, u.Email AS UserEmail, u.MobilePhone AS UserPhone 
+            FROM orders o 
+            LEFT JOIN status s ON o.StatusID = s.StatusID 
+            LEFT JOIN users u ON o.UserID = u.UserID
+            WHERE o.OrderID = ? 
+            LIMIT 1
+        `, [orderId]);
         if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
         
         const order = orderRow[0];
+        
+        // Use user's email/phone if customer fields are empty
+        if (!order.CustomerEmail && order.UserEmail) {
+            order.CustomerEmail = order.UserEmail;
+        }
+        if (!order.CustomerPhone && order.UserPhone) {
+            order.CustomerPhone = order.UserPhone;
+        }
         
         // Get order items
         const items = await dbQuery(`
@@ -962,8 +1005,27 @@ app.get('/admin/order/:orderId', requireAdmin, async function(req, res) {
             SELECT oio.* 
             FROM order_item_options oio
             WHERE oio.OrderDetailID IN (SELECT OrderDetailID FROM order_details WHERE OrderID = ?)
-            ORDER BY oio.OptionID
+            ORDER BY oio.OrderDetailID, oio.OptionID
         `, [orderId]);
+        
+        // Group options by OrderDetailID so each item gets its own options
+        const optionsByDetailId = {};
+        (options || []).forEach(opt => {
+            const detailId = opt.OrderDetailID;
+            if (!optionsByDetailId[detailId]) {
+                optionsByDetailId[detailId] = [];
+            }
+            optionsByDetailId[detailId].push({
+                type: opt.OptionName || 'Other',
+                name: opt.OptionValue || '',
+                price: parseFloat(opt.ExtraPrice || 0) || 0
+            });
+        });
+
+        // Attach options to their respective items
+        items.forEach(item => {
+            item.options = optionsByDetailId[item.OrderDetailID] || [];
+        });
         
         // Get all statuses for dropdown
         const statuses = await dbQuery('SELECT * FROM status ORDER BY StatusID');
@@ -1876,6 +1938,8 @@ app.listen(2000, function() {
 app.post('/checkout', async function(req, res){
         try {
                 const customerName = (req.body.customerName || '').toString().trim();
+                const customerEmail = (req.body.customerEmail || '').toString().trim();
+                const customerPhone = (req.body.customerPhone || '').toString().trim();
                 const paymentMethod = (req.body.paymentMethod || '').toString().trim();
                 
                 if (!customerName) return res.redirect('/order-summary');
@@ -1884,7 +1948,7 @@ app.post('/checkout', async function(req, res){
                 const cart = (req.session && req.session.orders) ? req.session.orders.slice() : [];
                 if (!cart.length) return res.redirect('/order-summary');
 
-                log('[checkout] starting. customerName=%s paymentMethod=%s cartCount=%d', customerName, paymentMethod, cart.length);
+                log('[checkout] starting. customerName=%s email=%s phone=%s paymentMethod=%s cartCount=%d', customerName, customerEmail || '(none)', customerPhone || '(none)', paymentMethod, cart.length);
                 // dump first cart item for quick inspection
                 try { if (cart[0]) log('[checkout] firstCartItem sample:', JSON.stringify(cart[0])); } catch(e) {}
 
@@ -1909,6 +1973,18 @@ app.post('/checkout', async function(req, res){
                 const userId = (req.session && req.session.user && req.session.user.UserID) ? req.session.user.UserID : null;
                 log('[checkout] UserID from session: %s', userId || 'not logged in');
                 
+                // If user is logged in but didn't provide email/phone, use their account info
+                let finalEmail = customerEmail;
+                let finalPhone = customerPhone;
+                if (userId && req.session.user) {
+                    if (!finalEmail && req.session.user.Email) {
+                        finalEmail = req.session.user.Email;
+                    }
+                    if (!finalPhone && req.session.user.MobilePhone) {
+                        finalPhone = req.session.user.MobilePhone;
+                    }
+                }
+                
                 // Create master order row with a business OrderID = CustomerName + '00' + 3-digit sequence
                 // Concurrency-safe with retry loop on duplicate key (requires UNIQUE INDEX on orders(OrderID)).
                 // NOTE: Run once manually: ALTER TABLE orders ADD UNIQUE INDEX uniq_OrderID (OrderID);
@@ -1932,11 +2008,11 @@ app.post('/checkout', async function(req, res){
                         } catch(e) { /* ignore; will try default 001 */ }
                         const candidateOrderCode = idPrefix + nextSeq;
                         try {
-                                attemptInsertRow = await dbQuery('INSERT INTO orders (UserID, CustomerName, TotalAmount, StatusID, PaymentMethod) VALUES (?, ?, ?, ?, ?)',
-                                                [userId, customerName, orderTotal.toFixed(2), statusId, paymentMethod || null]);
+                                attemptInsertRow = await dbQuery('INSERT INTO orders (UserID, CustomerName, CustomerEmail, CustomerPhone, TotalAmount, StatusID, PaymentMethod) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                                                [userId, customerName, finalEmail || null, finalPhone || null, orderTotal.toFixed(2), statusId, paymentMethod || null]);
                                 orderId = attemptInsertRow && attemptInsertRow.insertId ? attemptInsertRow.insertId : null;
                                 if (!orderId) throw new Error('No insertId returned');
-                                log('[checkout] master order created attempt=%d id=%s status=%d payment=%s userId=%s', attempt+1, orderId, statusId, paymentMethod || 'none', userId || 'null');
+                                log('[checkout] master order created attempt=%d id=%s status=%d payment=%s userId=%s email=%s phone=%s', attempt+1, orderId, statusId, paymentMethod || 'none', userId || 'null', finalEmail || 'null', finalPhone || 'null');
                                 break; // success
                         } catch (insertErr) {
                                 if (insertErr && insertErr.code === 'ER_DUP_ENTRY') {
@@ -2057,7 +2133,11 @@ app.post('/checkout', async function(req, res){
                         placedOrderId: orderId, 
                         placedStatus: statusDesc,
                         placedPaymentMethod: paymentMethod || null,
-                        orderTotal: orderTotal.toFixed(2)
+                        orderTotal: orderTotal.toFixed(2),
+                        customerName: customerName,
+                        customerEmail: customerEmail,
+                        customerPhone: customerPhone,
+                        isLoggedIn: !!userId
                 });
         } catch (e) {
                 console.error('checkout error', e);
@@ -2103,6 +2183,120 @@ app.get('/payment', async function(req, res){
 });
 
 // Order History by OrderID (user-scoped via possession; optionally check session.myOrders)
+// Reorder route - recreates a previous order in the cart
+app.post('/reorder/:orderId', async function(req, res){
+        try {
+                const orderId = parseInt(req.params.orderId, 10);
+                if (!orderId) return res.status(404).send('Order not found');
+                
+                // Get order details
+                const orderRow = await dbQuery('SELECT * FROM orders WHERE OrderID = ? LIMIT 1', [orderId]);
+                if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
+                
+                // Security check: Verify order ownership
+                const order = orderRow[0];
+                const isLoggedIn = req.session && req.session.user && req.session.user.UserID;
+                const orderUserId = order.UserID;
+                
+                if (isLoggedIn) {
+                        // If user is logged in, they can only reorder their own orders
+                        if (orderUserId && orderUserId !== req.session.user.UserID) {
+                                return res.status(403).send('Access denied: You can only reorder your own orders');
+                        }
+                } else {
+                        // If user is not logged in, check if this order is in their session
+                        const sessionOrders = req.session && req.session.myOrders ? req.session.myOrders : [];
+                        const canReorder = sessionOrders.includes(orderId);
+                        
+                        if (!canReorder) {
+                                return res.status(403).send('Access denied: You can only reorder orders you created in this session');
+                        }
+                }
+                
+                // Get order items
+                const items = await dbQuery(`
+                        SELECT od.*, p.Name AS ProductName
+                        FROM order_details od
+                        LEFT JOIN products p ON p.ProductID = od.ProductID
+                        WHERE od.OrderID = ?
+                        ORDER BY od.OrderDetailID
+                `, [orderId]);
+                
+                if (!items || items.length === 0) {
+                        return res.status(400).send('No items found in this order');
+                }
+                
+                // Get order options for each item
+                const options = await dbQuery(`
+                        SELECT oio.* 
+                        FROM order_item_options oio
+                        WHERE oio.OrderDetailID IN (SELECT OrderDetailID FROM order_details WHERE OrderID = ?)
+                        ORDER BY oio.OrderDetailID, oio.OptionID
+                `, [orderId]);
+                
+                // Group options by OrderDetailID
+                const optionsByDetailId = {};
+                (options || []).forEach(opt => {
+                        const detailId = opt.OrderDetailID;
+                        if (!optionsByDetailId[detailId]) {
+                                optionsByDetailId[detailId] = [];
+                        }
+                        optionsByDetailId[detailId].push(opt);
+                });
+                
+                // Clear existing cart
+                if (!req.session) req.session = {};
+                req.session.orders = [];
+                
+                // Recreate cart items from order
+                items.forEach(item => {
+                        const itemOptions = optionsByDetailId[item.OrderDetailID] || [];
+                        
+                        // Extract extras, sugar, and custom options
+                        const extras = [];
+                        let sugar = '';
+                        let customSelected = '';
+                        
+                        itemOptions.forEach(opt => {
+                                const optType = (opt.OptionName || '').toLowerCase();
+                                if (optType === 'topping' || optType === 'toppings') {
+                                        extras.push(opt.OptionValue || '');
+                                } else if (optType === 'sweetener' || optType === 'sugar') {
+                                        sugar = opt.OptionValue || '';
+                                } else if (optType === 'milk') {
+                                        customSelected = opt.OptionValue || '';
+                                }
+                        });
+                        
+                        const localId = 's' + Date.now() + Math.floor(Math.random() * 10000);
+                        const cartItem = {
+                                _localId: localId,
+                                customerName: orderRow[0].CustomerName || '',
+                                productId: item.ProductID,
+                                product: item.ProductName || '',
+                                size: item.Size || '',
+                                sugar: sugar,
+                                extras: extras,
+                                customSelected: customSelected,
+                                qty: item.Quantity || 1,
+                                amountPerItem: parseFloat(item.UnitPrice || 0),
+                                totalAmount: parseFloat(item.Subtotal || 0)
+                        };
+                        
+                        req.session.orders.push(cartItem);
+                });
+                
+                console.log('[REORDER] Order', orderId, 'recreated in cart with', items.length, 'items');
+                
+                // Redirect to order summary
+                return res.redirect('/order-summary');
+                
+        } catch (e) {
+                console.error('[REORDER] Error:', e);
+                return res.status(500).send('Failed to reorder');
+        }
+});
+
 app.get('/order/:orderId', async function(req, res){
         try {
                 let param = parseInt(req.params.orderId, 10);
@@ -2121,8 +2315,29 @@ app.get('/order/:orderId', async function(req, res){
                 }
 
                 // Load master order and summary
-                const orderRow = await dbQuery('SELECT * FROM orders WHERE OrderID = ? LIMIT 1', [masterOrderId]);
+                const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1', [masterOrderId]);
                 if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
+                
+                // Security check: Verify order ownership
+                const order = orderRow[0];
+                const isLoggedIn = req.session && req.session.user && req.session.user.UserID;
+                const orderUserId = order.UserID;
+                
+                if (isLoggedIn) {
+                        // If user is logged in, they can only view their own orders
+                        if (orderUserId && orderUserId !== req.session.user.UserID) {
+                                return res.status(403).send('Access denied: You can only view your own orders');
+                        }
+                } else {
+                        // If user is not logged in, check if this order is in their session
+                        const sessionOrders = req.session && req.session.myOrders ? req.session.myOrders : [];
+                        const canViewOrder = sessionOrders.includes(masterOrderId);
+                        
+                        if (!canViewOrder) {
+                                return res.status(403).send('Access denied: You can only view orders you created in this session');
+                        }
+                }
+                
                 const row0 = orderRow[0];
                 console.log('DEBUG: row0.OrderID =', row0.OrderID, 'masterOrderId =', masterOrderId, 'row0 =', row0);
                 const header = { 
@@ -2130,7 +2345,7 @@ app.get('/order/:orderId', async function(req, res){
                         CustomerName: row0.CustomerName || row0.customerName, 
                         TotalAmount: row0.TotalAmount || row0.totalAmount, 
                         StatusID: row0.StatusID || 1, 
-                        StatusDescription: 'Pending',
+                        StatusDescription: row0.StatusName || 'Pending',
                         PaymentMethod: row0.PaymentMethod || null,
                         CreatedAt: row0.CreatedAt || row0.created_at
                 };
@@ -2144,9 +2359,28 @@ app.get('/order/:orderId', async function(req, res){
                 const options = await dbQuery(`SELECT oio.* 
                                                 FROM order_item_options oio
                                                 WHERE oio.OrderDetailID IN (SELECT OrderDetailID FROM order_details WHERE OrderID = ?)
-                                                ORDER BY oio.OptionID`, [masterOrderId]);
+                                                ORDER BY oio.OrderDetailID, oio.OptionID`, [masterOrderId]);
 
-                // Group options by type for display
+                // Group options by OrderDetailID (so each product gets its own options)
+                const optionsByDetailId = {};
+                (options || []).forEach(opt => {
+                    const detailId = opt.OrderDetailID;
+                    if (!optionsByDetailId[detailId]) {
+                        optionsByDetailId[detailId] = [];
+                    }
+                    optionsByDetailId[detailId].push({
+                        type: opt.OptionName || 'Other',
+                        name: opt.OptionValue || '',
+                        price: parseFloat(opt.ExtraPrice || 0) || 0
+                    });
+                });
+
+                // Attach options to their respective items
+                items.forEach(item => {
+                    item.options = optionsByDetailId[item.OrderDetailID] || [];
+                });
+
+                // Also keep the old grouped format for backward compatibility (optional)
                 function groupOptions(arr){
                         const out = { Sweetener: [], Milk: [], Topping: [] };
                         (arr||[]).forEach(o=>{
@@ -2160,12 +2394,17 @@ app.get('/order/:orderId', async function(req, res){
                 }
                 const groupedOptions = groupOptions(options);
 
-                // Generate QR code if payment method is online
+                // Generate QR code if payment method is GCash or Online and status is Pending
                 let qrCodeDataUrl = null;
-                if (header.PaymentMethod === 'Online') {
+                if ((header.PaymentMethod === 'GCash' || header.PaymentMethod === 'Online') && header.StatusDescription === 'Pending') {
                         const accountNumber = '09265363860'; // GCash account number
                         const qrData = `Order ID: ${header.OrderID}\nAmount: ₱${parseFloat(header.TotalAmount).toFixed(2)}\nAccount: ${accountNumber}`;
-                        qrCodeDataUrl = await QRCode.toDataURL(qrData);
+                        try {
+                                qrCodeDataUrl = await QRCode.toDataURL(qrData);
+                                console.log('[USER ORDER] QR Code generated successfully, length:', qrCodeDataUrl.length);
+                        } catch (error) {
+                                console.error('[USER ORDER] Error generating QR code:', error);
+                        }
                 }
 
                 return res.render('viewOrder', {
@@ -2173,7 +2412,7 @@ app.get('/order/:orderId', async function(req, res){
                         items,
                         optionsByType: groupedOptions,
                         qrCodeDataUrl,
-                        __: req.__,
+                        __: req.__ || function(key) { return key; },
                         masterOrderId
                 });
         } catch (e) {

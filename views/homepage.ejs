@@ -174,8 +174,12 @@
     <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
   </footer>
   
-  <button onclick="toggleDarkMode()">🌙 <%= __('Toggle Dark Mode') %></button>
-  <a href="/menu" class="btn"><%= __('View Full Menu') %></a>
+  <div style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 <%= __('Toggle Dark Mode') %></button>
+    <a href="/menu" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
+      <%= __('View Full Menu') %>
+    </a>
+  </div>
 
   <script>
     // Carousel state management

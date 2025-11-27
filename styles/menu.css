@@ -291,8 +291,13 @@ body.dark-mode .btn:hover {
 }
 
 body.dark-mode button {
-    background: #555;
-    color: var(--text-dark);
+    background: #8b5a3c;
+    color: #ffffff;
+}
+
+body.dark-mode button:hover {
+    background: #a16841;
+    color: #ffffff;
 }
 
 body.dark-mode .type-column h3 {
