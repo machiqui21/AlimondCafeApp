@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 // Base URL for the application
 const BASE_URL = 'http://localhost:2000';
 
-test.describe('Alimond Cafe App Tests', () => {
+test.describe('Admin Navigation Tests', () => {
   test('should handle admin login with valid credentials', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
     await page.getByRole('textbox', { name: 'User Name' }).click();
