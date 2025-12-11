@@ -1,5 +1,6 @@
 // MySQL connection setup (use a pool to avoid 'Cannot enqueue Query after fatal error')
-require('dotenv').config();
+// Load .env variables if dotenv is available; run fine without it
+try { require('dotenv').config(); } catch (_) { /* optional dependency; continue */ }
 var mysql = require('mysql');
 
 // Resolve configuration from environment with sensible defaults

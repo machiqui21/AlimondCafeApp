@@ -1,433 +1,599 @@
 <html>
+
 <head>
     <title>Order Summary</title>
     <link rel="stylesheet" href="/menu.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
+
 <body>
     <header class="hero">
         <img class="logo" src="/images/AlimondsCafe.jpeg">
         <h1>Order Details</h1>
     </header>
-    <% if (typeof placedOrderId !== 'undefined' && placedOrderId) { %>
-        <% 
-            var paymentMethod = typeof placedPaymentMethod !== 'undefined' ? placedPaymentMethod : null;
-            var bgColor = '#fff7ed';
-            var borderColor = '#f3d4b6';
-            if (placedStatus === 'Paid') {
-                bgColor = '#d4edda';
-                borderColor = '#c3e6cb';
-            }
-        %>
-        <div style="max-width:900px;margin:16px auto; padding:20px; background:<%= bgColor %>; border:2px solid <%= borderColor %>; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div style="margin-bottom: 16px;">
-                <h2 style="margin: 0 0 12px 0; color: #7c4700;">✓ Order Placed Successfully!</h2>
-                <div style="display:flex; gap:20px; align-items:center; flex-wrap: wrap;">
-                    <div><strong>Order ID:</strong> <span style="font-size:1.2rem; color:#7c4700;">#<%= placedOrderId %></span></div>
-                    <div><strong>Status:</strong> <span style="padding: 4px 12px; background: <%= placedStatus === 'Paid' ? '#28a745' : '#ffc107' %>; color: <%= placedStatus === 'Paid' ? 'white' : '#000' %>; border-radius: 12px; font-weight: 600;"><%= placedStatus || 'Pending' %></span></div>
-                    <% if (paymentMethod) { %>
-                        <div><strong>Payment Method:</strong> <%= paymentMethod %></div>
-                    <% } %>
-                </div>
-            </div>
-            
-            <% if (paymentMethod === 'Cash') { %>
-                <div style="padding: 16px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; margin-top: 12px;">
-                    <h3 style="margin: 0 0 8px 0; color: #856404;">💵 Cash Payment</h3>
-                    <p style="margin: 0; color: #856404; font-size: 1.1rem;"><strong>Please proceed to the cashier for payment.</strong></p>
-                    <p style="margin: 8px 0 0 0; color: #856404;">Show Order ID <strong>#<%= placedOrderId %></strong> at the counter.</p>
-                </div>
-            <% } else if (paymentMethod === 'GCash') { %>
-                <div style="padding: 16px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 6px; margin-top: 12px;">
-                    <h3 style="margin: 0 0 12px 0; color: #0c5460;">📱 GCash Payment</h3>
-                    <p style="margin: 0 0 12px 0; color: #0c5460;"><strong>Scan the QR code below with your GCash app to complete payment:</strong></p>
-                    <div style="text-align: center; padding: 16px; background: white; border-radius: 6px;">
-                        <div id="gcashQRCode" style="display: inline-block;"></div>
-                        <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: #666;">Amount: <strong>₱<%= typeof orderTotal !== 'undefined' ? orderTotal : '0.00' %></strong></p>
-                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">Reference: Order #<%= placedOrderId %></p>
+    <% if (typeof placedOrderId !=='undefined' && placedOrderId) { %>
+        <% var paymentMethod=typeof placedPaymentMethod !=='undefined' ? placedPaymentMethod : null; var
+            bgColor='#fff7ed' ; var borderColor='#f3d4b6' ; if (placedStatus==='Paid' ) { bgColor='#d4edda' ;
+            borderColor='#c3e6cb' ; } %>
+            <div
+                style="max-width:900px;margin:16px auto; padding:20px; background:<%= bgColor %>; border:2px solid <%= borderColor %>; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="margin-bottom: 16px;">
+                    <h2 style="margin: 0 0 12px 0; color: #7c4700;">✓ Order Placed Successfully!</h2>
+                    <div style="display:flex; gap:20px; align-items:center; flex-wrap: wrap;">
+                        <div><strong>Order ID:</strong> <span style="font-size:1.2rem; color:#7c4700;">#<%=
+                                    placedOrderId %></span></div>
+                        <div><strong>Status:</strong> <span
+                                style="padding: 4px 12px; background: <%= placedStatus === 'Paid' ? '#28a745' : '#ffc107' %>; color: <%= placedStatus === 'Paid' ? 'white' : '#000' %>; border-radius: 12px; font-weight: 600;">
+                                <%= placedStatus || 'Pending' %>
+                            </span></div>
+                        <% if (paymentMethod) { %>
+                            <div><strong>Payment Method:</strong>
+                                <%= paymentMethod %>
+                            </div>
+                            <% } %>
                     </div>
-                    <p style="margin: 12px 0 0 0; color: #0c5460; font-size: 0.9rem;">After payment, please show the transaction receipt to staff.</p>
                 </div>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+                <% if (paymentMethod==='Cash' ) { %>
+                    <div
+                        style="padding: 16px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; margin-top: 12px;">
+                        <h3 style="margin: 0 0 8px 0; color: #856404;">💵 Cash Payment</h3>
+                        <p style="margin: 0; color: #856404; font-size: 1.1rem;"><strong>Please proceed to the cashier
+                                for payment.</strong></p>
+                        <p style="margin: 8px 0 0 0; color: #856404;">Show Order ID <strong>#<%= placedOrderId %>
+                            </strong> at the counter.</p>
+                    </div>
+                    <% } else if (paymentMethod==='GCash' ) { %>
+                        <div
+                            style="padding: 16px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 6px; margin-top: 12px;">
+                            <h3 style="margin: 0 0 12px 0; color: #0c5460;">📱 GCash Payment</h3>
+                            <p style="margin: 0 0 12px 0; color: #0c5460;"><strong>Scan the QR code below with your
+                                    GCash app to complete payment:</strong></p>
+                            <div style="text-align: center; padding: 16px; background: white; border-radius: 6px;">
+                                <div id="gcashQRCode" data-order-id="<%= placedOrderId %>" data-amount="<%= typeof orderTotal !== 'undefined' ? orderTotal : '' %>" style="display: inline-block;"></div>
+                                <p style="margin: 12px 0 0 0; font-size: 0.9rem; color: #666;">Amount: <strong>₱<%=
+                                            typeof orderTotal !=='undefined' ? orderTotal : '0.00' %></strong></p>
+                                <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #999;">Reference: Order #<%=
+                                        placedOrderId %>
+                                </p>
+                            </div>
+                            <p style="margin: 12px 0 0 0; color: #0c5460; font-size: 0.9rem;">After payment, please show
+                                the transaction receipt to staff.</p>
+                        </div>
+                        <script>
+                            (function () {
+                                var qrContainer = document.getElementById('gcashQRCode');
+                                if (qrContainer && typeof QRCode !== 'undefined') {
+                                    var qrData = <%- typeof qrCodeData !== "undefined" && qrCodeData ? JSON.stringify(qrCodeData) : '""' %>;
+                                    // Fallback: construct QR data on client if server-side string is missing
+                                    if (!qrData) {
+                                        var _orderId = qrContainer.getAttribute('data-order-id');
+                                        var _amount = qrContainer.getAttribute('data-amount');
+                                        if (_orderId && _amount) {
+                                            qrData = 'Order #' + _orderId + '\nAmount: ₱' + _amount + '\nAccount: 09265363860';
+                                        }
+                                    }
+                                    console.log('QR Code Data received:', qrData);
+                                    console.log('Type of qrData:', typeof qrData);
+                                    console.log('qrData length:', qrData ? qrData.length : 0);
+                                    // If text is unexpectedly long, switch to a compact payload
+                                    if (qrData && qrData.length > 300) {
+                                        var _orderId2 = qrContainer.getAttribute('data-order-id') || '';
+                                        var _amount2 = qrContainer.getAttribute('data-amount') || '';
+                                        var compact = 'ORD:' + _orderId2 + '|AMT:' + _amount2 + '|ACC:09265363860';
+                                        console.warn('QR payload too long. Using compact format:', compact);
+                                        qrData = compact;
+                                    }
+                                    function tryRender(text) {
+                                        var types = [4, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40];
+                                        for (var i = 0; i < types.length; i++) {
+                                            try {
+                                                qrContainer.innerHTML = '';
+                                                new QRCode(qrContainer, {
+                                                    text: text,
+                                                    width: 256,
+                                                    height: 256,
+                                                    colorDark: '#000000',
+                                                    colorLight: '#ffffff',
+                                                    correctLevel: QRCode.CorrectLevel.L,
+                                                    typeNumber: types[i]
+                                                });
+                                                console.log('QR rendered with typeNumber:', types[i]);
+                                                return true;
+                                            } catch (err) {
+                                                var msg = (err && err.message) || String(err);
+                                                if (msg.indexOf('code length overflow') === -1) {
+                                                    console.error('QR unexpected error:', err);
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                        return false;
+                                    }
+
+                                    if (qrData && tryRender(qrData)) {
+                                        // done
+                                    } else {
+                                        // Try compact payload then ultra-compact
+                                        var oid = qrContainer.getAttribute('data-order-id') || '';
+                                        var amt = qrContainer.getAttribute('data-amount') || '';
+                                        var compact = 'ORD:' + oid + '|AMT:' + amt + '|ACC:09265363860';
+                                        if (compact && tryRender(compact)) {
+                                            // done
+                                        } else {
+                                            var ultra = 'O:' + oid + '|P:' + amt;
+                                            if (!tryRender(ultra)) {
+                                                qrContainer.innerHTML = '<p style="color: #dc3545;">QR Code could not be generated. Please contact staff.</p>';
+                                            }
+                                        }
+                                    }
+                                    if (!qrData) {
+                                        qrContainer.innerHTML = '<p style="color: #dc3545;">QR Code data missing. Please contact staff.</p>';
+                                    }
+                                } else if (qrContainer) {
+                                    qrContainer.innerHTML = '<p style="color: #dc3545;">QR Code could not be generated. Please contact staff.</p>';
+                                }
+                            })();
+                        </script>
+                        <% } else if (paymentMethod==='Online' ) { %>
+                            <div
+                                style="padding: 16px; background: #e7e3fc; border: 1px solid #6f42c1; border-radius: 6px; margin-top: 12px;">
+                                <h3 style="margin: 0 0 12px 0; color: #4a148c;">💳 Online Payment</h3>
+                                <p style="margin: 0 0 12px 0; color: #4a148c;"><strong>Online payment integration coming
+                                        soon!</strong></p>
+                                <p style="margin: 0; color: #4a148c;">For now, please use Cash or GCash payment options.
+                                </p>
+                                <p style="margin: 8px 0 0 0; color: #4a148c; font-size: 0.9rem;">Supported payment
+                                    methods will include: PayMaya, PayPal, Credit/Debit Cards</p>
+                            </div>
+                            <% } %>
+
+                                <% if (typeof isLoggedIn !=='undefined' && !isLoggedIn) { %>
+                                    <% var hasEmail=typeof customerEmail !=='undefined' && customerEmail &&
+                                        customerEmail.trim().length> 0;
+                                        var hasPhone = typeof customerPhone !== 'undefined' && customerPhone &&
+                                        customerPhone.trim().length > 0;
+                                        var hasContactInfo = hasEmail && hasPhone;
+                                        %>
+                                        <div
+                                            style="padding: 16px; background: #f0f8ff; border: 2px solid #4a90e2; border-radius: 8px; margin-top: 16px;">
+                                            <h3 style="margin: 0 0 12px 0; color: #2c5aa0; font-size: 1.1rem;">🎁 Create
+                                                an Account for Exclusive Benefits!</h3>
+                                            <% if (hasContactInfo) { %>
+                                                <p style="margin: 0 0 12px 0; color: #2c5aa0;">We noticed you provided
+                                                    your contact details. Create an account to enjoy:</p>
+                                                <% } else { %>
+                                                    <p style="margin: 0 0 12px 0; color: #2c5aa0;">Create an account
+                                                        with Alimond Café to enjoy:</p>
+                                                    <% } %>
+                                                        <ul
+                                                            style="margin: 0 0 16px 0; padding-left: 24px; color: #2c5aa0; line-height: 1.8;">
+                                                            <li>Quick reordering of your favorite items</li>
+                                                            <li>Track your order history</li>
+                                                            <li>Faster checkout experience</li>
+                                                            <li>Exclusive member promotions</li>
+                                                        </ul>
+                                                        <div style="text-align: center;">
+                                                            <% if (hasContactInfo) { %>
+                                                                <% var regUrl='/register?name=' +
+                                                                    encodeURIComponent(customerName || '' ) + '&email='
+                                                                    + encodeURIComponent(customerEmail || '' )
+                                                                    + '&phone=' + encodeURIComponent(customerPhone || ''
+                                                                    ); %>
+                                                                    <a class="btn" href="<%= regUrl %>"
+                                                                        style="background: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">✨
+                                                                        Register with My Details</a>
+                                                                    <% } else { %>
+                                                                        <a class="btn"
+                                                                            href="/register?name=<%= encodeURIComponent(customerName || '') %>"
+                                                                            style="background: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">✨
+                                                                            Register to Alimond Café</a>
+                                                                        <% } %>
+                                                        </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div
+                                                style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
+                                                <a class="btn" href="/order/<%= placedOrderId %>"
+                                                    style="background: #d4a373; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">View
+                                                    Order Details</a>
+                                                <a class="btn" href="/menu"
+                                                    style="background: #d4a373; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Place
+                                                    Another Order</a>
+                                            </div>
+            </div>
+            <% } %>
+                <div style="max-width:900px; margin:20px auto;">
+                    <% if (typeof orders==='undefined' || !orders || orders.length===0) { %>
+                        <div
+                            style="text-align: center; padding: 40px 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h2 style="color: #8b5a3c; margin-bottom: 16px;">🎉 Thank You for Your Order!</h2>
+                            <p style="color: #666; font-size: 1.1rem; margin-bottom: 24px;">We appreciate your business
+                                and look forward to serving you again soon.</p>
+                            <a class="btn" href="/menu"
+                                style="background: #8b5a3c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Return
+                                to Menu</a>
+                        </div>
+                        <% } else { %>
+                            <table class="menu-table" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Customer</th>
+                                        <th>Product</th>
+                                        <th>Size</th>
+                                        <th>Milk</th>
+                                        <th>Sweetener</th>
+                                        <th>Toppings</th>
+                                        <th>Qty</th>
+                                        <th>Price/Item</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTbody">
+                                    <% let grand=0; orders.forEach(function(o, idx) { %>
+                                        <tr data-id="<%= o.id || o._localId || '' %>">
+                                            <td class="col-index">
+                                                <%= idx+1 %>
+                                            </td>
+                                            <td class="col-customer"><input class="customer-input" type="text"
+                                                    value="<%= o.customerName ? o.customerName.replace(/\" /g,'&quot;')
+                                                    : '' %>" placeholder="Customer name"></td>
+                                            <td class="col-product">
+                                                <%= o.product %>
+                                            </td>
+                                            <td class="col-size">
+                                                <%= o.size %>
+                                            </td>
+                                            <td class="col-custom">
+                                                <%= o.customSelected && o.customSelected.length ? o.customSelected : '-'
+                                                    %>
+                                            </td>
+                                            <td class="col-sugar">
+                                                <%= o.sugar && o.sugar.length ? o.sugar : '-' %>
+                                            </td>
+                                            <td class="col-extras">
+                                                <%= o.extras && o.extras.length ? o.extras.join(', ') : ' -' %>
+                                            </td>
+                                            <td class="col-qty"><input type="number" min="0" class="qty-input"
+                                                    value="<%= o.qty %>"></td>
+                                            <td class="col-per">₱<span class="per-val">
+                                                    <%= parseFloat(o.amountPerItem || o.amount || 0).toFixed(2) %>
+                                                </span></td>
+                                            <td class="col-line">₱<span class="line-val">
+                                                    <%= parseFloat(o.totalAmount || (o.amountPerItem * o.qty) ||
+                                                        0).toFixed(2) %>
+                                                </span></td>
+                                            <td class="col-actions">
+                                                <button class="btn remove-btn"
+                                                    data-id="<%= o.id || o._localId || '' %>">Remove</button>
+                                            </td>
+                                        </tr>
+                                        <% grand +=parseFloat(o.totalAmount || (o.amountPerItem * o.qty) || 0) || 0; });
+                                            %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9" style="text-align:right; font-weight:bold;">Grand Total</td>
+                                        <td style="font-weight:bold;" id="grandTotal">₱<%=
+                                                (parseFloat(grand)||0).toFixed(2) %>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div style="margin-top:16px;">
+                                <% if (typeof placedOrderId==='undefined' || !placedOrderId) { %>
+                                    <a href="/menu" class="btn"
+                                        style="background: #d4a373; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; min-width: 150px; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07); display: inline-block;">Back
+                                        to Menu</a>
+                                    <% } else { %>
+                                        <a href="/" class="btn"
+                                            style="background: #7c4700; color: white; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;">Back
+                                            to Homepage</a>
+                                        <% } %>
+
+                                            <% if (typeof placedOrderId==='undefined' || !placedOrderId) { %>
+                                                <!-- Customer Information and Payment Section -->
+                                                <div
+                                                    style="margin-top: 24px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                                    <h3 style="margin: 0 0 16px 0; color: #7c4700; font-size: 1.2rem;">
+                                                        Customer Information</h3>
+
+                                                    <div
+                                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                                                        <div>
+                                                            <label
+                                                                style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
+                                                                Customer Name <span style="color: #dc3545;">*</span>
+                                                            </label>
+                                                            <input id="checkoutCustomer" type="text" required
+                                                                placeholder="Your name"
+                                                                value="<%= user ? ((user.FirstName || '') + ' ' + (user.LastName || '')).trim() || user.Username || '' : '' %>"
+                                                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
+                                                        </div>
+
+                                                        <div>
+                                                            <label
+                                                                style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
+                                                                Email Address <span
+                                                                    style="color: #999; font-size: 0.85rem;">(optional)</span>
+                                                            </label>
+                                                            <input id="checkoutEmail" type="email"
+                                                                placeholder="your@email.com"
+                                                                value="<%= user && user.Email ? user.Email : '' %>"
+                                                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
+                                                        </div>
+
+                                                        <div>
+                                                            <label
+                                                                style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
+                                                                Phone Number <span
+                                                                    style="color: #999; font-size: 0.85rem;">(optional)</span>
+                                                            </label>
+                                                            <input id="checkoutPhone" type="tel"
+                                                                placeholder="09XXXXXXXXX"
+                                                                value="<%= user && user.MobilePhone ? user.MobilePhone : '' %>"
+                                                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
+                                                        </div>
+                                                    </div>
+
+                                                    <div style="border-top: 1px solid #e0e0e0; padding-top: 20px;">
+                                                        <h3
+                                                            style="margin: 0 0 16px 0; color: #7c4700; font-size: 1.2rem;">
+                                                            Select Payment Method</h3>
+
+                                                        <div
+                                                            style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+                                                            <form id="cashPaymentForm" action="/checkout" method="POST"
+                                                                style="display:inline; margin:0;">
+                                                                <input type="hidden" name="customerName"
+                                                                    class="customerNameInput" required>
+                                                                <input type="hidden" name="customerEmail"
+                                                                    class="customerEmailInput">
+                                                                <input type="hidden" name="customerPhone"
+                                                                    class="customerPhoneInput">
+                                                                <input type="hidden" name="paymentMethod" value="Cash">
+                                                                <button type="submit" class="btn payment-btn"
+                                                                    style="background: linear-gradient(135deg, #28a745 0%, #20833a 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">💵
+                                                                    Cash Payment</button>
+                                                            </form>
+                                                            <form id="gcashPaymentForm" action="/checkout" method="POST"
+                                                                style="display:inline; margin:0;">
+                                                                <input type="hidden" name="customerName"
+                                                                    class="customerNameInput" required>
+                                                                <input type="hidden" name="customerEmail"
+                                                                    class="customerEmailInput">
+                                                                <input type="hidden" name="customerPhone"
+                                                                    class="customerPhoneInput">
+                                                                <input type="hidden" name="paymentMethod" value="GCash">
+                                                                <button type="submit" class="btn payment-btn"
+                                                                    style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">📱
+                                                                    GCash Payment</button>
+                                                            </form>
+                                                            <form id="onlinePaymentForm" action="/checkout"
+                                                                method="POST" style="display:inline; margin:0;">
+                                                                <input type="hidden" name="customerName"
+                                                                    class="customerNameInput" required>
+                                                                <input type="hidden" name="customerEmail"
+                                                                    class="customerEmailInput">
+                                                                <input type="hidden" name="customerPhone"
+                                                                    class="customerPhoneInput">
+                                                                <input type="hidden" name="paymentMethod"
+                                                                    value="Online">
+                                                                <button type="submit" class="btn payment-btn"
+                                                                    style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">💳
+                                                                    Online Payment</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% } %>
+                            </div>
+
+                            <style>
+                                #checkoutCustomer:focus,
+                                #checkoutEmail:focus,
+                                #checkoutPhone:focus {
+                                    border-color: #7c4700;
+                                    box-shadow: 0 0 0 3px rgba(124, 71, 0, 0.1);
+                                }
+
+                                .payment-btn:hover {
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+                                }
+
+                                .payment-btn:active {
+                                    transform: translateY(0);
+                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                }
+
+                                .btn:hover {
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+                                }
+
+                                .btn:active {
+                                    transform: translateY(0);
+                                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                                }
+
+                                @media (max-width: 768px) {
+                                    .payment-btn {
+                                        width: 100%;
+                                        min-width: auto !important;
+                                    }
+                                }
+                            </style>
+
+                            <script>
+                                (function () {
+                                    function q(sel, ctx) { return (ctx || document).querySelector(sel); } function qa(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
+                                    var tbody = q('#ordersTbody');
+                                    var grandEl = q('#grandTotal');
+                                    var checkoutCustomer = q('#checkoutCustomer');
+                                    var checkoutEmail = q('#checkoutEmail');
+                                    var checkoutPhone = q('#checkoutPhone');
+
+                                    // Sync customer info to all payment forms
+                                    function syncCustomerInfo() {
+                                        var name = checkoutCustomer ? checkoutCustomer.value : '';
+                                        var email = checkoutEmail ? checkoutEmail.value : '';
+                                        var phone = checkoutPhone ? checkoutPhone.value : '';
+
+                                        qa('.customerNameInput').forEach(function (input) {
+                                            input.value = name;
+                                        });
+                                        qa('.customerEmailInput').forEach(function (input) {
+                                            input.value = email;
+                                        });
+                                        qa('.customerPhoneInput').forEach(function (input) {
+                                            input.value = phone;
+                                        });
+                                    }
+
+                                    if (checkoutCustomer) {
+                                        checkoutCustomer.addEventListener('input', syncCustomerInfo);
+                                    }
+                                    if (checkoutEmail) {
+                                        checkoutEmail.addEventListener('input', syncCustomerInfo);
+                                    }
+                                    if (checkoutPhone) {
+                                        checkoutPhone.addEventListener('input', syncCustomerInfo);
+                                    }
+
+                                    // Validate customer info before submitting any payment form
+                                    qa('form[id$="PaymentForm"]').forEach(function (form) {
+                                        form.addEventListener('submit', function (e) {
+                                            var name = checkoutCustomer ? checkoutCustomer.value.trim() : '';
+
+                                            if (!name) {
+                                                e.preventDefault();
+                                                alert('Please enter customer name');
+                                                if (checkoutCustomer) checkoutCustomer.focus();
+                                                return false;
+                                            }
+
+                                            syncCustomerInfo();
+                                        });
+                                    });
+
+                                    function recalcGrand() {
+                                        var sum = 0; qa('#ordersTbody tr').forEach(function (r) { var v = parseFloat((r.querySelector('.line-val') || { textContent: '0' }).textContent || 0) || 0; sum += v; });
+                                        if (grandEl) grandEl.textContent = '₱' + sum.toFixed(2);
+                                    }
+
+                                    function showNoOrdersMessage() {
+                                        var container = document.querySelector('div[style*="max-width:900px"]');
+                                        container.innerHTML = '<p>No order available. <a href="/menu">Return to menu</a></p>';
+                                    }
+
+                                    // Attach listeners to each row: qty change, customer name change, remove
+                                    qa('#ordersTbody tr').forEach(function (row) {
+                                        var id = row.dataset.id;
+                                        var qtyInput = row.querySelector('.qty-input');
+                                        var custInput = row.querySelector('.customer-input');
+                                        var per = parseFloat((row.querySelector('.per-val') || { textContent: '0' }).textContent) || 0;
+                                        var lineEl = row.querySelector('.line-val');
+                                        var removeBtn = row.querySelector('.remove-btn');
+
+                                        // initialize checkout customer name from first row if blank
+                                        if (checkoutCustomer && custInput && !checkoutCustomer.value) {
+                                            if (custInput.value && custInput.value.trim()) {
+                                                checkoutCustomer.value = custInput.value.trim();
+                                                syncCustomerInfo();
+                                            }
+                                        }
+
+                                        qtyInput.addEventListener('change', function () {
+                                            var newQ = parseInt(qtyInput.value, 10) || 0;
+                                            var newLine = per * newQ; if (lineEl) lineEl.textContent = newLine.toFixed(2); recalcGrand();
+                                            if (!id) return; // session-only client local change already reflected
+                                            fetch('/order-edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, qty: newQ }) })
+                                                .then(r => r.json()).then(function (js) { if (!js || !js.success) alert('Failed to update qty'); });
+                                        });
+
+                                        if (custInput) {
+                                            var tId = null;
+                                            custInput.addEventListener('input', function () {
+                                                // debounce
+                                                if (tId) clearTimeout(tId);
+                                                tId = setTimeout(function () {
+                                                    var v = custInput.value || '';
+                                                    if (checkoutCustomer && !checkoutCustomer.value) {
+                                                        checkoutCustomer.value = v;
+                                                        syncCustomerInfo();
+                                                    }
+                                                    if (!id) return;
+                                                    fetch('/order-edit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, customerName: v }) })
+                                                        .then(r => r.json()).then(function (js) { if (!js || !js.success) console.warn('Failed to update customerName'); });
+                                                }, 400);
+                                            });
+                                        }
+
+                                        if (removeBtn) {
+                                            removeBtn.addEventListener('click', function () {
+                                                var isLast = (qa('#ordersTbody tr').length === 1);
+                                                var proceed = true;
+                                                if (isLast) proceed = confirm('Remove last order?');
+                                                if (!proceed) return;
+                                                if (!id) {
+                                                    row.remove(); recalcGrand(); if (qa('#ordersTbody tr').length === 0) showNoOrdersMessage(); return;
+                                                }
+                                                fetch('/order-remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) })
+                                                    .then(r => r.json()).then(function (js) {
+                                                        if (js && js.success) {
+                                                            row.remove(); recalcGrand(); if ((js.remaining || 0) === 0) showNoOrdersMessage();
+                                                        } else { alert('Failed to remove order'); }
+                                                    }).catch(function () { alert('Remove failed'); });
+                                            });
+                                        }
+                                    });
+
+                                    // keep grand accurate on load
+                                    recalcGrand();
+                                })();
+                            </script>
+                            <% } %>
+                </div>
+
+                <footer class="footer">
+                    <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %>
+                    </p>
+                    <p>
+                        <%= __('Follow us @alimondscafe | Open daily 9am–7pm') %>
+                    </p>
+                </footer>
+
+                <div
+                    style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+                    <button class="dark-mode-toggle" onclick="toggleDarkMode()"
+                        style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙
+                        <%= __('Toggle Dark Mode') %>
+                    </button>
+                    <a href="/menu" class="btn"
+                        style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px; margin-bottom: 0; margin-top: 0; align-self: flex-end;">
+                        <%= __('View Full Menu') %>
+                    </a>
+                </div>
+
                 <script>
-                    (function() {
-                        var qrContainer = document.getElementById('gcashQRCode');
-                        if (qrContainer && typeof QRCode !== 'undefined') {
-                            var qrData = 'Order #<%= placedOrderId %>\nAmount: ₱<%= typeof orderTotal !== 'undefined' ? orderTotal : "0.00" %>';
-                            new QRCode(qrContainer, {
-                                text: qrData,
-                                width: 256,
-                                height: 256,
-                                colorDark: '#000000',
-                                colorLight: '#ffffff',
-                                correctLevel: QRCode.CorrectLevel.M
-                            });
-                        } else {
-                            qrContainer.innerHTML = '<p style="color: #dc3545;">QR Code could not be generated. Please contact staff.</p>';
-                        }
+                    function toggleDarkMode() {
+                        var isDark = document.body.classList.toggle('dark-mode');
+                        try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch (e) { }
+                    }
+
+                    // Restore saved dark mode preference
+                    (function () {
+                        try {
+                            var saved = localStorage.getItem('darkMode');
+                            if (saved === '1') document.body.classList.add('dark-mode');
+                        } catch (e) { }
                     })();
                 </script>
-            <% } else if (paymentMethod === 'Online') { %>
-                <div style="padding: 16px; background: #e7e3fc; border: 1px solid #6f42c1; border-radius: 6px; margin-top: 12px;">
-                    <h3 style="margin: 0 0 12px 0; color: #4a148c;">💳 Online Payment</h3>
-                    <p style="margin: 0 0 12px 0; color: #4a148c;"><strong>Online payment integration coming soon!</strong></p>
-                    <p style="margin: 0; color: #4a148c;">For now, please use Cash or GCash payment options.</p>
-                    <p style="margin: 8px 0 0 0; color: #4a148c; font-size: 0.9rem;">Supported payment methods will include: PayMaya, PayPal, Credit/Debit Cards</p>
-                </div>
-            <% } %>
-            
-            <% if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) { %>
-                <% 
-                    var hasEmail = typeof customerEmail !== 'undefined' && customerEmail && customerEmail.trim().length > 0;
-                    var hasPhone = typeof customerPhone !== 'undefined' && customerPhone && customerPhone.trim().length > 0;
-                    var hasContactInfo = hasEmail && hasPhone;
-                %>
-                <div style="padding: 16px; background: #f0f8ff; border: 2px solid #4a90e2; border-radius: 8px; margin-top: 16px;">
-                    <h3 style="margin: 0 0 12px 0; color: #2c5aa0; font-size: 1.1rem;">🎁 Create an Account for Exclusive Benefits!</h3>
-                    <% if (hasContactInfo) { %>
-                        <p style="margin: 0 0 12px 0; color: #2c5aa0;">We noticed you provided your contact details. Create an account to enjoy:</p>
-                    <% } else { %>
-                        <p style="margin: 0 0 12px 0; color: #2c5aa0;">Create an account with Alimond Café to enjoy:</p>
-                    <% } %>
-                    <ul style="margin: 0 0 16px 0; padding-left: 24px; color: #2c5aa0; line-height: 1.8;">
-                        <li>Quick reordering of your favorite items</li>
-                        <li>Track your order history</li>
-                        <li>Faster checkout experience</li>
-                        <li>Exclusive member promotions</li>
-                    </ul>
-                    <div style="text-align: center;">
-                        <% if (hasContactInfo) { %>
-                            <% 
-                                var regUrl = '/register?name=' + encodeURIComponent(customerName || '') + 
-                                           '&email=' + encodeURIComponent(customerEmail || '') + 
-                                           '&phone=' + encodeURIComponent(customerPhone || '');
-                            %>
-                            <a class="btn" href="<%= regUrl %>" style="background: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">✨ Register with My Details</a>
-                        <% } else { %>
-                            <a class="btn" href="/register?name=<%= encodeURIComponent(customerName || '') %>" style="background: #4a90e2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">✨ Register to Alimond Café</a>
-                        <% } %>
-                    </div>
-                </div>
-            <% } %>
-            
-            <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
-                <a class="btn" href="/order/<%= placedOrderId %>" style="background: #d4a373; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">View Order Details</a>
-                <a class="btn" href="/menu" style="background: #d4a373; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">Place Another Order</a>
-            </div>
-        </div>
-    <% } %>
-    <div style="max-width:900px; margin:20px auto;">
-        <% if (typeof orders === 'undefined' || !orders || orders.length === 0) { %>
-            <div style="text-align: center; padding: 40px 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2 style="color: #8b5a3c; margin-bottom: 16px;">🎉 Thank You for Your Order!</h2>
-                <p style="color: #666; font-size: 1.1rem; margin-bottom: 24px;">We appreciate your business and look forward to serving you again soon.</p>
-                <a class="btn" href="/menu" style="background: #8b5a3c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Return to Menu</a>
-            </div>
-        <% } else { %>
-            <table class="menu-table" style="width:100%;">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th>Size</th>
-                    <th>Milk</th>
-                    <th>Sweetener</th>
-                    <th>Toppings</th>
-                    <th>Qty</th>
-                    <th>Price/Item</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="ordersTbody">
-                <% let grand = 0; orders.forEach(function(o, idx) { %>
-                        <tr data-id="<%= o.id || o._localId || '' %>">
-                            <td class="col-index"><%= idx+1 %></td>
-                            <td class="col-customer"><input class="customer-input" type="text" value="<%= o.customerName ? o.customerName.replace(/\"/g,'&quot;') : '' %>" placeholder="Customer name"></td>
-                            <td class="col-product"><%= o.product %></td>
-                            <td class="col-size"><%= o.size %></td>
-                            <td class="col-custom"><%= o.customSelected && o.customSelected.length ? o.customSelected : '-' %></td>
-                            <td class="col-sugar"><%= o.sugar && o.sugar.length ? o.sugar : '-' %></td>
-                            <td class="col-extras"><%= o.extras && o.extras.length ? o.extras.join(', ') : '-' %></td>
-                            <td class="col-qty"><input type="number" min="0" class="qty-input" value="<%= o.qty %>"></td>
-                            <td class="col-per">₱<span class="per-val"><%= parseFloat(o.amountPerItem || o.amount || 0).toFixed(2) %></span></td>
-                            <td class="col-line">₱<span class="line-val"><%= parseFloat(o.totalAmount || (o.amountPerItem * o.qty) || 0).toFixed(2) %></span></td>
-                            <td class="col-actions">
-                                <button class="btn remove-btn" data-id="<%= o.id || o._localId || '' %>">Remove</button>
-                            </td>
-                        </tr>
-                <% grand += parseFloat(o.totalAmount || (o.amountPerItem * o.qty) || 0) || 0; }); %>
-                </tbody>
-                <tfoot>
-                <tr>
-                    <td colspan="9" style="text-align:right; font-weight:bold;">Grand Total</td>
-                    <td style="font-weight:bold;" id="grandTotal">₱<%= (parseFloat(grand)||0).toFixed(2) %></td>
-                    <td></td>
-                </tr>
-                </tfoot>
-            </table>
-            <div style="margin-top:16px;">
-                <% if (typeof placedOrderId === 'undefined' || !placedOrderId) { %>
-                    <a href="/menu" class="btn" style="background: #d4a373; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; min-width: 150px; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07); display: inline-block;">Back to Menu</a>
-                <% } else { %>
-                    <a href="/" class="btn" style="background: #7c4700; color: white; padding: 10px 20px; border: none; border-radius: 6px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;">Back to Homepage</a>
-                <% } %>
-                
-                <% if (typeof placedOrderId === 'undefined' || !placedOrderId) { %>
-                <!-- Customer Information and Payment Section -->
-                <div style="margin-top: 24px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <h3 style="margin: 0 0 16px 0; color: #7c4700; font-size: 1.2rem;">Customer Information</h3>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
-                                Customer Name <span style="color: #dc3545;">*</span>
-                            </label>
-                            <input id="checkoutCustomer" type="text" required placeholder="Your name" 
-                                value="<%= user ? ((user.FirstName || '') + ' ' + (user.LastName || '')).trim() || user.Username || '' : '' %>"
-                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
-                                Email Address <span style="color: #999; font-size: 0.85rem;">(optional)</span>
-                            </label>
-                            <input id="checkoutEmail" type="email" placeholder="your@email.com" 
-                                value="<%= user && user.Email ? user.Email : '' %>"
-                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #7c4700; font-size: 0.95rem;">
-                                Phone Number <span style="color: #999; font-size: 0.85rem;">(optional)</span>
-                            </label>
-                            <input id="checkoutPhone" type="tel" placeholder="09XXXXXXXXX" 
-                                value="<%= user && user.MobilePhone ? user.MobilePhone : '' %>"
-                                style="width: 100%; padding: 10px 14px; border: 2px solid #d4a574; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; box-sizing: border-box;">
-                        </div>
-                    </div>
-                    
-                    <div style="border-top: 1px solid #e0e0e0; padding-top: 20px;">
-                        <h3 style="margin: 0 0 16px 0; color: #7c4700; font-size: 1.2rem;">Select Payment Method</h3>
-                        
-                        <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-                            <form id="cashPaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
-                                <input type="hidden" name="customerName" class="customerNameInput" required>
-                                <input type="hidden" name="customerEmail" class="customerEmailInput">
-                                <input type="hidden" name="customerPhone" class="customerPhoneInput">
-                                <input type="hidden" name="paymentMethod" value="Cash">
-                                <button type="submit" class="btn payment-btn" style="background: linear-gradient(135deg, #28a745 0%, #20833a 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">💵 Cash Payment</button>
-                            </form>
-                            <form id="gcashPaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
-                                <input type="hidden" name="customerName" class="customerNameInput" required>
-                                <input type="hidden" name="customerEmail" class="customerEmailInput">
-                                <input type="hidden" name="customerPhone" class="customerPhoneInput">
-                                <input type="hidden" name="paymentMethod" value="GCash">
-                                <button type="submit" class="btn payment-btn" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">📱 GCash Payment</button>
-                            </form>
-                            <form id="onlinePaymentForm" action="/checkout" method="POST" style="display:inline; margin:0;">
-                                <input type="hidden" name="customerName" class="customerNameInput" required>
-                                <input type="hidden" name="customerEmail" class="customerEmailInput">
-                                <input type="hidden" name="customerPhone" class="customerPhoneInput">
-                                <input type="hidden" name="paymentMethod" value="Online">
-                                <button type="submit" class="btn payment-btn" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; min-width: 160px;">💳 Online Payment</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <% } %>
-            </div>
-            
-            <style>
-                #checkoutCustomer:focus,
-                #checkoutEmail:focus,
-                #checkoutPhone:focus {
-                    border-color: #7c4700;
-                    box-shadow: 0 0 0 3px rgba(124, 71, 0, 0.1);
-                }
-                
-                .payment-btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                }
-                
-                .payment-btn:active {
-                    transform: translateY(0);
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                }
-                
-                .btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                }
-                
-                .btn:active {
-                    transform: translateY(0);
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                }
-                
-                @media (max-width: 768px) {
-                    .payment-btn {
-                        width: 100%;
-                        min-width: auto !important;
-                    }
-                }
-            </style>
-
-            <script>
-                (function(){
-                    function q(sel,ctx){return (ctx||document).querySelector(sel);} function qa(sel,ctx){return Array.from((ctx||document).querySelectorAll(sel));}
-                    var tbody = q('#ordersTbody');
-                    var grandEl = q('#grandTotal');
-                    var checkoutCustomer = q('#checkoutCustomer');
-                    var checkoutEmail = q('#checkoutEmail');
-                    var checkoutPhone = q('#checkoutPhone');
-
-                    // Sync customer info to all payment forms
-                    function syncCustomerInfo() {
-                        var name = checkoutCustomer ? checkoutCustomer.value : '';
-                        var email = checkoutEmail ? checkoutEmail.value : '';
-                        var phone = checkoutPhone ? checkoutPhone.value : '';
-                        
-                        qa('.customerNameInput').forEach(function(input) {
-                            input.value = name;
-                        });
-                        qa('.customerEmailInput').forEach(function(input) {
-                            input.value = email;
-                        });
-                        qa('.customerPhoneInput').forEach(function(input) {
-                            input.value = phone;
-                        });
-                    }
-
-                    if (checkoutCustomer) {
-                        checkoutCustomer.addEventListener('input', syncCustomerInfo);
-                    }
-                    if (checkoutEmail) {
-                        checkoutEmail.addEventListener('input', syncCustomerInfo);
-                    }
-                    if (checkoutPhone) {
-                        checkoutPhone.addEventListener('input', syncCustomerInfo);
-                    }
-
-                    // Validate customer info before submitting any payment form
-                    qa('form[id$="PaymentForm"]').forEach(function(form) {
-                        form.addEventListener('submit', function(e) {
-                            var name = checkoutCustomer ? checkoutCustomer.value.trim() : '';
-                            
-                            if (!name) {
-                                e.preventDefault();
-                                alert('Please enter customer name');
-                                if (checkoutCustomer) checkoutCustomer.focus();
-                                return false;
-                            }
-                            
-                            syncCustomerInfo();
-                        });
-                    });
-
-                    function recalcGrand(){
-                        var sum = 0; qa('#ordersTbody tr').forEach(function(r){ var v = parseFloat((r.querySelector('.line-val')||{textContent:'0'}).textContent||0) || 0; sum += v; });
-                        if (grandEl) grandEl.textContent = '₱' + sum.toFixed(2);
-                    }
-
-                    function showNoOrdersMessage(){
-                        var container = document.querySelector('div[style*="max-width:900px"]');
-                        container.innerHTML = '<p>No order available. <a href="/menu">Return to menu</a></p>';
-                    }
-
-                    // Attach listeners to each row: qty change, customer name change, remove
-                    qa('#ordersTbody tr').forEach(function(row){
-                        var id = row.dataset.id;
-                        var qtyInput = row.querySelector('.qty-input');
-                        var custInput = row.querySelector('.customer-input');
-                        var per = parseFloat((row.querySelector('.per-val')||{textContent:'0'}).textContent) || 0;
-                        var lineEl = row.querySelector('.line-val');
-                        var removeBtn = row.querySelector('.remove-btn');
-
-                        // initialize checkout customer name from first row if blank
-                        if (checkoutCustomer && custInput && !checkoutCustomer.value) {
-                            if (custInput.value && custInput.value.trim()) {
-                                checkoutCustomer.value = custInput.value.trim();
-                                syncCustomerInfo();
-                            }
-                        }
-
-                        qtyInput.addEventListener('change', function(){
-                            var newQ = parseInt(qtyInput.value,10) || 0;
-                            var newLine = per * newQ; if (lineEl) lineEl.textContent = newLine.toFixed(2); recalcGrand();
-                            if (!id) return; // session-only client local change already reflected
-                            fetch('/order-edit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, qty: newQ }) })
-                                .then(r=>r.json()).then(function(js){ if (!js || !js.success) alert('Failed to update qty'); });
-                        });
-
-                        if (custInput) {
-                            var tId = null;
-                            custInput.addEventListener('input', function(){
-                                // debounce
-                                if (tId) clearTimeout(tId);
-                                tId = setTimeout(function(){
-                                    var v = custInput.value || '';
-                                    if (checkoutCustomer && !checkoutCustomer.value) {
-                                        checkoutCustomer.value = v;
-                                        syncCustomerInfo();
-                                    }
-                                    if (!id) return;
-                                    fetch('/order-edit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id, customerName: v }) })
-                                        .then(r=>r.json()).then(function(js){ if (!js || !js.success) console.warn('Failed to update customerName'); });
-                                }, 400);
-                            });
-                        }
-
-                        if (removeBtn) {
-                            removeBtn.addEventListener('click', function(){
-                                var isLast = (qa('#ordersTbody tr').length === 1);
-                                var proceed = true;
-                                if (isLast) proceed = confirm('Remove last order?');
-                                if (!proceed) return;
-                                if (!id) {
-                                    row.remove(); recalcGrand(); if (qa('#ordersTbody tr').length === 0) showNoOrdersMessage(); return;
-                                }
-                                fetch('/order-remove', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id }) })
-                                    .then(r=>r.json()).then(function(js){ if (js && js.success) {
-                                        row.remove(); recalcGrand(); if ((js.remaining||0) === 0) showNoOrdersMessage();
-                                    } else { alert('Failed to remove order'); } }).catch(function(){ alert('Remove failed'); });
-                            });
-                        }
-                    });
-
-                    // keep grand accurate on load
-                    recalcGrand();
-                })();
-            </script>
-        <% } %>
-    </div>
-    
-        <footer class="footer">
-                <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
-                <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
-        </footer>
-
-        <div style="margin: 20px 0; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
-            <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 <%= __('Toggle Dark Mode') %></button>
-            <a href="/menu" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
-                <%= __('View Full Menu') %>
-            </a>
-        </div>
-
-    <script>
-      function toggleDarkMode() {
-        var isDark = document.body.classList.toggle('dark-mode');
-        try { localStorage.setItem('darkMode', isDark ? '1' : '0'); } catch(e) {}
-      }
-      
-      // Restore saved dark mode preference
-      (function() {
-        try {
-          var saved = localStorage.getItem('darkMode');
-          if (saved === '1') document.body.classList.add('dark-mode');
-        } catch(e) {}
-      })();
-    </script>
 </body>
+
 </html>
