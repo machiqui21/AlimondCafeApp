@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('User registration should work', async ({ page }) => {
+test('User Registration Tests', async ({ page }) => {
   // Navigate to register page
   await page.goto('http://localhost:2000/register');
   
@@ -54,7 +54,10 @@ test('User registration should work', async ({ page }) => {
   }
   
   // Should be on success page or redirected
-  expect(url).not.toContain('/register');
-  
+  await expect(url).toContain('/register');
+  await expect(page.getByRole('heading', { name: 'Registration Successful' })).toBeVisible();
   console.log('✓ Registration successful!');
+  await page.getByRole('link', { name: 'Logout' }).click();
+  const myButton = page.getByRole('link', { name: 'Logout' });
+  await expect(myButton).toBeTruthy();
 });

@@ -160,7 +160,8 @@ button:hover,
 @media (max-width: 700px) {
 
   button,
-  .btn {
+  .btn,
+  .dark-mode-toggle {
     font-size: 1em;
     padding: 0.5em 1em;
     width: 100%;
@@ -754,6 +755,51 @@ body.dark-mode a {
 
 body.dark-mode a:hover {
   color: #aac8ff;
+}
+
+/* Dark Mode Toggle Button */
+.dark-mode-toggle {
+  font-size: 1.1em;
+  padding: 0.6em 1.4em;
+  border-radius: 6px;
+  border: none;
+  background: #8b5a3c;
+  color: #fff;
+  cursor: pointer;
+  margin: 0.5em 0.3em;
+  transition: background 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  display: inline-block;
+  font-weight: 500;
+}
+
+.dark-mode-toggle:hover {
+  background: #7a4d30;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .dark-mode-toggle {
+  background: #d4a373;
+  color: #1e1e1e;
+}
+
+body.dark-mode .dark-mode-toggle:hover {
+  background: #e5b684;
+  color: #1e1e1e;
+}
+
+/* Improve dark mode button contrast */
+body.dark-mode button,
+body.dark-mode .btn {
+  background-color: #8b5a3c;
+  color: #ffffff;
+}
+
+body.dark-mode button:hover,
+body.dark-mode .btn:hover {
+  background-color: #a16841;
+  color: #ffffff;
 }
 
 /* Google Translate Widget Styling */

@@ -164,8 +164,48 @@
           <% items.forEach(function(item, idx) { %>
             <tr>
               <td><%= idx + 1 %></td>
-              <td><%= item.ProductName || 'Product #' + item.ProductID %></td>
-              <td><%= item.Size || '-' %></td>
+              <td>
+                <div style="font-weight: 600; margin-bottom: 4px;">
+                  <%= item.ProductName || 'Product #' + item.ProductID %>
+                </div>
+                <% 
+                  // Calculate base size price if item has a size
+                  var baseSizePrice = 0;
+                  if (item.Size) {
+                    baseSizePrice = parseFloat(item.UnitPrice || 0) || 0;
+                    if (item.options && item.options.length > 0) {
+                      item.options.forEach(function(opt) {
+                        baseSizePrice -= (parseFloat(opt.price) || 0);
+                      });
+                    }
+                  }
+                  var hasOptions = item.options && item.options.length > 0;
+                  var optionsCount = item.options ? item.options.length : 0;
+                %>
+                <% if (hasOptions) { %>
+                  <div style="margin-top: 8px; padding: 8px 12px; background: #f8f9fa; border-left: 3px solid #7c4700; border-radius: 4px;">
+                    <% item.options.forEach(function(opt) { %>
+                      <div style="font-size: 0.9rem; color: #555; margin: 3px 0;">
+                        <span style="font-weight: 600; color: #7c4700;"><%= opt.type %>:</span> 
+                        <span style="color: #333;"><%= opt.name %></span>
+                        <% if (opt.price > 0) { %>
+                          <span style="color: #28a745; font-size: 0.85rem; margin-left: 4px;">(+₱<%= opt.price.toFixed(2) %>)</span>
+                        <% } %>
+                      </div>
+                    <% }); %>
+                  </div>
+                <% } else { %>
+                  <div style="margin-top: 4px; padding: 4px 8px; background: #fff3cd; border-left: 2px solid #ffc107; font-size: 0.85rem; color: #856404;">
+                    No customizations (Options: <%= optionsCount %>)
+                  </div>
+                <% } %>
+              </td>
+              <td>
+                <%= item.Size || '-' %>
+                <% if (item.Size && baseSizePrice > 0) { %>
+                  <div style="color: #28a745; font-size: 0.85rem;">(₱<%= baseSizePrice.toFixed(2) %>)</div>
+                <% } %>
+              </td>
               <td><%= item.Quantity %></td>
               <td>₱<%= parseFloat(item.UnitPrice || 0).toFixed(2) %></td>
               <td>₱<%= parseFloat(item.Subtotal || 0).toFixed(2) %></td>
@@ -178,28 +218,6 @@
         <% } %>
       </tbody>
     </table>
-
-    <% if (options && options.length > 0) { %>
-      <h3 style="margin-top: 30px;">Order Options</h3>
-      <table class="menu-table" style="width: 100%;">
-        <thead>
-          <tr>
-            <th>Option Type</th>
-            <th>Value</th>
-            <th>Extra Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% options.forEach(function(opt) { %>
-            <tr>
-              <td><%= opt.OptionName %></td>
-              <td><%= opt.OptionValue %></td>
-              <td>₱<%= parseFloat(opt.ExtraPrice || 0).toFixed(2) %></td>
-            </tr>
-          <% }); %>
-        </tbody>
-      </table>
-    <% } %>
 
     <div style="margin-top: 20px;">
       <a href="/admin/dashboard" class="btn">Back to Dashboard</a>
@@ -224,15 +242,15 @@
         return;
       }
       
-      // Create form data
-      const formData = new FormData();
-      formData.append('orderId', orderId);
-      formData.append('email', customerEmail);
-      
       // Send email request
       fetch('/admin/order/' + orderId + '/send-receipt', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: customerEmail
+        })
       })
       .then(response => response.json())
       .then(data => {
@@ -243,7 +261,7 @@
         }
       })
       .catch(error => {
-        alert('✗ Failed to send receipt. Please check your internet connection.');
+        alert('✗ Failed to send receipt: ' + error.message);
         console.error('Email error:', error);
       });
     }
@@ -284,7 +302,7 @@
     }
   </style>
   
-  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
   <script>
     function toggleDarkMode() {

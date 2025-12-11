@@ -93,6 +93,50 @@
   color: white !important;
 }
 
+/* Dark Mode for Navbar */
+body.dark-mode .navbar {
+  background: #2c2c2c !important;
+  border-bottom: 1px solid #444;
+}
+
+body.dark-mode .nav-link {
+  color: #f5f5f5;
+}
+
+body.dark-mode .nav-link:hover {
+  background: rgba(212, 163, 115, 0.2);
+  color: #d4a373;
+}
+
+body.dark-mode .user-badge {
+  background: #8b5a3c;
+  color: #ffffff;
+}
+
+body.dark-mode .admin-badge {
+  background: #4a8f4a;
+  color: #ffffff;
+}
+
+body.dark-mode .logout-link {
+  color: #ff6b6b !important;
+}
+
+body.dark-mode .logout-link:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff4444 !important;
+}
+
+body.dark-mode .login-link {
+  background: #8b5a3c;
+  color: #ffffff !important;
+}
+
+body.dark-mode .login-link:hover {
+  background: #a16841;
+  color: #ffffff !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .navbar .container-fluid {

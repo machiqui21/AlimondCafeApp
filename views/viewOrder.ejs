@@ -33,16 +33,46 @@
       </section>
     <% } %>
 
-    <% if (typeof qrCodeDataUrl !== 'undefined' && qrCodeDataUrl) { %>
-      <section style="margin-top:16px; background:#fff; border-radius:8px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06); text-align:center;">
-        <h3 style="margin-top:0; color:#7c4700;">Scan to Pay</h3>
-        <img src="<%= qrCodeDataUrl %>" alt="Payment QR Code" style="max-width:300px; border:2px solid #e5e7eb; border-radius:8px; padding:8px;"/>
-        <p style="margin-top:12px; color:#666;">
-          Scan this QR code with your payment app<br/>
-          <strong>Account:</strong> 09265363860<br/>
-          <strong>Amount:</strong> ₱<%= (parseFloat(header && header.TotalAmount || 0)||0).toFixed(2) %><br/>
-          <strong>Order ID:</strong> #<%= (header && (header.OrderID||header.ID)) %>
-        </p>
+    <% if (header && (header.PaymentMethod === 'GCash' || header.PaymentMethod === 'Online') && header.StatusDescription === 'Pending') { %>
+      <section style="margin-top:16px; background:#fff; border-radius:8px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <h3 style="margin-top:0; color:#7c4700; text-align:center;">
+          <% if (header.PaymentMethod === 'GCash') { %>
+            💳 GCash Payment
+          <% } else { %>
+            💳 Online Payment
+          <% } %>
+        </h3>
+        
+        <% if (typeof qrCodeDataUrl !== 'undefined' && qrCodeDataUrl) { %>
+          <div style="text-align:center; margin:20px 0;">
+            <img src="<%= qrCodeDataUrl %>" alt="Payment QR Code" style="max-width:300px; border:2px solid #e5e7eb; border-radius:8px; padding:8px; margin:0 auto;"/>
+          </div>
+        <% } %>
+        
+        <div style="margin-top:16px; padding:16px; background:#f9fafb; border-radius:8px;">
+          <p style="margin:0 0 12px 0; color:#374151; font-size:1rem; font-weight:600;">Payment Instructions:</p>
+          <ul style="margin:0; padding-left:24px; color:#4b5563; line-height:1.8;">
+            <% if (header.PaymentMethod === 'GCash') { %>
+              <li>Open your <strong>GCash app</strong></li>
+              <li>Scan the QR code above</li>
+              <li>Enter the amount: <strong style="color:#16a34a;">₱<%= (parseFloat(header.TotalAmount || 0)).toFixed(2) %></strong></li>
+              <li>Add a note: <strong>Order #<%= header.OrderID || header.ID %></strong></li>
+              <li>Complete the payment and wait for confirmation</li>
+            <% } else { %>
+              <li>Use your preferred <strong>online payment method</strong></li>
+              <li>Scan the QR code above</li>
+              <li>Enter the amount: <strong style="color:#16a34a;">₱<%= (parseFloat(header.TotalAmount || 0)).toFixed(2) %></strong></li>
+              <li>Include reference: <strong>Order #<%= header.OrderID || header.ID %></strong></li>
+              <li>Complete the payment and wait for confirmation</li>
+            <% } %>
+          </ul>
+        </div>
+        
+        <div style="margin-top:16px; padding:12px; background:#fef3c7; border-left:4px solid #f59e0b; border-radius:4px;">
+          <p style="margin:0; color:#92400e; font-size:0.95rem;">
+            ⏰ <strong>Please complete your payment.</strong> Your order will be processed once payment is confirmed.
+          </p>
+        </div>
       </section>
     <% } %>
 
@@ -62,8 +92,37 @@
             <tr>
               <td><%= idx+1 %></td>
               <td>
-                <%= it.ProductName || ('#'+(it.ProductID||'')) %>
-                <% if (it.Size) { %><br/><small>Size: <%= it.Size %></small><% } %>
+                <div style="font-weight: 600; margin-bottom: 4px;">
+                  <%= it.ProductName || ('#'+(it.ProductID||'')) %>
+                  <% if (it.Size) { %>
+                    <% 
+                      // Calculate base size price by subtracting option prices from unit price
+                      let baseSizePrice = parseFloat(it.UnitPrice || it.Price || 0) || 0;
+                      if (it.options && it.options.length > 0) {
+                        it.options.forEach(function(opt) {
+                          baseSizePrice -= (parseFloat(opt.price) || 0);
+                        });
+                      }
+                    %>
+                    <span style="color: #666; font-weight: 500;"> - <%= it.Size %></span>
+                    <% if (baseSizePrice > 0) { %>
+                      <span style="color: #28a745; font-size: 0.85rem;">(₱<%= baseSizePrice.toFixed(2) %>)</span>
+                    <% } %>
+                  <% } %>
+                </div>
+                <% if (it.options && it.options.length > 0) { %>
+                  <div style="margin-top: 8px; padding-left: 12px; border-left: 3px solid #d4a574;">
+                    <% it.options.forEach(function(opt, optIdx) { %>
+                      <div style="font-size: 0.9rem; color: #555; margin: 4px 0;">
+                        <span style="font-weight: 600; color: #7c4700;"><%= opt.type %>:</span> 
+                        <%= opt.name %>
+                        <% if (opt.price > 0) { %>
+                          <span style="color: #28a745; font-size: 0.85rem;">(+₱<%= opt.price.toFixed(2) %>)</span>
+                        <% } %>
+                      </div>
+                    <% }); %>
+                  </div>
+                <% } %>
               </td>
               <td><%= it.Quantity || it.qty || 1 %></td>
               <td>₱<%= (parseFloat(it.UnitPrice||it.Price||0)||0).toFixed(2) %></td>
@@ -74,55 +133,32 @@
       </table>
     </section>
 
-    <section style="margin-top:16px; display:flex; gap:16px; flex-wrap:wrap;">
-      <% var opts = optionsByType || {}; %>
-      <div style="flex:1 1 260px; background:#fff; padding:12px 16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-        <h3>Sweetener</h3>
-        <% if (opts.Sweetener && opts.Sweetener.length) { %>
-          <ul>
-            <% opts.Sweetener.forEach(function(o){ %>
-              <li><%= o.name %> <small>(₱<%= (parseFloat(o.price||0)||0).toFixed(2) %>)</small></li>
-            <% }); %>
-          </ul>
-        <% } else { %>
-          <div class="empty">None</div>
-        <% } %>
-      </div>
+    <!-- Options are now displayed inline with each product above -->
 
-      <div style="flex:1 1 260px; background:#fff; padding:12px 16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-        <h3>Milk</h3>
-        <% if (opts.Milk && opts.Milk.length) { %>
-          <ul>
-            <% opts.Milk.forEach(function(o){ %>
-              <li><%= o.name %> <small>(₱<%= (parseFloat(o.price||0)||0).toFixed(2) %>)</small></li>
-            <% }); %>
-          </ul>
-        <% } else { %>
-          <div class="empty">None</div>
-        <% } %>
-      </div>
-
-      <div style="flex:1 1 260px; background:#fff; padding:12px 16px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-        <h3>Toppings</h3>
-        <% if (opts.Topping && opts.Topping.length) { %>
-          <ul>
-            <% opts.Topping.forEach(function(o){ %>
-              <li><%= o.name %> <small>(₱<%= (parseFloat(o.price||0)||0).toFixed(2) %>)</small></li>
-            <% }); %>
-          </ul>
-        <% } else { %>
-          <div class="empty">None</div>
-        <% } %>
-      </div>
-    </section>
-
-    <div style="margin-top:16px; display:flex; gap:12px;">
+    <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+      <% if (header && (header.StatusDescription === 'Completed' || header.StatusDescription === 'Ready')) { %>
+        <form action="/reorder/<%= header.OrderID %>" method="POST" style="margin:0;">
+          <button type="submit" class="btn" style="background:#28a745; border-color:#28a745;">
+            🔄 Reorder
+          </button>
+        </form>
+      <% } %>
       <a class="btn" href="/menu">Back to Menu</a>
       <a class="btn" href="/">Back to Homepage</a>
     </div>
   </main>
   
-  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #8b5a3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+  <footer class="footer">
+    <p>📍 <%= __('Alimond\'s Café – Every cup brewed with love, for the neighborhood we call home.') %></p>
+    <p><%= __('Follow us @alimondscafe | Open daily 9am–7pm') %></p>
+  </footer>
+
+  <div style="margin: 20px; padding: 0 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">🌙 <%= __('Toggle Dark Mode') %></button>
+    <a href="/" class="btn" style="background: linear-gradient(135deg, #d4a574 0%, #c99860 100%); color: white; height: 48px; padding: 0 24px; text-decoration: none; border-radius: 8px;margin-top: 0; font-size: 1rem; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.3s ease; display: inline-block; min-width: 150px; text-align: center; font-family: inherit; line-height: 48px;">
+      <%= __('View Full Menu') %>
+    </a>
+  </div>
 
   <script>
     function toggleDarkMode() {

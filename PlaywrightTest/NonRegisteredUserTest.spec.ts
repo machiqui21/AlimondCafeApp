@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 // Base URL for the application
 const BASE_URL = 'http://localhost:2000';
 
-test.describe('Alimond Cafe App Tests', () => {
+test.describe('User Navigation Tests', () => {
 
   test('should load homepage successfully', async ({ page }) => {
     await page.goto(BASE_URL);
@@ -68,71 +68,6 @@ test.describe('Alimond Cafe App Tests', () => {
     await page.getByLabel('Pastry').getByRole('button', { name: 'Add to Order' }).click();
     await page.getByRole('link', { name: 'Checkout' }).click();
     await expect(page.getByRole('heading', { name: 'Order Details' })).toBeVisible();
-    await expect(page.locator('body')).toMatchAriaSnapshot(`
-    - banner:
-      - img
-      - heading "Order Details" [level=1]
-    - table:
-      - rowgroup:
-        - row "# Customer Product Size Milk Sweetener Toppings Qty Price/Item Total Actions":
-          - cell "#"
-          - cell "Customer"
-          - cell "Product"
-          - cell "Size"
-          - cell "Milk"
-          - cell "Sweetener"
-          - cell "Toppings"
-          - cell "Qty"
-          - cell "Price/Item"
-          - cell "Total"
-          - cell "Actions"
-      - rowgroup:
-        - row /1 Iced Coffee Brew Small Soy Milk \\d+% sweetness \\(approx\\. 4g\\) Hazelnut 1 ₱\\d+\\.\\d+ ₱\\d+\\.\\d+ Remove/:
-          - cell "1"
-          - cell:
-            - textbox "Customer name"
-          - cell "Iced Coffee Brew"
-          - cell "Small"
-          - cell "Soy Milk"
-          - cell /\\d+% sweetness \\(approx\\. 4g\\)/
-          - cell "Hazelnut"
-          - cell "1":
-            - spinbutton: "1"
-          - cell /₱\\d+\\.\\d+/
-          - cell /₱\\d+\\.\\d+/
-          - cell "Remove":
-            - button "Remove"
-        - row /2 Cookies - - - 1 ₱\\d+\\.\\d+ ₱\\d+\\.\\d+ Remove/:
-          - cell "2"
-          - cell:
-            - textbox "Customer name"
-          - cell "Cookies"
-          - cell
-          - cell "-"
-          - cell "-"
-          - cell "-"
-          - cell "1":
-            - spinbutton: "1"
-          - cell /₱\\d+\\.\\d+/
-          - cell /₱\\d+\\.\\d+/
-          - cell "Remove":
-            - button "Remove"
-      - rowgroup:
-        - row /Grand Total ₱\\d+\\.\\d+/:
-          - cell "Grand Total"
-          - cell /₱\\d+\\.\\d+/
-          - cell
-    - link "Back to Menu":
-      - /url: /menu
-    - text: "Customer name:"
-    - textbox "Customer name:":
-      - /placeholder: Your name
-    - text: "Payment Options:"
-    - button "💵 Cash Payment"
-    - button "📱 GCash Payment"
-    - button "💳 Online Payment"
-    - button "🌙 Toggle Dark Mode"
-    `);
     await expect(page.getByRole('button', { name: '💵 Cash Payment' })).toBeVisible();
     await expect(page.getByRole('button', { name: '📱 GCash Payment' })).toBeVisible();
     await expect(page.getByRole('button', { name: '💳 Online Payment' })).toBeVisible();

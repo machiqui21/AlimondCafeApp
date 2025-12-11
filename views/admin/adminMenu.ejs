@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Menu - Alimond's Café</title>
   <link rel="stylesheet" href="/menu.css">
+  <link rel="stylesheet" href="/admin.css">
   <style>
     * {
       margin: 0;
@@ -224,8 +225,9 @@
       background: #5a6268;
     }
     .btn-small {
-      padding: 5px 12px;
+      padding: 6px 10px;
       font-size: 12px;
+      min-height: 28px;
     }
     .modal {
       display: none;
@@ -326,7 +328,7 @@
       transition: transform 0.3s, box-shadow 0.3s;
       display: flex;
       flex-direction: column;
-      min-height: 280px;
+      min-height: 560px;
     }
     .product-card:hover {
       transform: translateY(-2px);
@@ -341,51 +343,51 @@
       display: flex;
       justify-content: space-between;
       align-items: start;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
     .product-name {
-      font-size: 1.2em;
+      font-size: 1.15em;
       font-weight: bold;
       color: #7c4700;
+      margin-bottom: 2px;
     }
     .product-category {
       display: inline-block;
       background: #e3f2fd;
       color: #1976d2;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.8em;
-      margin-bottom: 8px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.72em;
+      margin-bottom: 4px;
     }
     .product-type {
       display: inline-block;
       background: #fff3e0;
       color: #f57c00;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.8em;
-      margin-left: 5px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.72em;
+      margin-left: 3px;
     }
     .product-description {
-      color: #666;
-      font-size: 0.9em;
-      margin-bottom: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      color: #333;
+      font-size: 0.85em;
+      margin-bottom: 6px;
+      line-height: 1.25;
+      padding: 0;
+      font-style: italic;
+      display: block;
     }
     .product-price {
-      font-size: 1.1em;
+      font-size: 1em;
       font-weight: bold;
       color: #28a745;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
     .product-flags {
       display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 5px;
+      margin-bottom: 6px;
       flex-wrap: wrap;
     }
     .flag {
@@ -401,14 +403,13 @@
     }
     .product-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex-direction: column;
+      gap: 5px;
       margin-top: auto;
-      padding-top: 15px;
+      padding-top: 10px;
     }
     .product-actions .btn {
-      flex: 1;
-      min-width: 70px;
+      width: 100%;
       text-align: center;
       white-space: nowrap;
     }
@@ -461,6 +462,44 @@
       content: " (Unavailable)";
       font-size: 0.8em;
       color: #dc3545;
+    }
+    
+    /* Dark Mode Support */
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #f5f5f5;
+    }
+    body.dark-mode .product-card {
+      background: #2c2c2c;
+      color: #f5f5f5;
+    }
+    body.dark-mode .product-name {
+      color: #d4a373;
+    }
+    body.dark-mode .product-description {
+      color: #ddd;
+    }
+    body.dark-mode .product-price {
+      color: #4caf50;
+    }
+    body.dark-mode .tabs-container {
+      background: #2c2c2c;
+    }
+    body.dark-mode .tab {
+      color: #ccc;
+    }
+    body.dark-mode .tab.active {
+      background: #3a3a3a;
+      color: #d4a373;
+      border-bottom-color: #d4a373;
+    }
+    body.dark-mode .filter-item label {
+      color: #ccc;
+    }
+    body.dark-mode .filter-item select {
+      background: #3a3a3a;
+      color: #f5f5f5;
+      border-color: #555;
     }
   </style>
 </head>
@@ -768,7 +807,7 @@
             <% if (product.HasSizes && SizePriceData) { %>
               <% var productSizes = SizePriceData.filter(function(sp) { return sp.ProductID === product.ProductID; }); %>
               <% if (productSizes.length > 0) { %>
-                <div style="font-size: 0.85em; color: #666; margin-top: 8px;">
+                <div style="font-size: 0.78em; color: #666; margin-top: 4px; margin-bottom: 2px;">
                   <strong>Sizes:</strong>
                   <% productSizes.forEach(function(sp, idx) { %>
                     <%= sp.Size %>: ₱<%= sp.Price.toFixed(2) %><%= idx < productSizes.length - 1 ? ', ' : '' %>
@@ -1249,7 +1288,7 @@
         <div>
           <input type="text" name="sizeNames[]" placeholder="Size (e.g., Small, Medium)" value="${sizeName}" class="form-control">
         </div>
-        <div>
+c:\Users\MCDelRosario\AppData\Local\Packages\MicrosoftWindows.Client.Core_cw5n1h2txyewy\TempState\ScreenClip\{F4992738-66E5-4C35-ACEF-69AC95A5D52B}.png        <div>
           <input type="number" name="sizePrices[]" placeholder="Price" step="0.01" min="0" value="${price}" class="form-control">
         </div>
         <div>
@@ -1398,7 +1437,7 @@
     })();
   </script>
   
-  <button onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; background: #7c4700; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">🌙 Toggle Dark Mode</button>
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 </body>
 </html>
 
