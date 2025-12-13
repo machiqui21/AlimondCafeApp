@@ -2155,6 +2155,53 @@ app.post('/checkout', async function (req, res) {
         }
 });
 
+// View order details
+app.get('/orderSummary', async function (req, res) {
+        try {
+                const orderId = parseInt(req.params.orderId, 10);
+
+                // Get order details
+                const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1',
+                        [orderId]);
+                if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
+
+                const order = orderRow[0];
+
+                // Get order items
+                const items = await dbQuery(`
+            SELECT od.*, p.Name AS ProductName
+            FROM order_details od
+            LEFT JOIN products p ON p.ProductID = od.ProductID
+            WHERE od.OrderID = ?
+            ORDER BY od.OrderDetailID
+        `, [orderId]);
+
+                // Get order options
+                const options = await dbQuery(`
+            SELECT oio.* 
+            FROM order_item_options oio
+            WHERE oio.OrderDetailID IN (SELECT OrderDetailID FROM order_details WHERE OrderID = ?)
+            ORDER BY oio.OptionID
+        `, [orderId]);
+
+                // Get all statuses for dropdown
+                const statuses = await dbQuery('SELECT * FROM status ORDER BY StatusID');
+
+                res.render('admin/orderDetail', {
+                        adminUser: req.session.adminUser,
+                        order: order,
+                        items: items || [],
+                        options: options || [],
+                        statuses: statuses || [],
+                        created: false,
+                        __: req.__
+                });
+        } catch (e) {
+                console.error('Admin order view error:', e);
+                res.status(500).send('Failed to load order');
+        }
+});
+
 // Payment route - handles both cash and online payment
 app.get('/payment', async function (req, res) {
         try {
