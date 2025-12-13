@@ -1,28 +1,22 @@
+// PlaywrightTest/AdminUserTest.spec.ts
 import { test, expect } from '@playwright/test';
+import { getDecryptedTestPassword } from './helpers/secret.helper';
 
-// Base URL for the application
 const BASE_URL = 'http://localhost:2000';
+const password = getDecryptedTestPassword(); 
 
-test.describe('Admin Navigation Tests', () => {
-  test.beforeAll(async ({ request }) => {
-    // Create or update an admin user for tests via secured test-only endpoint
-    await request.post(`${BASE_URL}/__test__/admin`, {
-      headers: { 'x-test-token': 'secret-test-token' },
-      data: { username: 'Admin', password: '12345', email: 'admin@example.com' },
-    });
-  });
-  test('should handle admin login with valid credentials', async ({ page }) => {
+test('admin login with encrypted password', async ({ page }) => {
+
+  await page.goto(`${BASE_URL}/login`);
+  await page.getByPlaceholder('User Name').fill('Admin');
+  await page.getByPlaceholder('Password').fill(password);
+  await page.getByRole('button', { name: /login/i }).click();
+  await expect(page).toHaveURL(/admin\/dashboard/);
+});
+test('admin should access queue page', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
     await page.getByPlaceholder('User Name').fill('Admin');
-    await page.getByPlaceholder('Password').fill('12345');
-    await page.getByRole('button', { name: /login/i }).click();
-    await expect(page).toHaveURL(/admin\/dashboard/);
-  });
-
-  test('admin should access queue page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
-    await page.getByPlaceholder('User Name').fill('Admin');
-    await page.getByPlaceholder('Password').fill('12345');
+    await page.getByPlaceholder('Password').fill(password);
     await page.getByRole('button', { name: /login/i }).click();
 
     // Navigate to admin queue
@@ -34,5 +28,4 @@ test.describe('Admin Navigation Tests', () => {
     await expect(page.getByRole('link', { name: 'Order Queue' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Menu' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Logout' })).toBeVisible();
-  });
 });
