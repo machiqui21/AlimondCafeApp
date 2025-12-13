@@ -1,5 +1,9 @@
+// PlaywrightTest/AdminUserTest.spec.ts
 import { test, expect } from '@playwright/test';
+import { getDecryptedTestPassword } from './helpers/secret.helper';
 
+
+const password = getDecryptedTestPassword(); 
 test('User Registration Tests', async ({ page }) => {
   // Navigate to register page
   await page.goto('http://localhost:2000/register');
@@ -15,7 +19,7 @@ test('User Registration Tests', async ({ page }) => {
     username: `testuser${timestamp}`,
     email: `test${timestamp}@example.com`,
     mobilePhone: '1234567890',
-    password: 'password123'
+    password: password
   };
   
   console.log('Testing registration with username:', testUser.username);

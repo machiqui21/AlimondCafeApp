@@ -4,42 +4,32 @@ import { test, expect } from '@playwright/test';
 const BASE_URL = 'http://localhost:2000';
 
 test.describe('User Navigation Tests', () => {
-
   test('should load homepage successfully', async ({ page }) => {
     await page.goto(BASE_URL);
-
     // Check if page loads and has expected title
     await expect(page).toHaveTitle(/Alimond/i);
   });
-
   test('should navigate to menu page', async ({ page }) => {
     await page.goto(BASE_URL);
-
     // Click on menu link (adjust selector based on your actual navbar)
     await page.getByRole('link', { name: 'Menu', exact: true }).click();
-
     // Verify we're on the menu page
     await expect(page).toHaveURL(/\/menu/);
   });
-
   test('should display product categories on menu', async ({ page }) => {
     await page.goto(`${BASE_URL}/menu`);
-
     // Wait for products to load
     await page.waitForSelector('.category, .product-item, [data-category]', {
       timeout: 5000
     }).catch(() => {
       // If specific selectors don't exist, at least check page loaded
     });
-
     // Check that menu content is visible
     const content = await page.textContent('body');
     expect(content).toBeTruthy();
   });
-
   test('should navigate to login page', async ({ page }) => {
     await page.goto(`${BASE_URL}/login`);
-
     // Check for login form elements
     await expect(page.getByRole('textbox', { name: 'User Name' })).toBeVisible();
     await expect(page.locator('input[name="password"], input[type="password"]')).toBeVisible();
@@ -47,7 +37,6 @@ test.describe('User Navigation Tests', () => {
     await expect (page.getByRole('button', { name: 'Login' })).toBeVisible();
     await expect (page.getByRole('link', { name: 'Create Account' })).toBeVisible();
   });
-
   test('should navigate to register page', async ({ page }) => {
     await page.goto(`${BASE_URL}/register`);
 
@@ -55,10 +44,8 @@ test.describe('User Navigation Tests', () => {
     await expect(page.locator('#registerForm')).toBeVisible();
     await expect (page.getByRole('link', { name: 'Login' })).toBeVisible();
   });
-
   test('should add item to cart and proceed to checkout', async ({ page }) => {
     await page.goto(`${BASE_URL}/menu`);
-
     await page.goto('http://localhost:2000/menu');
     await page.getByText('Small - ₱80.00').click();
     await page.getByLabel('Espresso Beverage (Iced)').locator('select[name="extras"]').selectOption('Hazelnut');
@@ -72,9 +59,6 @@ test.describe('User Navigation Tests', () => {
     await expect(page.getByRole('button', { name: '📱 GCash Payment' })).toBeVisible();
     await expect(page.getByRole('button', { name: '💳 Online Payment' })).toBeVisible();
   });
-
-
-
   test('should display order summary page', async ({ page }) => {
     // This test assumes there's an order in session or you need to create one first
     await page.goto(`${BASE_URL}/orderSummary`);

@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { url } from 'inspector';
+import { getDecryptedTestPassword } from './helpers/secret.helper';
+
+const password = getDecryptedTestPassword(); 
 
 test('Registered user Navigation Tests', async ({ page }) => {
 
@@ -19,7 +21,7 @@ test('Registered user Navigation Tests', async ({ page }) => {
   // Perform login and navigation checks
   await userNameInput.click();
   await userNameInput.fill('User1');
-  await passwordInput.fill('123456');
+  await passwordInput.fill(password);
   await loginButton.click();
   await expect(menuLink).toBeVisible();
   await expect(myOrdersLink).toBeVisible();
