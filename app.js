@@ -948,52 +948,6 @@ app.get('/admin/archived-orders', requireAdmin, async function (req, res) {
         }
 });
 
-// View order details
-app.get('/orderSummary', async function (req, res) {
-        try {
-                const orderId = parseInt(req.params.orderId, 10);
-
-                // Get order details
-                const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1', [orderId]);
-                if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
-
-                const order = orderRow[0];
-
-                // Get order items
-                const items = await dbQuery(`
-            SELECT od.*, p.Name AS ProductName
-            FROM order_details od
-            LEFT JOIN products p ON p.ProductID = od.ProductID
-            WHERE od.OrderID = ?
-            ORDER BY od.OrderDetailID
-        `, [orderId]);
-
-                // Get order options
-                const options = await dbQuery(`
-            SELECT oio.* 
-            FROM order_item_options oio
-            WHERE oio.OrderDetailID IN (SELECT OrderDetailID FROM order_details WHERE OrderID = ?)
-            ORDER BY oio.OptionID
-        `, [orderId]);
-
-                // Get all statuses for dropdown
-                const statuses = await dbQuery('SELECT * FROM status ORDER BY StatusID');
-
-                res.render('admin/orderDetail', {
-                        adminUser: req.session.adminUser,
-                        order: order,
-                        items: items || [],
-                        options: options || [],
-                        statuses: statuses || [],
-                        created: false,
-                        __: req.__
-                });
-        } catch (e) {
-                console.error('Admin order view error:', e);
-                res.status(500).send('Failed to load order');
-        }
-});
-
 // Admin View Order Details
 app.get('/admin/order/:orderId', requireAdmin, async function (req, res) {
         try {
@@ -1659,7 +1613,10 @@ app.get('/menu', function (req, res) {
 
                                 db.query(customProductsQuery, function (err, customProductsRows) {
                                         if (err) { console.warn('Failed to load custom products:', err && err.message); }
-                                        const plainCustomPricelist = (customProductsRows || []).map(p => ({ option: p.Name, description: p.Description, price: parseFloat(p.Price || p.price || 0), type: p.Type || p.type || 'custom' }));
+                                        const plainCustomPricelist = (customProductsRows || []).map(p => ({
+                                                option: p.Name, description: p.Description,
+                                                price: parseFloat(p.Price || p.price || 0), type: p.Type || p.type || 'custom'
+                                        }));
 
                                         db.query(extrasProductQuery, function (err, extrasProductsRows) {
                                                 if (err) { console.warn('Failed to load extras products:', err && err.message); }
@@ -1728,7 +1685,10 @@ app.post('/order', async function (req, res) {
 
                 const plainSizePrices = (sizePrices || []).map(r => ({ ...r }));
                 // normalize custom products to expected shape: option/description/price/type
-                const plainCustoms = (customProducts || []).map(r => ({ option: r.Name, description: r.Description, price: parseFloat(r.Price || r.price || 0), type: r.Type || r.type || 'custom' }));
+                const plainCustoms = (customProducts || []).map(r => ({
+                        option: r.Name, description: r.Description, price: parseFloat(r.Price || r.price || 0),
+                        type: r.Type || r.type || 'custom'
+                }));
                 const plainExtras = (extrasProducts || []).map(r => ({ Item: r.Name, description: r.Description, price: parseFloat(r.Price || r.price || 0) }));
 
                 // helper to find per-product size — match by product Type === size_price.Type OR product id if provided
@@ -1759,7 +1719,8 @@ app.post('/order', async function (req, res) {
                 const hasSizesFlag = productRow && (productRow.HasSizes === 1 || productRow.HasSizes === '1' || productRow.HasSizes === true);
                 if (hasSizesFlag) {
                         const foundPerProductSize = findPerProductSize(productRow, size);
-                        if (foundPerProductSize) base = parseFloat(foundPerProductSize.price || foundPerProductSize.Amount || foundPerProductSize.amount || foundPerProductSize.Price || 0) || 0;
+                        if (foundPerProductSize) base = parseFloat(foundPerProductSize.price || foundPerProductSize.Amount || foundPerProductSize.amount ||
+                                foundPerProductSize.Price || 0) || 0;
                         else base = 0; // no fallback to pricelist — per instruction we use size_prices matched by type
                 } else {
                         // use products table price directly for non-sized items
@@ -1781,7 +1742,10 @@ app.post('/order', async function (req, res) {
                 let customSelected = req.body.customOption || '';
                 let customAmount = 0;
                 if (customSelected) {
-                        const foundCust = plainCustoms.find(function (c) { return (c.option && c.option === customSelected) || (c.Item && c.Item === customSelected) || (c.name && c.name === customSelected); });
+                        const foundCust = plainCustoms.find(function (c) {
+                                return (c.option && c.option === customSelected) || (c.Item && c.Item === customSelected)
+                                        || (c.name && c.name === customSelected);
+                        });
                         if (foundCust) customAmount = parseFloat(foundCust.price || foundCust.Amount || 0);
                 }
 
@@ -1792,7 +1756,10 @@ app.post('/order', async function (req, res) {
                 if (!req.session.orders) req.session.orders = [];
                 // create a lightweight local id for session-only orders so the summary can update/remove them
                 const localId = 's' + Date.now() + Math.floor(Math.random() * 10000);
-                const sessOrder = { _localId: localId, customerName, productId, product: productName, size, sugar, extras, customSelected, qty, amountPerItem, totalAmount };
+                const sessOrder = {
+                        _localId: localId, customerName, productId, product: productName, size, sugar, extras, customSelected, qty, amountPerItem,
+                        totalAmount
+                };
                 req.session.orders.push(sessOrder);
 
                 // If persistence is disabled OR header schema requires checkout, respond using session-only behavior
@@ -1851,13 +1818,6 @@ app.get('/order-summary', function (req, res) {
         return res.render('orderSummary', { orders: [], user: req.session.user || null, adminUser: req.session.adminUser || null, __: req.__ });
 });
 
-// Clear orders from session (and DB rows for this session if persistence enabled)
-app.post('/clear-orders', async function (req, res) {
-        try {
-                if (req.session) req.session.orders = [];
-                return res.redirect('/order-summary');
-        } catch (e) { console.error('clear-orders error', e); return res.redirect('/order-summary'); }
-});
 
 // Update a single order's qty (AJAX)
 app.post('/order-update', express.json(), async function (req, res) {
@@ -1952,10 +1912,6 @@ app.post('/order-remove', express.json(), async function (req, res) {
         } catch (e) { console.error('order-remove error', e); return res.status(500).json({ success: false, error: e.message || '' }); }
 });
 
-// Simple JSON endpoint to read current session orders (used by the live sidebar)
-app.get('/api/orders', function (req, res) {
-        return res.json({ orders: req.session.orders || [] });
-});
 
 console.log('REACHED: before app.listen');
 app.listen(2000, function () {
@@ -1977,7 +1933,8 @@ app.post('/checkout', async function (req, res) {
                 const cart = (req.session && req.session.orders) ? req.session.orders.slice() : [];
                 if (!cart.length) return res.redirect('/order-summary');
 
-                log('[checkout] starting. customerName=%s email=%s phone=%s paymentMethod=%s cartCount=%d', customerName, customerEmail || '(none)', customerPhone || '(none)', paymentMethod, cart.length);
+                log('[checkout] starting. customerName=%s email=%s phone=%s paymentMethod=%s cartCount=%d', customerName, customerEmail ||
+                        '(none)', customerPhone || '(none)', paymentMethod, cart.length);
                 // dump first cart item for quick inspection
                 try { if (cart[0]) log('[checkout] firstCartItem sample:', JSON.stringify(cart[0])); } catch (e) { }
 
@@ -2041,7 +1998,8 @@ app.post('/checkout', async function (req, res) {
                                         [userId, customerName, finalEmail || null, finalPhone || null, orderTotal.toFixed(2), statusId, paymentMethod || null]);
                                 orderId = attemptInsertRow && attemptInsertRow.insertId ? attemptInsertRow.insertId : null;
                                 if (!orderId) throw new Error('No insertId returned');
-                                log('[checkout] master order created attempt=%d id=%s status=%d payment=%s userId=%s email=%s phone=%s', attempt + 1, orderId, statusId, paymentMethod || 'none', userId || 'null', finalEmail || 'null', finalPhone || 'null');
+                                log('[checkout] master order created attempt=%d id=%s status=%d payment=%s userId=%s email=%s phone=%s', attempt + 1, orderId, statusId, paymentMethod || 'none', userId
+                                        || 'null', finalEmail || 'null', finalPhone || 'null');
                                 break; // success
                         } catch (insertErr) {
                                 if (insertErr && insertErr.code === 'ER_DUP_ENTRY') {
@@ -2105,7 +2063,8 @@ app.post('/checkout', async function (req, res) {
                                         const milkPrice = milk ? parseFloat(milk.Price || milk.price || 0) : 0;
                                         await dbQuery('INSERT INTO order_item_options (OrderDetailID, OptionName, OptionValue, ExtraPrice) VALUES (?, ?, ?, ?)',
                                                 [orderDetailId, 'Milk', milkName, milkPrice.toFixed(2)]).then(r => {
-                                                        log('[checkout] -> order_item_options Milk inserted (detailId=%s value=%s price=%s)', orderDetailId, milkName, milkPrice.toFixed(2));
+                                                        log('[checkout] -> order_item_options Milk inserted (detailId=%s value=%s price=%s)', orderDetailId, milkName,
+                                                                milkPrice.toFixed(2));
                                                 }).catch(err => { console.warn('[checkout] milk insert failed:', err.message || err); });
                                 }
                                 // Extras
@@ -2114,12 +2073,14 @@ app.post('/checkout', async function (req, res) {
                                 if (Array.isArray(extrasList)) {
                                         for (const ex of extrasList) {
                                                 if (!ex) continue;
-                                                const exProd = findProductByNameOrDesc(ex) || (allExtras || []).find(p => (p.Name || '').toString().trim().toLowerCase() === ex.toString().trim().toLowerCase());
+                                                const exProd = findProductByNameOrDesc(ex) || (allExtras || []).find(p => (p.Name || '').toString().trim().toLowerCase()
+                                                        === ex.toString().trim().toLowerCase());
                                                 const exName = exProd ? (exProd.Name || '') : ex;
                                                 const exPrice = exProd ? parseFloat(exProd.Price || exProd.price || 0) : 0;
                                                 await dbQuery('INSERT INTO order_item_options (OrderDetailID, OptionName, OptionValue, ExtraPrice) VALUES (?, ?, ?, ?)',
                                                         [orderDetailId, 'Topping', exName, exPrice.toFixed(2)]).then(r => {
-                                                                log('[checkout] -> order_item_options Topping inserted (detailId=%s value=%s price=%s)', orderDetailId, exName, exPrice.toFixed(2));
+                                                                log('[checkout] -> order_item_options Topping inserted (detailId=%s value=%s price=%s)', orderDetailId,
+                                                                        exName, exPrice.toFixed(2));
                                                         }).catch(err => { console.warn('[checkout] topping insert failed:', err.message || err); });
                                         }
                                 }
@@ -2353,7 +2314,8 @@ app.get('/order/:orderId', async function (req, res) {
                 }
 
                 // Load master order and summary
-                const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1', [masterOrderId]);
+                const orderRow = await dbQuery('SELECT o.*, s.StatusName FROM orders o LEFT JOIN status s ON o.StatusID = s.StatusID WHERE o.OrderID = ? LIMIT 1',
+                        [masterOrderId]);
                 if (!orderRow || !orderRow[0]) return res.status(404).send('Order not found');
 
                 // Security check: Verify order ownership
