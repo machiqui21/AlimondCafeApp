@@ -433,35 +433,6 @@ app.get('/logout', function (req, res) {
         res.redirect('/login');
 });
 
-// Test-only admin management endpoint (enabled when ALLOW_TEST_SETUP=1)
-if (process.env.ALLOW_TEST_SETUP === '1') {
-        app.post('/__test__/admin', async function (req, res) {
-                try {
-                        const token = req.headers['x-test-token'] || '';
-                        if (!process.env.TEST_SETUP_TOKEN || token !== process.env.TEST_SETUP_TOKEN) {
-                                return res.status(403).send('forbidden');
-                        }
-                        const username = (req.body.username || '').toString().trim();
-                        const email = (req.body.email || '').toString().trim() || null;
-                        const password = (req.body.password || '').toString();
-                        if (!username || !password) {
-                                return res.status(400).json({ success: false, message: 'username and password required' });
-                        }
-
-                        const existing = await dbQuery('SELECT AdminID FROM admin_users WHERE Username = ? LIMIT 1', [username]).catch(() => []);
-                        if (existing && existing[0]) {
-                                await dbQuery('UPDATE admin_users SET Email = ?, PasswordHash = NULL, Password = ? WHERE AdminID = ?', [email, password, existing[0].AdminID]);
-                        } else {
-                                await dbQuery('INSERT INTO admin_users (Username, Email, Password) VALUES (?,?,?)', [username, email, password]);
-                        }
-                        return res.json({ success: true });
-                } catch (e) {
-                        console.error('Test admin endpoint error:', e);
-                        return res.status(500).json({ success: false, message: e && e.message || 'error' });
-                }
-        });
-}
-
 // Middleware to check if user is logged in
 function requireUser(req, res, next) {
         if (req.session && req.session.user) {
